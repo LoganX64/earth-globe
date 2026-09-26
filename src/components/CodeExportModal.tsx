@@ -57,9 +57,13 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}`;
 
   // Shared by both tabs — mirrors the component's current config
-  const embedSrc = `${baseSrc}${activeMarker ? `&marker=${activeMarker.id}` : ''}${
-    highlightState ? `&state=${encodeURIComponent(highlightState)}` : ''
-  }`;
+  const embedSrc = `${baseSrc}${
+    activeMarker
+      ? `&marker=${encodeURIComponent(activeMarker.id)}&name=${encodeURIComponent(activeMarker.name)}&lat=${activeMarker.lat.toFixed(4)}&lng=${activeMarker.lng.toFixed(4)}${
+          activeMarker.region ? `&region=${encodeURIComponent(activeMarker.region)}` : ''
+        }`
+      : ''
+  }${highlightState ? `&state=${encodeURIComponent(highlightState)}` : ''}`;
 
   const iframeSnippet = `<!-- Drop-in 3D India Globe for any Portfolio, Webflow, WordPress, or HTML website -->
 <!-- Mode: ${embedMode === 'light' ? 'Light Mode Map & UI' : 'Dark Mode Map & UI'} -->

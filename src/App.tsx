@@ -90,16 +90,48 @@ export default function App() {
   const [showSecondaryMarkers, setShowSecondaryMarkers] = useState<boolean>(false);
 
   // Active marker states
-  const initialMarkerParam = urlParams?.get('marker');
   const getInitialMarker = (): GlobeMarker | null => {
-    if (!initialMarkerParam) return null;
-    const lower = initialMarkerParam.toLowerCase();
+    const markerParam = urlParams?.get('marker');
+    const latParam = urlParams?.get('lat');
+    const lngParam = urlParams?.get('lng');
+    const nameParam = urlParams?.get('name');
+    const regionParam = urlParams?.get('region');
+
+    // 1. If explicit lat and lng coordinates are passed in URL query parameters:
+    if (latParam && lngParam) {
+      const lat = parseFloat(latParam);
+      const lng = parseFloat(lngParam);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return {
+          id: markerParam || `url-marker-${lat.toFixed(4)}-${lng.toFixed(4)}`,
+          name: nameParam || 'Selected Location',
+          lat,
+          lng,
+          region: regionParam || undefined,
+          country: 'India',
+          isPrimary: true,
+        };
+      }
+    }
+
+    // 2. Lookup by ID or location name:
+    if (!markerParam) return null;
+    const lower = markerParam.toLowerCase();
     if (lower === 'ulhasnagar') return ULHASNAGAR_MARKER;
     if (lower === 'thrissur') return THRISSUR_MARKER;
     if (lower === 'mumbai') return MUMBAI_MARKER;
-    return POPULAR_INDIAN_LOCATIONS.find((p) => p.id.toLowerCase() === lower || p.name.toLowerCase().includes(lower)) || null;
+
+    return (
+      POPULAR_INDIAN_LOCATIONS.find(
+        (p) =>
+          p.id.toLowerCase() === lower ||
+          p.name.toLowerCase() === lower ||
+          p.name.toLowerCase().includes(lower)
+      ) || null
+    );
   };
 
+  const initialMarkerParam = urlParams?.get('marker') || urlParams?.get('lat');
   const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(getInitialMarker);
   const [isControlsOpen, setIsControlsOpen] = useState<boolean>(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(Boolean(initialMarkerParam));
