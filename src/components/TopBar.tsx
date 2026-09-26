@@ -24,6 +24,7 @@ interface TopBarProps {
   onToggleEmbedMode?: () => void;
   onToggleDarkMode?: () => void;
   isDark?: boolean;
+  mapThemeIsDark?: boolean;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -37,16 +38,17 @@ export const TopBar: React.FC<TopBarProps> = ({
   isControlsOpen,
   onToggleEmbedMode,
   onToggleDarkMode,
-  isDark = true,
+  isDark = false,
+  mapThemeIsDark = false,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const borderClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
 
   return (
-    <>
+    <div className="relative z-40 shrink-0">
       <header
-        className={`fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors duration-300 gap-3 ${
+        className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors duration-300 gap-3 ${
           isDark ? "bg-zinc-950/90 text-zinc-100" : "bg-white/90 text-zinc-900"
         } ${borderClass}`}
       >
@@ -74,28 +76,28 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
         </div>
 
-        {/* Right Section: Controls, Dark/Light Mode, Embed, & Mobile Hamburger */}
+        {/* Right Section: Controls, Map Theme Switch, Embed, & Mobile Hamburger */}
         <div className="flex items-center gap-2">
-          {/* Theme Mode Toggle (Sun / Moon) */}
+          {/* Map Theme Toggle (Sun / Moon) — switches ONLY the globe theme, never the site UI */}
           {onToggleDarkMode && (
             <button
               onClick={onToggleDarkMode}
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
-                isDark
-                  ? "bg-zinc-900 hover:bg-zinc-800 text-amber-300 border-zinc-700"
-                  : "bg-zinc-100 hover:bg-zinc-200 text-amber-600 border-zinc-300"
-              }`}
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
+              title={
+                mapThemeIsDark
+                  ? "Switch Map to Light Theme (UI stays light)"
+                  : "Switch Map to Dark Theme (UI stays light)"
+              }
             >
-              {isDark ? (
+              {mapThemeIsDark ? (
                 <>
-                  <Sun className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="hidden sm:inline">Light Mode</span>
+                  <Sun className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span className="hidden sm:inline">Light Map</span>
                 </>
               ) : (
                 <>
                   <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
-                  <span className="hidden sm:inline">Dark Mode</span>
+                  <span className="hidden sm:inline">Dark Map</span>
                 </>
               )}
             </button>
@@ -228,7 +230,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Mobile & Tablet Dropdown Drawer */}
       {isMobileMenuOpen && (
         <div
-          className={`fixed top-12 left-0 right-0 z-30 p-4 border-b shadow-2xl backdrop-blur-xl lg:hidden flex flex-col gap-3 ${
+          className={`absolute top-full left-0 right-0 z-50 p-4 border-b shadow-2xl backdrop-blur-xl lg:hidden flex flex-col gap-3 ${
             isDark
               ? "bg-zinc-950/95 border-zinc-800 text-zinc-200"
               : "bg-white/95 border-zinc-200 text-zinc-900"
@@ -288,7 +290,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

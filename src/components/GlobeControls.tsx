@@ -58,6 +58,7 @@ interface GlobeControlsProps {
   onClose?: () => void;
   onToggleDarkMode?: () => void;
   isDark?: boolean;
+  mapThemeIsDark?: boolean;
 }
 
 export const GlobeControls: React.FC<GlobeControlsProps> = ({
@@ -90,14 +91,15 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   onFlyToPreset,
   onClose,
   onToggleDarkMode,
-  isDark = true,
+  isDark = false,
+  mapThemeIsDark = false,
 }) => {
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [customCity, setCustomCity] = useState('');
   const [customState, setCustomState] = useState('Kerala');
   const [customLat, setCustomLat] = useState('10.5276');
   const [customLng, setCustomLng] = useState('76.2144');
-  const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>(isDark ? 'dark' : 'light');
+  const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>('all');
 
   const containerClass = isDark
     ? 'bg-zinc-950/90 backdrop-blur-md border-zinc-800 text-zinc-200'
@@ -174,11 +176,15 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           {onToggleDarkMode && (
             <button
               onClick={onToggleDarkMode}
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              title={
+                mapThemeIsDark
+                  ? 'Switch Map to Light Theme (UI stays light)'
+                  : 'Switch Map to Dark Theme (UI stays light)'
+              }
               className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
             >
-              {isDark ? (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
+              {mapThemeIsDark ? (
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
               ) : (
                 <Moon className="w-3.5 h-3.5 text-indigo-600" />
               )}
@@ -540,7 +546,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span>Theme &amp; Contrast</span>
             </label>
             <span className="text-[10px] text-zinc-500 font-medium">
-              {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme}
+              {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme} · Map Only
             </span>
           </div>
 
@@ -551,7 +557,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('all')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
-                themeTab === 'all' ? buttonActive : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                themeTab === 'all' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               All ({Object.keys(THEME_PRESETS).length})
@@ -559,7 +565,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('dark')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'dark' ? buttonActive : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                themeTab === 'dark' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <Moon className="w-2.5 h-2.5" />
@@ -568,7 +574,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('light')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'light' ? buttonActive : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                themeTab === 'light' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
               }`}
             >
               <Sun className="w-2.5 h-2.5" />
@@ -590,7 +596,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   title={`${t.name} (${t.isDark ? 'Dark Mode' : 'Light Mode'})`}
                 >
                   <span
-                    className="w-3 h-3 rounded-full shrink-0 border border-black/20 dark:border-white/20 shadow-sm"
+                    className="w-3 h-3 rounded-full shrink-0 border border-black/20 shadow-sm"
                     style={{ backgroundColor: t.highlightLand }}
                   />
                   <span className="truncate">{t.name.split('(')[0]}</span>

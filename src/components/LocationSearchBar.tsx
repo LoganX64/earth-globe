@@ -27,7 +27,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   onClearLocation,
   activeMarker,
   placeholder = 'Search place (e.g. Ulhasnagar, MH)...',
-  isDark = true,
+  isDark = false,
   className = '',
   compact = false,
 }) => {

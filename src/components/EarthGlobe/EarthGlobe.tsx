@@ -559,26 +559,43 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const isHighlighted = highlightedStatesList.includes(stName);
 
             if (isHighlighted) {
-              ctx.save();
-              ctx.shadowColor = activeTheme.highlightGlow;
-              ctx.shadowBlur = 12;
-
-              ctx.beginPath();
-              path(stateFeature);
-
-              // Distinct highlight fill for the requested state only
-              ctx.fillStyle =
+              const hFill =
                 highlightStateColor ||
                 activeTheme.highlightLand ||
                 (activeTheme.isDark ? '#3b82f6' : '#1565c0');
-              ctx.fill();
-
-              ctx.strokeStyle =
+              const hStroke =
                 activeTheme.highlightLandBorder ||
                 (activeTheme.isDark ? '#60a5fa' : '#0d47a1');
-              ctx.lineWidth = 1.6;
+
+              // === INWARD GLOW TECHNIQUE ===
+              // Clip to the state's OWN polygon so any shadow/stroke stays
+              // strictly inside the state — zero bleed onto neighboring countries.
+              ctx.save();
+              ctx.beginPath();
+              path(stateFeature);
+              ctx.clip(); // shadow + stroke now confined to inside this state
+
+              // Fill with shadow — radiates inward only (cannot cross the clip)
+              ctx.shadowColor = activeTheme.highlightGlow;
+              ctx.shadowBlur = 18;
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 0;
+              ctx.beginPath();
+              path(stateFeature);
+              ctx.fillStyle = hFill;
+              ctx.fill();
+
+              // Inside-stroke: clear shadow, draw at 2× lineWidth so only the
+              // inner half is visible (outer half is clipped away)
+              ctx.shadowColor = 'transparent';
+              ctx.shadowBlur = 0;
+              ctx.beginPath();
+              path(stateFeature);
+              ctx.strokeStyle = hStroke;
+              ctx.lineWidth = 3.2;
               ctx.stroke();
-              ctx.restore();
+
+              ctx.restore(); // release state clip
             }
           }
           ctx.restore();

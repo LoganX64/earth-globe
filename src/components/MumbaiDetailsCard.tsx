@@ -28,7 +28,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   onDeselect,
   isStateHighlighted = false,
   onToggleStateHighlight,
-  isDark = true,
+  isDark = false,
 }) => {
   const [istTime, setIstTime] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);

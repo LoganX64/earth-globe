@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* The website chrome is always light mode — force native controls too. */
+html {
+  color-scheme: light;
+}

@@ -22,15 +22,18 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   highlightState,
   autoRotateSpeed = 1.2,
   autoRotate = true,
-  theme = DEFAULT_DARK_THEME_ID,
+  theme = DEFAULT_LIGHT_THEME_ID,
   onlyIndia = true,
-  isDark = true,
+  isDark = false,
 }) => {
   const [activeTab, setActiveTab] = useState<'embed' | 'react' | 'vercel' | 'current'>('embed');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [embedSize, setEmbedSize] = useState<'500' | '400' | '600' | '100%'>('500');
   const [embedOnlyIndia, setEmbedOnlyIndia] = useState<boolean>(onlyIndia);
-  const [embedMode, setEmbedMode] = useState<'dark' | 'light'>(isDark ? 'dark' : 'light');
+  // Embed preview mode follows the MAP theme (chrome itself is always light)
+  const [embedMode, setEmbedMode] = useState<'dark' | 'light'>(
+    THEME_PRESETS[theme]?.isDark ? 'dark' : 'light'
+  );
   // Viewer-facing controls — pre-selected here, baked into the exported URL / snippet
   const [embedDrag, setEmbedDrag] = useState<boolean>(true);
   const [embedZoom, setEmbedZoom] = useState<boolean>(true);
@@ -375,7 +378,7 @@ vercel
                     href={embedSrc}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-bold underline underline-offset-2 shrink-0"
+                    className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 font-bold underline underline-offset-2 shrink-0"
                   >
                     <span>{activeTab === 'embed' ? 'Test Embed URL' : 'Test Preview URL'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />

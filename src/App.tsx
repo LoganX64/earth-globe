@@ -138,11 +138,15 @@ export default function App() {
   const [isCodeModalOpen, setIsCodeModalOpen] = useState<boolean>(false);
 
   const currentThemeConfig = THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
+
+  // Map theme darkness — drives ONLY the globe and pure-view overlays.
+  // The site chrome itself is always light mode.
   const isDark = currentThemeConfig.isDark;
 
+  // Theme switch changes ONLY the map theme; website UI never leaves light mode
   const handleToggleDarkMode = useCallback(() => {
     setTheme((prevTheme) => {
-      const currentIsDark = THEME_PRESETS[prevTheme]?.isDark ?? true;
+      const currentIsDark = THEME_PRESETS[prevTheme]?.isDark ?? false;
       return currentIsDark ? DEFAULT_LIGHT_THEME_ID : DEFAULT_DARK_THEME_ID;
     });
   }, []);
@@ -372,11 +376,12 @@ export default function App() {
         isControlsOpen={isControlsOpen}
         onToggleEmbedMode={() => setIsEmbedMode(true)}
         onToggleDarkMode={handleToggleDarkMode}
+        mapThemeIsDark={isDark}
         isDark={false} // Navbar ALWAYS stays in Light Mode UI
       />
 
       {/* 2. Interactive 3D Canvas Globe Viewport */}
-      <main className="relative flex-1 w-full h-full pt-14">
+      <main className="relative flex-1 w-full h-full min-h-0">
         <EarthGlobe
           ref={globeRef}
           theme={theme}
@@ -407,7 +412,7 @@ export default function App() {
 
         {/* 3. Floating Left Panel: Active Location Spotlight Card */}
         {isDetailsOpen && activeMarker && (
-          <div className="absolute top-20 left-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-left-4 duration-300">
+          <div className="absolute top-6 left-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-left-4 duration-300">
             <LocationDetailsCard
               marker={activeMarker}
               onFlyTo={(lat, lng, zoom) => globeRef.current?.flyTo(lat, lng, zoom)}
@@ -435,7 +440,7 @@ export default function App() {
 
         {/* 4. Floating Right Panel: Globe Customizer & Controls HUD */}
         {isControlsOpen && (
-          <div className="absolute top-20 right-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="absolute top-6 right-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300">
             <GlobeControls
               currentTheme={theme}
               onThemeChange={setTheme}
@@ -468,6 +473,7 @@ export default function App() {
               }
               onClose={() => setIsControlsOpen(false)}
               onToggleDarkMode={handleToggleDarkMode}
+              mapThemeIsDark={isDark}
               isDark={false}
             />
           </div>
@@ -477,7 +483,7 @@ export default function App() {
         {!isControlsOpen && (
           <button
             onClick={() => setIsControlsOpen(true)}
-            className="absolute top-18 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105 bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl"
+            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105 bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl"
             title="Open Globe Customizer & Layers Menu"
           >
             <SlidersHorizontal className="w-4 h-4 text-zinc-900" />
@@ -551,11 +557,13 @@ export default function App() {
             <span>{onlyIndia ? 'MODE: ONLY INDIA (ISOLATED)' : 'MODE: GLOBAL'}</span>
             <span>·</span>
             <span>PROJECTION: ORTHOGRAPHIC 3D</span>
+            <span>·</span>
+            <span>MAP: {currentThemeConfig.name.toUpperCase()}</span>
           </div>
           <div className="hidden lg:flex items-center gap-2">
             <span>[SPACE] Pause</span>
             <span>·</span>
-            <span>[T] Map Mode</span>
+            <span>[T] Map Theme</span>
             <span>·</span>
             <span>[X] Clear</span>
             <span>·</span>
@@ -574,7 +582,7 @@ export default function App() {
         autoRotate={autoRotate}
         theme={theme}
         onlyIndia={onlyIndia}
-        isDark={isDark}
+        isDark={false} // Export modal chrome ALWAYS stays in Light Mode UI
       />
     </div>
   );

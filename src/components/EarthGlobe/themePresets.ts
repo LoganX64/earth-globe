@@ -264,7 +264,7 @@ export const THEME_PRESETS: Record<string, GlobeThemeColors> = {
 
 export const DEFAULT_DARK_THEME_ID = 'black-and-white';
 export const DEFAULT_LIGHT_THEME_ID = 'daylight-atlas';
-export const DEFAULT_THEME_ID = DEFAULT_DARK_THEME_ID;
+export const DEFAULT_THEME_ID = DEFAULT_LIGHT_THEME_ID;
 
 export const DARK_THEME_PRESETS = Object.values(THEME_PRESETS).filter((t) => t.isDark);
 export const LIGHT_THEME_PRESETS = Object.values(THEME_PRESETS).filter((t) => !t.isDark);
