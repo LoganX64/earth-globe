@@ -20,6 +20,7 @@ export interface GlobeThemeColors {
   name: string;
   id: string;
   ocean: string;
+  oceanBorder?: string;
   land: string;
   landBorder: string;
   highlightLand: string;
@@ -34,6 +35,7 @@ export interface GlobeThemeColors {
   markerPulse: string;
   background: string;
   isDark: boolean;
+  uiAccent?: string;
 }
 
 export interface EarthGlobeProps {
@@ -53,6 +55,8 @@ export interface EarthGlobeProps {
   onMarkerHover?: (marker: GlobeMarker | null) => void;
   /** Callback fired when country is clicked */
   onCountryClick?: (countryName: string, id: string | number) => void;
+  /** Mode indicator ('dark' | 'light' | 'auto') for seamless dark/light mode switching in host apps */
+  mode?: 'dark' | 'light' | 'auto';
   /** Current color theme */
   theme?: string;
   /** Custom colors overriding active theme */

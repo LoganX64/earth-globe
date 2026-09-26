@@ -30,7 +30,7 @@ import indiaOfficialGeo from '../../data/india-official.json';
 import indiaOuterBoundary from '../../data/india-outer-boundary.json';
 import indiaInternalBorders from '../../data/india-internal-borders.json';
 import { EarthGlobeProps, GlobeMarker, GlobeThemeColors } from './types';
-import { THEME_PRESETS, DEFAULT_THEME_ID } from './themePresets';
+import { THEME_PRESETS, DEFAULT_THEME_ID, DEFAULT_DARK_THEME_ID, DEFAULT_LIGHT_THEME_ID } from './themePresets';
 
 export interface EarthGlobeRef {
   flyTo: (lat: number, lng: number, zoomMultiplier?: number) => void;
@@ -101,6 +101,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       onMarkerClick,
       onMarkerHover,
       onCountryClick,
+      mode,
       theme = DEFAULT_THEME_ID,
       customColors,
       autoRotate = true,
@@ -122,9 +123,25 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    // Resolve theme based on mode ('dark' | 'light' | 'auto') or explicit theme prop
+    const resolvedThemeId = (() => {
+      if (mode === 'light') {
+        if (theme && theme in THEME_PRESETS && !THEME_PRESETS[theme].isDark) {
+          return theme;
+        }
+        return DEFAULT_LIGHT_THEME_ID;
+      } else if (mode === 'dark') {
+        if (theme && theme in THEME_PRESETS && THEME_PRESETS[theme].isDark) {
+          return theme;
+        }
+        return DEFAULT_DARK_THEME_ID;
+      }
+      return theme in THEME_PRESETS ? theme : DEFAULT_THEME_ID;
+    })();
+
     // Color theme resolution
     const activeTheme: GlobeThemeColors = {
-      ...(THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID]),
+      ...(THEME_PRESETS[resolvedThemeId] || THEME_PRESETS[DEFAULT_THEME_ID]),
       ...customColors,
     };
 
@@ -401,21 +418,17 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           );
           glowGrad.addColorStop(
             0,
-            activeTheme.isDark
-              ? 'rgba(255, 255, 255, 0.40)'
-              : 'rgba(0, 0, 0, 0.25)'
+            activeTheme.atmosphereOuter ||
+              (activeTheme.isDark
+                ? 'rgba(255, 255, 255, 0.40)'
+                : 'rgba(56, 189, 248, 0.25)')
           );
           glowGrad.addColorStop(
-            0.35,
-            activeTheme.isDark
-              ? 'rgba(255, 255, 255, 0.16)'
-              : 'rgba(0, 0, 0, 0.09)'
-          );
-          glowGrad.addColorStop(
-            0.7,
-            activeTheme.isDark
-              ? 'rgba(255, 255, 255, 0.05)'
-              : 'rgba(0, 0, 0, 0.02)'
+            0.4,
+            activeTheme.atmosphereInner ||
+              (activeTheme.isDark
+                ? 'rgba(255, 255, 255, 0.14)'
+                : 'rgba(56, 189, 248, 0.08)')
           );
           glowGrad.addColorStop(1, 'transparent');
 
@@ -443,7 +456,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         oceanGrad.addColorStop(0, activeTheme.ocean);
         oceanGrad.addColorStop(
           1,
-          activeTheme.isDark ? '#000000' : '#d4d4d8'
+          activeTheme.oceanBorder || (activeTheme.isDark ? '#000000' : '#a1a1aa')
         );
 
         ctx.fillStyle = oceanGrad;
@@ -538,12 +551,13 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
               // Distinct highlight fill for the requested state only
               ctx.fillStyle =
                 highlightStateColor ||
-                (activeTheme.isDark
-                  ? '#ffffff'
-                  : '#18181b');
+                activeTheme.highlightLand ||
+                (activeTheme.isDark ? '#3b82f6' : '#1565c0');
               ctx.fill();
 
-              ctx.strokeStyle = activeTheme.isDark ? '#000000' : '#ffffff';
+              ctx.strokeStyle =
+                activeTheme.highlightLandBorder ||
+                (activeTheme.isDark ? '#60a5fa' : '#0d47a1');
               ctx.lineWidth = 1.8;
               ctx.stroke();
 
@@ -647,9 +661,12 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const pulseAlpha = (1 - pulsePhase) * 0.85;
 
             // Outer radar ring
+            const pulseColor = activeTheme.markerPulse || activeTheme.markerPrimary;
+            ctx.save();
             ctx.beginPath();
             ctx.arc(mx, my, pulseRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+            ctx.strokeStyle = pulseColor;
+            ctx.globalAlpha = pulseAlpha;
             ctx.lineWidth = 1.4;
             ctx.stroke();
 
@@ -659,9 +676,11 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const pulseAlpha2 = (1 - pulsePhase2) * 0.7;
             ctx.beginPath();
             ctx.arc(mx, my, pulseRadius2, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(255, 255, 255, ${pulseAlpha2})`;
+            ctx.strokeStyle = pulseColor;
+            ctx.globalAlpha = pulseAlpha2;
             ctx.lineWidth = 1.0;
             ctx.stroke();
+            ctx.restore();
 
             // Concentric target rings
             ctx.beginPath();

@@ -6,9 +6,8 @@ import {
   SlidersHorizontal,
   Menu,
   X,
-  Compass,
-  MapPin,
-  Layers,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { GlobeMarker } from "./EarthGlobe/types";
 import { LocationSearchBar } from "./LocationSearchBar";
@@ -23,6 +22,7 @@ interface TopBarProps {
   onToggleControls: () => void;
   isControlsOpen: boolean;
   onToggleEmbedMode?: () => void;
+  onToggleDarkMode?: () => void;
   isDark?: boolean;
 }
 
@@ -36,23 +36,28 @@ export const TopBar: React.FC<TopBarProps> = ({
   onToggleControls,
   isControlsOpen,
   onToggleEmbedMode,
+  onToggleDarkMode,
   isDark = true,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const borderClass = isDark ? "border-zinc-800" : "border-zinc-200";
+  const borderClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors gap-3 ${
-          isDark ? "bg-zinc-950/90" : "bg-white/90"
+        className={`fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors duration-300 gap-3 ${
+          isDark ? "bg-zinc-950/90 text-zinc-100" : "bg-white/90 text-zinc-900"
         } ${borderClass}`}
       >
         {/* Left Section: Wordmark Brand & Search */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm sm:text-base font-extrabold tracking-tight text-white whitespace-nowrap">
+            <span
+              className={`text-sm sm:text-base font-extrabold tracking-tight whitespace-nowrap ${
+                isDark ? "text-white" : "text-zinc-900"
+              }`}
+            >
               BHARAT // ATLAS
             </span>
           </div>
@@ -69,15 +74,44 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
         </div>
 
-        {/* Right Section: Controls, Embed, & Mobile Hamburger */}
+        {/* Right Section: Controls, Dark/Light Mode, Embed, & Mobile Hamburger */}
         <div className="flex items-center gap-2">
-          {/* Controls HUD Toggle Button - ALWAYS VISIBLE */}
+          {/* Theme Mode Toggle (Sun / Moon) */}
+          {onToggleDarkMode && (
+            <button
+              onClick={onToggleDarkMode}
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
+                isDark
+                  ? "bg-zinc-900 hover:bg-zinc-800 text-amber-300 border-zinc-700"
+                  : "bg-zinc-100 hover:bg-zinc-200 text-amber-600 border-zinc-300"
+              }`}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="hidden sm:inline">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span className="hidden sm:inline">Dark Mode</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Controls HUD Toggle Button */}
           <button
             onClick={onToggleControls}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
               isControlsOpen
-                ? "bg-white text-zinc-950 border-white font-bold"
-                : "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
+                ? isDark
+                  ? "bg-white text-zinc-950 border-white font-bold"
+                  : "bg-blue-600 text-white border-blue-600 font-bold shadow-md"
+                : isDark
+                ? "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
+                : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
           >
@@ -87,8 +121,12 @@ export const TopBar: React.FC<TopBarProps> = ({
             <span
               className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold ${
                 isControlsOpen
-                  ? "bg-zinc-950 text-white"
-                  : "bg-zinc-700 text-zinc-300"
+                  ? isDark
+                    ? "bg-zinc-950 text-white"
+                    : "bg-blue-800 text-white"
+                  : isDark
+                  ? "bg-zinc-800 text-zinc-300"
+                  : "bg-zinc-200 text-zinc-700"
               }`}
             >
               {isControlsOpen ? "ON" : "OFF"}
@@ -98,7 +136,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Embed & Code Modal Button */}
           <button
             onClick={onOpenCode}
-            className="hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 hover:text-white transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
+              isDark
+                ? "border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 hover:text-white"
+                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950"
+            }`}
             title="Embed code, Vercel free tier guide, & React component"
           >
             <Code2 className="w-3.5 h-3.5" />
@@ -109,7 +151,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleEmbedMode && (
             <button
               onClick={onToggleEmbedMode}
-              className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className={`hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
+                isDark
+                  ? "border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 hover:text-white"
+                  : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950"
+              }`}
               title="Preview pure isolated component view (without app chrome)"
             >
               <Maximize2 className="w-3.5 h-3.5" />
@@ -122,7 +168,11 @@ export const TopBar: React.FC<TopBarProps> = ({
             <div className="flex items-center gap-1">
               <button
                 onClick={onFocusActiveLocation}
-                className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm"
+                className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
+                  isDark
+                    ? "bg-zinc-800 text-white hover:bg-zinc-700 border-zinc-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-md"
+                }`}
               >
                 <Navigation className="w-3.5 h-3.5" />
                 <span className="truncate max-w-25 sm:max-w-30">
@@ -131,7 +181,11 @@ export const TopBar: React.FC<TopBarProps> = ({
               </button>
               <button
                 onClick={onDeselectLocation}
-                className="px-2 py-1.5 text-xs font-medium rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                className={`px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
+                  isDark
+                    ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
+                    : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
+                }`}
                 title="Deselect active pin"
               >
                 ✕
@@ -140,7 +194,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           ) : (
             <button
               onClick={onFocusActiveLocation}
-              className="hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm"
+              className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
+                isDark
+                  ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
+                  : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
+              }`}
               title="Recenter camera on India"
             >
               <Navigation className="w-3.5 h-3.5" />
@@ -151,7 +209,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Mobile Navigation Drawer Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden p-1.5 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+            className={`lg:hidden p-1.5 rounded-lg border transition-colors cursor-pointer ${
+              isDark
+                ? "border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white"
+                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 shadow-sm"
+            }`}
             title="Open quick menu"
           >
             {isMobileMenuOpen ? (
@@ -188,13 +250,21 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-800">
+          <div
+            className={`grid grid-cols-2 gap-2 pt-2 border-t ${
+              isDark ? "border-zinc-800" : "border-zinc-200"
+            }`}
+          >
             <button
               onClick={() => {
                 onToggleControls();
                 setIsMobileMenuOpen(false);
               }}
-              className="px-3 py-2 text-xs font-semibold rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 flex items-center justify-center gap-1.5 cursor-pointer text-white"
+              className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white"
+                  : "bg-white hover:bg-zinc-100 border-zinc-300 text-zinc-900 shadow-sm"
+              }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>
@@ -206,7 +276,11 @@ export const TopBar: React.FC<TopBarProps> = ({
                 onOpenCode();
                 setIsMobileMenuOpen(false);
               }}
-              className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-zinc-950 hover:bg-zinc-200 flex items-center justify-center gap-1.5 cursor-pointer"
+              className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? "bg-white text-zinc-950 border-white hover:bg-zinc-200"
+                  : "bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800 shadow-sm"
+              }`}
             >
               <Code2 className="w-3.5 h-3.5" />
               <span>Embed &amp; API</span>

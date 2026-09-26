@@ -2,7 +2,7 @@
  * Earth Globe Application
  * Interactive reusable 3D globe with official Survey of India cartography.
  * Supports customizable speeds, dynamic state highlighting, custom location pins,
- * pure embed / component mode, and isolated "Only India" map projection.
+ * pure embed / component mode, light & dark mode globes, and isolated "Only India" map projection.
  * 100% Client-side React + Vite SPA (Zero backend needed, Vercel Free Tier ready).
  */
 
@@ -12,6 +12,8 @@ import {
   EarthGlobeRef,
   GlobeMarker,
   DEFAULT_THEME_ID,
+  DEFAULT_DARK_THEME_ID,
+  DEFAULT_LIGHT_THEME_ID,
   THEME_PRESETS,
 } from './components/EarthGlobe';
 import {
@@ -42,7 +44,28 @@ export default function App() {
   const initialOnlyIndia = urlParams?.get('onlyIndia') === 'true' || urlParams?.get('indiaOnly') === 'true';
   const initialWidth = urlParams?.get('width') || urlParams?.get('size') || '100%';
   const initialHeight = urlParams?.get('height') || urlParams?.get('size') || '100%';
-  const initialTheme = urlParams?.get('theme') || DEFAULT_THEME_ID;
+
+  // URL mode or theme resolution
+  const modeParam = urlParams?.get('mode')?.toLowerCase();
+  const themeParam = urlParams?.get('theme');
+
+  let defaultInitialTheme = DEFAULT_THEME_ID;
+  if (modeParam === 'light') {
+    if (themeParam && themeParam in THEME_PRESETS && !THEME_PRESETS[themeParam].isDark) {
+      defaultInitialTheme = themeParam;
+    } else {
+      defaultInitialTheme = DEFAULT_LIGHT_THEME_ID;
+    }
+  } else if (modeParam === 'dark') {
+    if (themeParam && themeParam in THEME_PRESETS && THEME_PRESETS[themeParam].isDark) {
+      defaultInitialTheme = themeParam;
+    } else {
+      defaultInitialTheme = DEFAULT_DARK_THEME_ID;
+    }
+  } else if (themeParam && themeParam in THEME_PRESETS) {
+    defaultInitialTheme = themeParam;
+  }
+
   const initialSpeed = urlParams?.get('speed') ? parseFloat(urlParams.get('speed')!) : 1.2;
   // Embed output controls — pre-selected via URL (defaults keep old links working)
   const embedDragEnabled = urlParams?.get('drag') !== 'false';
@@ -54,7 +77,7 @@ export default function App() {
   const [embedHeight, setEmbedHeight] = useState<string | number>(initialHeight);
 
   // Core configuration states
-  const [theme, setTheme] = useState<string>(initialTheme in THEME_PRESETS ? initialTheme : DEFAULT_THEME_ID);
+  const [theme, setTheme] = useState<string>(defaultInitialTheme);
   const [onlyIndia, setOnlyIndia] = useState<boolean>(initialOnlyIndia);
   const [highlightState, setHighlightState] = useState<string | null>(urlParams?.get('state') || null);
   const [autoRotate, setAutoRotate] = useState<boolean>(urlParams?.get('rotate') !== 'false');
@@ -84,6 +107,13 @@ export default function App() {
 
   const currentThemeConfig = THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
   const isDark = currentThemeConfig.isDark;
+
+  const handleToggleDarkMode = useCallback(() => {
+    setTheme((prevTheme) => {
+      const currentIsDark = THEME_PRESETS[prevTheme]?.isDark ?? true;
+      return currentIsDark ? DEFAULT_LIGHT_THEME_ID : DEFAULT_DARK_THEME_ID;
+    });
+  }, []);
 
   // Active markers passed to the globe
   const markersToRender: GlobeMarker[] = activeMarker
@@ -157,8 +187,6 @@ export default function App() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isEmbedMode) {
-        // URL-loaded embeds stay locked (display output); Pure View entered
-        // from the app can exit with X / Escape
         if (!initialEmbed && (e.key === 'x' || e.key === 'X' || e.key === 'Escape')) {
           setIsEmbedMode(false);
         }
@@ -177,12 +205,14 @@ export default function App() {
         handleResetView();
       } else if (e.key === 'c' || e.key === 'C') {
         setIsControlsOpen((prev) => !prev);
+      } else if (e.key === 't' || e.key === 'T') {
+        handleToggleDarkMode();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSelectLocation, isEmbedMode]);
+  }, [handleSelectLocation, isEmbedMode, handleToggleDarkMode]);
 
   // =========================================================================
   // PURE EMBED / COMPONENT MODE: ONLY THE GLOBE AND MAP WITH SIZE CUSTOMIZATION
@@ -193,7 +223,7 @@ export default function App() {
 
     return (
       <div
-        className="w-screen h-screen flex items-center justify-center overflow-hidden relative"
+        className="w-screen h-screen flex items-center justify-center overflow-hidden relative transition-colors duration-500"
         style={{
           backgroundColor: currentThemeConfig.background,
           overscrollBehavior: 'contain',
@@ -231,7 +261,7 @@ export default function App() {
             className="w-full h-full"
           />
 
-          {/* Floating zoom controls (only when pre-enabled via URL; theme-aware) */}
+          {/* Floating zoom controls */}
           {embedZoomEnabled && (
             <div
               className={`absolute bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
@@ -264,7 +294,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Exit Pure View — only for embeds entered from the app (never in URL embeds) */}
+          {/* Exit Pure View button */}
           {!initialEmbed && (
             <button
               onClick={() => setIsEmbedMode(false)}
@@ -290,7 +320,7 @@ export default function App() {
   return (
     <div
       className={`relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans ${
-        isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-zinc-100 text-zinc-900'
+        isDark ? 'bg-zinc-950 text-zinc-100' : 'bg-zinc-50 text-zinc-900'
       }`}
     >
       {/* 1. Header Navigation Bar */}
@@ -310,6 +340,7 @@ export default function App() {
         onToggleControls={() => setIsControlsOpen((prev) => !prev)}
         isControlsOpen={isControlsOpen}
         onToggleEmbedMode={() => setIsEmbedMode(true)}
+        onToggleDarkMode={handleToggleDarkMode}
         isDark={isDark}
       />
 
@@ -405,6 +436,7 @@ export default function App() {
                 globeRef.current?.flyTo(lat, lng, zoom)
               }
               onClose={() => setIsControlsOpen(false)}
+              onToggleDarkMode={handleToggleDarkMode}
               isDark={isDark}
             />
           </div>
@@ -414,10 +446,14 @@ export default function App() {
         {!isControlsOpen && (
           <button
             onClick={() => setIsControlsOpen(true)}
-            className="absolute top-18 right-6 z-30 px-3.5 py-2 rounded-xl bg-zinc-950/90 hover:bg-zinc-900 text-white border border-zinc-700 backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+            className={`absolute top-18 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105 ${
+              isDark
+                ? 'bg-zinc-950/90 hover:bg-zinc-900 text-white border-zinc-700'
+                : 'bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl'
+            }`}
             title="Open Globe Customizer & Layers Menu"
           >
-            <SlidersHorizontal className="w-4 h-4 text-white" />
+            <SlidersHorizontal className={`w-4 h-4 ${isDark ? 'text-white' : 'text-zinc-900'}`} />
             <span className="text-xs font-bold">Open Customizer Menu</span>
           </button>
         )}
@@ -428,15 +464,25 @@ export default function App() {
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none ${
+                isDark
+                  ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700/80'
+                  : 'bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300 shadow-md'
+              }`}
               title="Deselect active pin so map is completely clean"
             >
-              <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
               <span className="leading-none">Deselect Pin</span>
-              <span className="inline-flex items-center justify-center text-[10px] text-zinc-400 font-mono leading-none">[X]</span>
+              <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[X]</span>
             </button>
           ) : (
-            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900/80 text-zinc-400 border border-zinc-800 backdrop-blur-md inline-flex items-center gap-1.5 shadow-lg select-none leading-none">
+            <div
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-flex items-center gap-1.5 shadow-lg select-none leading-none ${
+                isDark
+                  ? 'bg-zinc-900/80 text-zinc-400 border-zinc-800'
+                  : 'bg-white/80 text-zinc-600 border-zinc-200'
+              }`}
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
               <span className="leading-none">Clean Map (No Point)</span>
             </div>
@@ -445,7 +491,11 @@ export default function App() {
           {/* Embed / Pure Mode Button */}
           <button
             onClick={() => setIsEmbedMode(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/80 backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none"
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none ${
+              isDark
+                ? 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700/80'
+                : 'bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300 shadow-md'
+            }`}
             title="Switch to clean isolated globe view (no UI chrome)"
           >
             <Maximize2 className="w-3.5 h-3.5 shrink-0" />
@@ -454,26 +504,38 @@ export default function App() {
         </div>
 
         {/* 6. Floating Zoom & Orientation HUD */}
-        <div className="absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-1 backdrop-blur-md shadow-xl">
+        <div
+          className={`absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
+            isDark
+              ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
+              : 'bg-white/90 border-zinc-200/80 text-zinc-700'
+          }`}
+        >
           <button
             onClick={handleZoomIn}
-            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer text-base font-bold"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              isDark ? 'hover:bg-zinc-800 hover:text-white' : 'hover:bg-zinc-200 hover:text-zinc-950'
+            }`}
             title="Zoom In"
           >
             +
           </button>
-          <div className="w-5 h-px bg-zinc-800" />
+          <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
           <button
             onClick={handleZoomOut}
-            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer text-base font-bold"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              isDark ? 'hover:bg-zinc-800 hover:text-white' : 'hover:bg-zinc-200 hover:text-zinc-950'
+            }`}
             title="Zoom Out"
           >
             −
           </button>
-          <div className="w-5 h-px bg-zinc-800" />
+          <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
           <button
             onClick={handleResetView}
-            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs ${
+              isDark ? 'hover:bg-zinc-800 hover:text-white' : 'hover:bg-zinc-200 hover:text-zinc-950'
+            }`}
             title="Reset to India Center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -481,7 +543,11 @@ export default function App() {
         </div>
 
         {/* 7. Bottom Status Bar & Shortcuts Guide */}
-        <div className="absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono text-zinc-500 pointer-events-none">
+        <div
+          className={`absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none ${
+            isDark ? 'text-zinc-500' : 'text-zinc-600 font-medium'
+          }`}
+        >
           <div className="flex items-center gap-3">
             <span>SURVEY OF INDIA CARTOGRAPHY</span>
             <span>·</span>
@@ -491,6 +557,8 @@ export default function App() {
           </div>
           <div className="hidden lg:flex items-center gap-2">
             <span>[SPACE] Pause</span>
+            <span>·</span>
+            <span>[T] Dark/Light</span>
             <span>·</span>
             <span>[X] Clear</span>
             <span>·</span>

@@ -61,8 +61,8 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   };
 
   const bgClass = isDark
-    ? "bg-zinc-950/85 backdrop-blur-md border-zinc-800 text-zinc-100"
-    : "bg-white/90 backdrop-blur-md border-zinc-200 text-zinc-900";
+    ? "bg-zinc-950/90 backdrop-blur-md border-zinc-800 text-zinc-100"
+    : "bg-white/95 backdrop-blur-md border-zinc-200 text-zinc-900 shadow-2xl";
 
   const subTextClass = isDark ? "text-zinc-400" : "text-zinc-600";
   const dividerClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
@@ -75,7 +75,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       <div className="flex items-start justify-between gap-3 pb-3 border-b border-inherit">
         <div>
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-zinc-400">
-            <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" />
+            <span
+              className={`inline-block w-2 h-2 rounded-full animate-pulse ${
+                isDark ? "bg-white" : "bg-zinc-900"
+              }`}
+            />
             <span>Active Location Pin</span>
             <span aria-hidden="true">·</span>
             <span>{marker.region || "India"}</span>
@@ -106,15 +110,25 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.0)}
             title={`Fly to ${marker.name}`}
-            className="p-2 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 text-zinc-200 transition-colors border border-zinc-700/60 flex items-center justify-center cursor-pointer"
+            className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
+              isDark
+                ? "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-200 border-zinc-700/60"
+                : "bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
+            }`}
           >
-            <Navigation className="w-4 h-4 text-white" />
+            <Navigation
+              className={`w-4 h-4 ${isDark ? "text-white" : "text-zinc-900"}`}
+            />
           </button>
           {onDeselect && (
             <button
               onClick={onDeselect}
               title="Deselect / Remove pin from map"
-              className="p-2 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors border border-zinc-700/60 flex items-center justify-center cursor-pointer"
+              className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
+                isDark
+                  ? "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-400 hover:text-white border-zinc-700/60"
+                  : "bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-950 border-zinc-300"
+              }`}
             >
               <X className="w-4 h-4" />
             </button>
@@ -145,7 +159,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
               {marker.lat.toFixed(4)}° N, {marker.lng.toFixed(4)}° E
             </span>
             {copied ? (
-              <Check className="w-3 h-3 text-emerald-400" />
+              <Check className="w-3 h-3 text-emerald-500" />
             ) : (
               <Copy className="w-3 h-3 text-zinc-400" />
             )}
@@ -203,11 +217,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         )}
 
         <div className="flex items-center justify-between pt-1 border-t border-inherit/40 text-[11px]">
-          <span className="text-zinc-400 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+          <span className={`${subTextClass} flex items-center gap-1.5`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
             <span>Map Cartography</span>
           </span>
-          <span className="text-zinc-300 font-medium">
+          <span className="font-medium">
             Survey of India (Official)
           </span>
         </div>
@@ -218,10 +232,14 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         {marker.region && onToggleStateHighlight && (
           <button
             onClick={onToggleStateHighlight}
-            className={`w-full py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+            className={`w-full py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
               isStateHighlighted
-                ? "bg-white text-zinc-950 border-white shadow-sm"
-                : "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
+                ? isDark
+                  ? "bg-white text-zinc-950 border-white shadow-sm"
+                  : "bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700"
+                : isDark
+                ? "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
+                : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300 shadow-sm"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -236,14 +254,22 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 1.6)}
-            className="px-3 py-2 text-xs font-semibold rounded-lg bg-white text-zinc-950 hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+            className={`px-3 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
+              isDark
+                ? "bg-white text-zinc-950 hover:bg-zinc-200"
+                : "bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 shadow-md"
+            }`}
           >
-            <Navigation className="w-3.5 h-3.5 text-zinc-950" />
+            <Navigation className="w-3.5 h-3.5" />
             <span>Center Pin</span>
           </button>
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.6)}
-            className="px-3 py-2 text-xs font-medium rounded-lg border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className={`px-3 py-2 text-xs font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              isDark
+                ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
+                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 shadow-sm"
+            }`}
           >
             <Maximize2 className="w-3.5 h-3.5" />
             <span>Close Up</span>
