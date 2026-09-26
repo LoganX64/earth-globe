@@ -44,6 +44,9 @@ export default function App() {
   const initialHeight = urlParams?.get('height') || urlParams?.get('size') || '100%';
   const initialTheme = urlParams?.get('theme') || DEFAULT_THEME_ID;
   const initialSpeed = urlParams?.get('speed') ? parseFloat(urlParams.get('speed')!) : 1.2;
+  // Embed output controls — pre-selected via URL (defaults keep old links working)
+  const embedDragEnabled = urlParams?.get('drag') !== 'false';
+  const embedZoomEnabled = urlParams?.get('zoom') !== 'false';
 
   // Embed Mode state (shows ONLY globe and map)
   const [isEmbedMode, setIsEmbedMode] = useState<boolean>(initialEmbed);
@@ -153,6 +156,7 @@ export default function App() {
   // Keyboard shortcut navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEmbedMode) return; // Pure embed/display output: no keyboard controls
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
@@ -161,11 +165,7 @@ export default function App() {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
       } else if (e.key === 'x' || e.key === 'X' || e.key === 'Escape') {
-        if (isEmbedMode) {
-          setIsEmbedMode(false);
-        } else {
-          handleSelectLocation(null);
-        }
+        handleSelectLocation(null);
       } else if (e.key === 'r' || e.key === 'R') {
         handleResetView();
       } else if (e.key === 'c' || e.key === 'C') {
@@ -211,39 +211,48 @@ export default function App() {
             selectedMarkerId={activeMarker?.id || null}
             autoRotate={autoRotate}
             autoRotateSpeed={autoRotateSpeed}
-            enableDrag={true}
-            enableZoom={true}
+            enableDrag={embedDragEnabled}
+            enableZoom={embedZoomEnabled}
             showGraticule={showGraticule}
             showAtmosphere={showAtmosphere}
             showStars={showStars}
             initialCenter={activeMarker ? [activeMarker.lng, activeMarker.lat] : [78.9629, 20.5937]}
             initialZoom={1.2}
-            onMarkerClick={(marker) => handleSelectLocation(marker)}
-            onStateClick={(stateName) => handleHighlightStateChange(stateName)}
             className="w-full h-full"
           />
 
-          {/* Prominent top floating toolbar for Embed View */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/90 border border-zinc-700 backdrop-blur-md shadow-2xl text-xs">
-            <span className="text-zinc-300 font-semibold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Pure Component View</span>
-            </span>
-            <div className="w-px h-4 bg-zinc-800" />
-            <button
-              onClick={() => setOnlyIndia((prev) => !prev)}
-              className="px-2.5 py-1 rounded-md text-[11px] font-mono border border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white cursor-pointer transition-colors"
+          {/* Floating zoom controls (only when pre-enabled via URL; theme-aware) */}
+          {embedZoomEnabled && (
+            <div
+              className={`absolute bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
+                isDark ? 'bg-zinc-950/80 border-zinc-800/80' : 'bg-white/85 border-zinc-200/80'
+              }`}
             >
-              {onlyIndia ? '✓ Only India Map' : 'Global Map'}
-            </button>
-            <button
-              onClick={() => setIsEmbedMode(false)}
-              className="px-3 py-1 rounded-md text-[11px] font-bold bg-white text-zinc-950 hover:bg-zinc-200 cursor-pointer flex items-center gap-1 shadow-sm transition-colors"
-            >
-              <SlidersHorizontal className="w-3 h-3" />
-              <span>Show All Menus &amp; Controls</span>
-            </button>
-          </div>
+              <button
+                onClick={handleZoomIn}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+                  isDark
+                    ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                }`}
+                title="Zoom In"
+              >
+                +
+              </button>
+              <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+              <button
+                onClick={handleZoomOut}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+                  isDark
+                    ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                    : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                }`}
+                title="Zoom Out"
+              >
+                −
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -471,6 +480,7 @@ export default function App() {
         activeMarker={activeMarker}
         highlightState={highlightState || undefined}
         autoRotateSpeed={autoRotateSpeed}
+        autoRotate={autoRotate}
         theme={theme}
         onlyIndia={onlyIndia}
         isDark={isDark}
