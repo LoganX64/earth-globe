@@ -111,22 +111,6 @@ export default function App() {
     globeRef.current?.flyTo(marker.lat, marker.lng, 1.8);
   }, []);
 
-  const handleSelectThrissur = useCallback(() => {
-    handleSelectLocation(THRISSUR_MARKER);
-  }, [handleSelectLocation]);
-
-  const handleSelectMumbai = useCallback(() => {
-    handleSelectLocation(MUMBAI_MARKER);
-  }, [handleSelectLocation]);
-
-  const handleSelectUlhasnagar = useCallback(() => {
-    handleSelectLocation(ULHASNAGAR_MARKER);
-  }, [handleSelectLocation]);
-
-  const handleSelectJK = useCallback(() => {
-    globeRef.current?.flyTo(34.2, 76.0, 2.0);
-  }, []);
-
   const handleHighlightStateChange = useCallback((stateName: string | null) => {
     setHighlightState(stateName);
     if (stateName) {
@@ -176,12 +160,6 @@ export default function App() {
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
-      } else if (e.key === 'u' || e.key === 'U') {
-        handleSelectUlhasnagar();
-      } else if (e.key === 't' || e.key === 'T') {
-        handleSelectThrissur();
-      } else if (e.key === 'm' || e.key === 'M') {
-        handleSelectMumbai();
       } else if (e.key === 'x' || e.key === 'X' || e.key === 'Escape') {
         if (isEmbedMode) {
           setIsEmbedMode(false);
@@ -197,7 +175,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSelectLocation, handleSelectMumbai, handleSelectThrissur, handleSelectUlhasnagar, isEmbedMode]);
+  }, [handleSelectLocation, isEmbedMode]);
 
   // =========================================================================
   // PURE EMBED / COMPONENT MODE: ONLY THE GLOBE AND MAP WITH SIZE CUSTOMIZATION
@@ -291,9 +269,6 @@ export default function App() {
             globeRef.current?.flyTo(20.5937, 78.9629, 1.4);
           }
         }}
-        onSelectThrissur={handleSelectThrissur}
-        onSelectMumbai={handleSelectMumbai}
-        onSelectJK={handleSelectJK}
         onDeselectLocation={() => handleSelectLocation(null)}
         onSearchSelectLocation={handleSearchSelectLocation}
         onOpenCode={() => setIsCodeModalOpen(true)}
@@ -412,7 +387,7 @@ export default function App() {
           </button>
         )}
 
-        {/* 5. Floating Quick Location Switcher Buttons */}
+        {/* 5. Floating Quick Actions Buttons */}
         <div className="absolute bottom-10 left-6 z-30 flex items-center gap-2 flex-wrap max-w-[85vw]">
           {/* Active location indicator / Deselect button */}
           {activeMarker ? (
@@ -431,51 +406,6 @@ export default function App() {
               <span className="leading-none">Clean Map (No Point)</span>
             </div>
           )}
-
-          {/* Ulhasnagar Toggle Button */}
-          <button
-            onClick={handleSelectUlhasnagar}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none ${
-              activeMarker?.id === 'ulhasnagar'
-                ? 'bg-white text-zinc-950 border-white ring-2 ring-white/30'
-                : 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700/80'
-            }`}
-            title={activeMarker?.id === 'ulhasnagar' ? 'Click to deselect Ulhasnagar' : 'Point to Ulhasnagar, Maharashtra'}
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${activeMarker?.id === 'ulhasnagar' ? 'bg-zinc-950' : 'bg-white'}`} />
-            <span className="leading-none">Ulhasnagar, MH</span>
-            <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[U]</span>
-          </button>
-
-          {/* Thrissur Toggle Button */}
-          <button
-            onClick={handleSelectThrissur}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none ${
-              activeMarker?.id === 'thrissur'
-                ? 'bg-white text-zinc-950 border-white ring-2 ring-white/30'
-                : 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700/80'
-            }`}
-            title={activeMarker?.id === 'thrissur' ? 'Click to deselect Thrissur' : 'Point to Thrissur, Kerala'}
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${activeMarker?.id === 'thrissur' ? 'bg-zinc-950' : 'bg-white'}`} />
-            <span className="leading-none">Thrissur, Kerala</span>
-            <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[T]</span>
-          </button>
-
-          {/* Mumbai Toggle Button */}
-          <button
-            onClick={handleSelectMumbai}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-lg inline-flex items-center gap-1.5 leading-none ${
-              activeMarker?.id === 'mumbai'
-                ? 'bg-white text-zinc-950 border-white ring-2 ring-white/30'
-                : 'bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700/80'
-            }`}
-            title={activeMarker?.id === 'mumbai' ? 'Click to deselect Mumbai' : 'Point to Mumbai, Maharashtra'}
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${activeMarker?.id === 'mumbai' ? 'bg-zinc-950' : 'bg-white'}`} />
-            <span className="leading-none">Mumbai</span>
-            <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[M]</span>
-          </button>
 
           {/* Embed / Pure Mode Button */}
           <button
@@ -526,12 +456,6 @@ export default function App() {
           </div>
           <div className="hidden lg:flex items-center gap-2">
             <span>[SPACE] Pause</span>
-            <span>·</span>
-            <span>[U] Ulhasnagar</span>
-            <span>·</span>
-            <span>[T] Thrissur</span>
-            <span>·</span>
-            <span>[M] Mumbai</span>
             <span>·</span>
             <span>[X] Clear</span>
             <span>·</span>

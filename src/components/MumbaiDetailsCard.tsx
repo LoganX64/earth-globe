@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { GlobeMarker } from './EarthGlobe/types';
+import React, { useState, useEffect } from "react";
+import { GlobeMarker } from "./EarthGlobe/types";
 import {
   Navigation,
   Compass,
@@ -11,7 +11,7 @@ import {
   Maximize2,
   Sparkles,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface LocationDetailsCardProps {
   marker: GlobeMarker;
@@ -30,18 +30,18 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   onToggleStateHighlight,
   isDark = true,
 }) => {
-  const [istTime, setIstTime] = useState<string>('');
+  const [istTime, setIstTime] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
 
   // Live IST (Indian Standard Time) Clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const istString = now.toLocaleTimeString('en-US', {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+      const istString = now.toLocaleTimeString("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
         hour12: true,
       });
       setIstTime(istString);
@@ -53,17 +53,19 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   }, []);
 
   const copyCoords = () => {
-    navigator.clipboard.writeText(`${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}`);
+    navigator.clipboard.writeText(
+      `${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}`,
+    );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const bgClass = isDark
-    ? 'bg-zinc-950/85 backdrop-blur-md border-zinc-800 text-zinc-100'
-    : 'bg-white/90 backdrop-blur-md border-zinc-200 text-zinc-900';
+    ? "bg-zinc-950/85 backdrop-blur-md border-zinc-800 text-zinc-100"
+    : "bg-white/90 backdrop-blur-md border-zinc-200 text-zinc-900";
 
-  const subTextClass = isDark ? 'text-zinc-400' : 'text-zinc-600';
-  const dividerClass = isDark ? 'border-zinc-800/80' : 'border-zinc-200/80';
+  const subTextClass = isDark ? "text-zinc-400" : "text-zinc-600";
+  const dividerClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
 
   return (
     <div
@@ -76,23 +78,25 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" />
             <span>Active Location Pin</span>
             <span aria-hidden="true">·</span>
-            <span>{marker.region || 'India'}</span>
+            <span>{marker.region || "India"}</span>
           </div>
           <h2 className="text-xl font-bold tracking-tight mt-1 text-inherit">
             {marker.name}
           </h2>
           <div className={`text-xs mt-0.5 ${subTextClass}`}>
-            <span>{marker.region || 'State'}</span>
+            <span>{marker.region || "State"}</span>
             <span aria-hidden="true" className="mx-1.5">
               ·
             </span>
-            <span>{marker.country || 'India'}</span>
+            <span>{marker.country || "India"}</span>
             {marker.data?.role && (
               <>
                 <span aria-hidden="true" className="mx-1.5">
                   ·
                 </span>
-                <span className="truncate max-w-[120px] inline-block align-bottom">{marker.data.role}</span>
+                <span className="truncate max-w-30 inline-block align-bottom">
+                  {marker.data.role}
+                </span>
               </>
             )}
           </div>
@@ -154,7 +158,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span>Local Time (IST)</span>
           </span>
           <span className="font-mono text-xs font-semibold tabular-nums">
-            {istTime || 'Loading IST...'}
+            {istTime || "Loading IST..."}
           </span>
         </div>
       </div>
@@ -163,27 +167,36 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       <div className={`pt-3 border-t ${dividerClass} space-y-2 text-xs`}>
         <div className="flex items-center justify-between">
           <span className={subTextClass}>State / Territory</span>
-          <span className="font-medium text-right">{marker.region || 'India'}</span>
+          <span className="font-medium text-right">
+            {marker.region || "India"}
+          </span>
         </div>
 
         {marker.data?.elevation && (
           <div className="flex items-center justify-between">
             <span className={subTextClass}>Elevation</span>
-            <span className="font-mono tabular-nums">{marker.data.elevation}</span>
+            <span className="font-mono tabular-nums">
+              {marker.data.elevation}
+            </span>
           </div>
         )}
 
         {marker.data?.populationMetro && (
           <div className="flex items-center justify-between">
             <span className={subTextClass}>Metro Population</span>
-            <span className="font-mono tabular-nums">{marker.data.populationMetro}</span>
+            <span className="font-mono tabular-nums">
+              {marker.data.populationMetro}
+            </span>
           </div>
         )}
 
         {marker.data?.majorLandmarks && (
           <div className="flex items-center justify-between">
             <span className={subTextClass}>Landmarks</span>
-            <span className="font-medium text-right truncate max-w-[170px]" title={String(marker.data.majorLandmarks)}>
+            <span
+              className="font-medium text-right truncate max-w-42.5"
+              title={String(marker.data.majorLandmarks)}
+            >
               {marker.data.majorLandmarks}
             </span>
           </div>
@@ -194,7 +207,9 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
             <span>Map Cartography</span>
           </span>
-          <span className="text-zinc-300 font-medium">Survey of India (Official)</span>
+          <span className="text-zinc-300 font-medium">
+            Survey of India (Official)
+          </span>
         </div>
       </div>
 
@@ -205,8 +220,8 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             onClick={onToggleStateHighlight}
             className={`w-full py-1.5 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               isStateHighlighted
-                ? 'bg-white text-zinc-950 border-white shadow-sm'
-                : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700'
+                ? "bg-white text-zinc-950 border-white shadow-sm"
+                : "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
