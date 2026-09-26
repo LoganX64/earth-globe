@@ -225,7 +225,7 @@ vercel
           {/* Quick Customizer Bar for Embed & Component (not relevant to Vercel guide) */}
           {activeTab !== 'vercel' && (
           <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5 text-xs">
-            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-zinc-400 font-medium">Map Isolation:</span>
                 <button
@@ -256,16 +256,6 @@ vercel
                   </button>
                 ))}
               </div>
-
-              <a
-                href={embedSrc}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-zinc-300 hover:text-white underline underline-offset-2 ml-auto"
-              >
-                <span>{activeTab === 'embed' ? 'Test Embed URL' : 'Test Preview URL'}</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
             </div>
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -310,6 +300,16 @@ vercel
                   {embedZoom ? '✓ Scroll + ±' : 'Off'}
                 </button>
               </div>
+
+              <a
+                href={embedSrc}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-zinc-300 hover:text-white underline underline-offset-2 ml-auto"
+              >
+                <span>{activeTab === 'embed' ? 'Test Embed URL' : 'Test Preview URL'}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
           </div>
           )}
