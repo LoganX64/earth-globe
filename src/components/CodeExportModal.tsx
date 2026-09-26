@@ -132,10 +132,10 @@ vercel
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div
-        className={`w-full max-w-3xl max-h-[90vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${bgClass}`}
+        className={`w-full max-w-3xl h-[760px] max-h-[88vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${bgClass}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-inherit">
+        <div className="flex items-center justify-between shrink-0 px-6 py-4 border-b border-inherit">
           <div className="flex items-center gap-2.5">
             <Globe className="w-5 h-5 text-white" />
             <div>
@@ -152,44 +152,47 @@ vercel
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 px-6 pt-3 border-b border-inherit overflow-x-auto">
+        <div className="flex items-center gap-2 shrink-0 px-6 pt-3 border-b border-inherit">
           <button
             onClick={() => setActiveTab('embed')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'embed'
                 ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Globe className="w-3.5 h-3.5" />
-            <span>Website / Portfolio (iFrame)</span>
+            <Globe className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Website / Portfolio (iFrame)</span>
           </button>
           <button
             onClick={() => setActiveTab('react')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'react'
                 ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Code className="w-3.5 h-3.5" />
-            <span>React / Next.js Component</span>
+            <Code className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">React / Next.js Component</span>
           </button>
           <button
             onClick={() => setActiveTab('vercel')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'vercel'
                 ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Terminal className="w-3.5 h-3.5" />
-            <span>Vercel Deploy Guide</span>
+            <Terminal className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Vercel Deploy Guide</span>
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-5 text-sm">
+        <div
+          className="flex-1 min-h-0 min-w-0 p-6 overflow-y-auto space-y-5 text-sm"
+          style={{ scrollbarGutter: 'stable' }}
+        >
           {/* Quick Customizer Bar for Embed & Component */}
           <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
@@ -381,7 +384,7 @@ vercel
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-3 border-t border-inherit bg-zinc-900/40">
+        <div className="flex items-center justify-between shrink-0 px-6 py-3 border-t border-inherit bg-zinc-900/40">
           <span className="text-xs text-zinc-400">
             Survey of India compliant · Official borders including J&amp;K and Ladakh
           </span>
