@@ -32,15 +32,18 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
   const currentHost = typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.vercel.app';
 
-  const iframeSrc = `${currentHost}/?embed=true${embedOnlyIndia ? '&onlyIndia=true' : ''}${
+  const baseSrc = `${currentHost}/?embed=true${embedOnlyIndia ? '&onlyIndia=true' : ''}${
     theme !== 'black-and-white' ? `&theme=${theme}` : ''
-  }${autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ''}${
-    activeMarker ? `&marker=${activeMarker.id}` : ''
-  }${highlightState ? `&state=${encodeURIComponent(highlightState)}` : ''}`;
+  }${autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ''}`;
+
+  // Shared by both tabs — mirrors the component's current config
+  const embedSrc = `${baseSrc}${activeMarker ? `&marker=${activeMarker.id}` : ''}${
+    highlightState ? `&state=${encodeURIComponent(highlightState)}` : ''
+  }`;
 
   const iframeSnippet = `<!-- Drop-in 3D India Globe for any Portfolio, Webflow, WordPress, or HTML website -->
 <iframe
-  src="${iframeSrc}"
+  src="${embedSrc}"
   width="${embedSize === '100%' ? '100%' : `${embedSize}px`}"
   height="${embedSize === '100%' ? '600px' : `${embedSize}px`}"
   style="border: none; border-radius: 16px; overflow: hidden; background: #000000;"
@@ -193,7 +196,8 @@ vercel
           className="flex-1 min-h-0 min-w-0 p-6 overflow-y-auto space-y-5 text-sm"
           style={{ scrollbarGutter: 'stable' }}
         >
-          {/* Quick Customizer Bar for Embed & Component */}
+          {/* Quick Customizer Bar for Embed & Component (not relevant to Vercel guide) */}
+          {activeTab !== 'vercel' && (
           <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
               <span className="text-zinc-400 font-medium">Map Isolation:</span>
@@ -227,15 +231,16 @@ vercel
             </div>
 
             <a
-              href={iframeSrc}
+              href={embedSrc}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-zinc-300 hover:text-white underline underline-offset-2 ml-auto"
             >
-              <span>Test Embed URL</span>
+              <span>{activeTab === 'embed' ? 'Test Embed URL' : 'Test Preview URL'}</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
+          )}
 
           {/* Tab 1: iFrame Embed */}
           {activeTab === 'embed' && (
