@@ -653,76 +653,103 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
 
           ctx.save();
 
+          const primaryPinColor = activeTheme.markerPrimary || (activeTheme.isDark ? '#ef4444' : '#dc2626');
+          const secondaryPinColor = activeTheme.markerSecondary || (activeTheme.isDark ? '#38bdf8' : '#2563eb');
+          const pulseColor = activeTheme.markerPulse || primaryPinColor;
+
           if (isPrimary) {
-            // === Primary Location Beacon (e.g. Thrissur, Kerala or Mumbai, Maharashtra) ===
-            // Radar pulse ring animation
-            const pulsePhase = (now % 2400) / 2400; // 0 to 1 cycle
-            const pulseRadius = 8 + pulsePhase * 24;
+            // === PRIMARY 3D LOCATION PIN (Thrissur, Mumbai, Ulhasnagar, etc.) ===
+            
+            // 1. Radar Pulse Animation at ground level
+            const pulsePhase = (now % 2400) / 2400;
+            const pulseRadius = 8 + pulsePhase * 26;
             const pulseAlpha = (1 - pulsePhase) * 0.85;
 
-            // Outer radar ring
-            const pulseColor = activeTheme.markerPulse || activeTheme.markerPrimary;
             ctx.save();
             ctx.beginPath();
             ctx.arc(mx, my, pulseRadius, 0, Math.PI * 2);
             ctx.strokeStyle = pulseColor;
             ctx.globalAlpha = pulseAlpha;
-            ctx.lineWidth = 1.4;
+            ctx.lineWidth = 1.6;
             ctx.stroke();
 
-            // Second secondary pulse wave
             const pulsePhase2 = ((now + 1200) % 2400) / 2400;
-            const pulseRadius2 = 8 + pulsePhase2 * 24;
+            const pulseRadius2 = 8 + pulsePhase2 * 26;
             const pulseAlpha2 = (1 - pulsePhase2) * 0.7;
             ctx.beginPath();
             ctx.arc(mx, my, pulseRadius2, 0, Math.PI * 2);
             ctx.strokeStyle = pulseColor;
             ctx.globalAlpha = pulseAlpha2;
-            ctx.lineWidth = 1.0;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
             ctx.restore();
 
-            // Concentric target rings
+            // 2. Ground Contact Target Rings at (mx, my)
             ctx.beginPath();
-            ctx.arc(mx, my, 7, 0, Math.PI * 2);
-            ctx.fillStyle = activeTheme.isDark
-              ? 'rgba(0, 0, 0, 0.7)'
-              : 'rgba(255, 255, 255, 0.8)';
+            ctx.arc(mx, my, 6.5, 0, Math.PI * 2);
+            ctx.fillStyle = activeTheme.isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)';
             ctx.fill();
-            ctx.strokeStyle = activeTheme.markerPrimary;
+            ctx.strokeStyle = primaryPinColor;
+            ctx.lineWidth = 2.2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(mx, my, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = primaryPinColor;
+            ctx.fill();
+
+            // 3. Stalk Line with Contrast Background Shadow Line
+            const pinY = my - 30; // Center of pin head badge
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 3;
+
+            // Background outline stalk stroke
+            ctx.beginPath();
+            ctx.moveTo(mx, my - 4);
+            ctx.lineTo(mx, pinY + 8);
+            ctx.strokeStyle = activeTheme.isDark ? '#000000' : '#ffffff';
+            ctx.lineWidth = 3.6;
+            ctx.stroke();
+
+            // Foreground stalk line
+            ctx.beginPath();
+            ctx.moveTo(mx, my - 4);
+            ctx.lineTo(mx, pinY + 8);
+            ctx.strokeStyle = primaryPinColor;
             ctx.lineWidth = 2.0;
             ctx.stroke();
 
-            // Center glowing core dot
+            // 4. Teardrop 3D Map Pin Badge at (mx, pinY)
+            const pinR = 10.5;
             ctx.beginPath();
-            ctx.arc(mx, my, 3.2, 0, Math.PI * 2);
-            ctx.fillStyle = activeTheme.markerPrimary;
-            ctx.shadowColor = activeTheme.markerPulse;
-            ctx.shadowBlur = 10;
-            ctx.fill();
-            ctx.shadowBlur = 0;
+            ctx.arc(mx, pinY, pinR, Math.PI * 0.75, Math.PI * 0.25, true);
+            ctx.lineTo(mx, my - 14);
+            ctx.closePath();
 
-            // Vertical beacon stalk & pinhead
-            const stalkHeight = 28;
-            ctx.beginPath();
-            ctx.moveTo(mx, my - 7);
-            ctx.lineTo(mx, my - stalkHeight);
-            ctx.strokeStyle = activeTheme.markerPrimary;
-            ctx.lineWidth = 1.2;
+            // Vibrant Pin Fill
+            ctx.fillStyle = primaryPinColor;
+            ctx.fill();
+
+            // Solid 2.2px Outline for sharp visibility on any background
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.2;
             ctx.stroke();
 
-            // Pin diamond / circle at top of stalk
+            // Inner White Core Dot
             ctx.beginPath();
-            ctx.arc(mx, my - stalkHeight, 4, 0, Math.PI * 2);
-            ctx.fillStyle = activeTheme.markerPrimary;
+            ctx.arc(mx, pinY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
-            ctx.strokeStyle = activeTheme.isDark ? '#09090b' : '#ffffff';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 1;
             ctx.stroke();
+            ctx.restore();
 
-            // Clean callout label for active location
-            const labelX = mx + 12;
-            const labelY = my - stalkHeight - 4;
+            // 5. High-Visibility Callout Label Card
+            const labelX = mx + 16;
+            const labelY = pinY;
 
             ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
             const title = marker.name.toUpperCase();
@@ -730,60 +757,78 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const titleWidth = ctx.measureText(title).width;
             ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif';
             const subWidth = ctx.measureText(sub).width;
-            const boxWidth = Math.max(titleWidth, subWidth) + 16;
+            const boxWidth = Math.max(titleWidth, subWidth) + 18;
             const boxHeight = 28;
 
-            // Callout background box
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 2;
+
+            // Connecting leader line to label
+            ctx.beginPath();
+            ctx.moveTo(mx + pinR, pinY);
+            ctx.lineTo(labelX, labelY);
+            ctx.strokeStyle = primaryPinColor;
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+
+            // Callout Box Background
             ctx.fillStyle = activeTheme.isDark
-              ? 'rgba(9, 9, 11, 0.88)'
-              : 'rgba(255, 255, 255, 0.94)';
+              ? 'rgba(9, 9, 11, 0.94)'
+              : 'rgba(255, 255, 255, 0.98)';
             ctx.strokeStyle = activeTheme.isDark
-              ? 'rgba(255, 255, 255, 0.28)'
-              : 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 1;
+              ? 'rgba(255, 255, 255, 0.35)'
+              : 'rgba(0, 0, 0, 0.25)';
+            ctx.lineWidth = 1.2;
 
             ctx.beginPath();
             ctx.rect(labelX, labelY - 14, boxWidth, boxHeight);
             ctx.fill();
             ctx.stroke();
-
-            // Callout connecting line
-            ctx.beginPath();
-            ctx.moveTo(mx + 4, my - stalkHeight);
-            ctx.lineTo(labelX, my - stalkHeight);
-            ctx.strokeStyle = activeTheme.markerPrimary;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+            ctx.restore();
 
             // Text rendering
             ctx.fillStyle = activeTheme.isDark ? '#ffffff' : '#09090b';
             ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
-            ctx.fillText(title, labelX + 8, labelY - 2);
+            ctx.fillText(title, labelX + 9, labelY - 2);
 
             ctx.fillStyle = activeTheme.isDark ? '#a1a1aa' : '#52525b';
             ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif';
-            ctx.fillText(sub, labelX + 8, labelY + 9);
+            ctx.fillText(sub, labelX + 9, labelY + 9);
           } else {
-            // Secondary Location Marker
-            const markerR = isHovered || isSelected ? 5.5 : 4;
+            // === SECONDARY LOCATION MARKERS ===
+            const markerR = isHovered || isSelected ? 6.5 : 5;
 
-            ctx.beginPath();
-            ctx.arc(mx, my, markerR + 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.fill();
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 2;
 
+            // Outer Halo
             ctx.beginPath();
-            ctx.arc(mx, my, markerR, 0, Math.PI * 2);
-            ctx.fillStyle = activeTheme.markerSecondary;
+            ctx.arc(mx, my, markerR + 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = activeTheme.isDark ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.9)';
             ctx.fill();
-            ctx.strokeStyle = activeTheme.isDark ? '#000000' : '#ffffff';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.6;
             ctx.stroke();
 
+            // Inner Core Dot
+            ctx.beginPath();
+            ctx.arc(mx, my, markerR - 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = secondaryPinColor;
+            ctx.fill();
+            ctx.restore();
+
             if (isHovered || isSelected) {
-              ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
+              ctx.save();
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+              ctx.shadowBlur = 6;
+              ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
               ctx.fillStyle = activeTheme.isDark ? '#ffffff' : '#09090b';
-              ctx.fillText(marker.name, mx + 8, my - 6);
+              ctx.fillText(marker.name, mx + 10, my + 3);
+              ctx.restore();
             }
           }
 
