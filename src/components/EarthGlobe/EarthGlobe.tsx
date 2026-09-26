@@ -497,6 +497,13 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           }
           ctx.fillStyle = activeTheme.land;
           ctx.fill();
+
+          // Understroke with land color to completely seal sub-pixel seam gaps with neighboring countries
+          ctx.strokeStyle = activeTheme.land;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          // Border outlines for other countries
           ctx.strokeStyle = activeTheme.landBorder;
           ctx.lineWidth = 0.55;
           ctx.stroke();
@@ -505,13 +512,18 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         // 5. OFFICIAL INDIA MAP (Survey of India: J&K, Ladakh, Kerala, Maharashtra, etc.)
         ctx.save();
 
-        // 5a. Base fill for all Indian States & Union Territories (solid unified land color)
+        // 5a. Base fill & seam seal for all Indian States & Union Territories
         ctx.beginPath();
         for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
           path(stateFeature);
         }
         ctx.fillStyle = activeTheme.land;
         ctx.fill();
+
+        // Understroke with land color to seal state polygon borders seamlessly
+        ctx.strokeStyle = activeTheme.land;
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
 
         // 5b. Internal State Boundaries (ONLY drawn when showStateBorders is enabled!)
         if (showStateBorders) {
@@ -536,6 +548,12 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         // 5d. ON-REQUEST STATE HIGHLIGHT ONLY
         // Highlights strictly and exclusively the state(s) requested by the user
         if (highlightedStatesList.length > 0) {
+          ctx.save();
+          // Clip state highlight rendering inside India boundary to prevent blue glow/stroke spilling into water
+          ctx.beginPath();
+          path(indiaOuterBoundary as any);
+          ctx.clip();
+
           for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
             const stName = (stateFeature.properties?.st_nm || '').toLowerCase().trim();
             const isHighlighted = highlightedStatesList.includes(stName);
@@ -543,7 +561,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             if (isHighlighted) {
               ctx.save();
               ctx.shadowColor = activeTheme.highlightGlow;
-              ctx.shadowBlur = 18;
+              ctx.shadowBlur = 12;
 
               ctx.beginPath();
               path(stateFeature);
@@ -558,16 +576,12 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
               ctx.strokeStyle =
                 activeTheme.highlightLandBorder ||
                 (activeTheme.isDark ? '#60a5fa' : '#0d47a1');
-              ctx.lineWidth = 1.8;
-              ctx.stroke();
-
-              // Subtle glowing rim
-              ctx.strokeStyle = activeTheme.highlightGlow;
-              ctx.lineWidth = 2.4;
+              ctx.lineWidth = 1.6;
               ctx.stroke();
               ctx.restore();
             }
           }
+          ctx.restore();
         }
 
         // 5e. Hovered State Preview (gentle translucent outline when pointer is over a state)
