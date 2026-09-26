@@ -136,10 +136,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-4 shadow-2xl transition-all max-w-sm w-full space-y-4 max-h-[85vh] overflow-y-auto ${containerClass}`}
+      className={`rounded-xl border shadow-2xl transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
     >
-      {/* Title & Quick Zoom */}
-      <div className="flex items-center justify-between pb-2 border-b border-inherit">
+      {/* Title & Quick Zoom (fixed header) */}
+      <div className="flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b border-inherit">
         <div className="flex items-center gap-2">
           <GlobeIcon className="w-4 h-4 text-inherit" />
           <span className="text-xs font-bold uppercase tracking-wider">
@@ -180,6 +180,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
       </div>
 
+      {/* Scrollable body */}
+      <div className="px-4 py-4 overflow-y-auto grow space-y-4">
       {/* 1. Location Pin Selector (Select or Deselect Pins on the Globe) */}
       <div>
         <div className="flex items-center justify-between mb-2">
@@ -659,6 +661,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             </button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
