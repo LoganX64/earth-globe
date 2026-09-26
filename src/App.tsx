@@ -156,7 +156,14 @@ export default function App() {
   // Keyboard shortcut navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isEmbedMode) return; // Pure embed/display output: no keyboard controls
+      if (isEmbedMode) {
+        // URL-loaded embeds stay locked (display output); Pure View entered
+        // from the app can exit with X / Escape
+        if (!initialEmbed && (e.key === 'x' || e.key === 'X' || e.key === 'Escape')) {
+          setIsEmbedMode(false);
+        }
+        return;
+      }
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
@@ -255,6 +262,22 @@ export default function App() {
                 −
               </button>
             </div>
+          )}
+
+          {/* Exit Pure View — only for embeds entered from the app (never in URL embeds) */}
+          {!initialEmbed && (
+            <button
+              onClick={() => setIsEmbedMode(false)}
+              className={`absolute bottom-6 left-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md shadow-xl transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
+              }`}
+              title="Exit Pure View (or press X / Esc)"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Exit Pure View</span>
+            </button>
           )}
         </div>
       </div>
