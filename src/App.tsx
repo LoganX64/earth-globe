@@ -36,6 +36,33 @@ import {
 } from 'lucide-react';
 
 const LAST_LOCATION_STORAGE_KEY = 'bharat-atlas-active-location';
+const HIGHLIGHT_STATE_STORAGE_KEY = 'bharat-atlas-highlight-state';
+const MAP_SETTINGS_STORAGE_KEY = 'bharat-atlas-map-settings';
+
+type SavedMapSettings = {
+  theme?: string;
+  onlyIndia?: boolean;
+  autoRotate?: boolean;
+  autoRotateSpeed?: number;
+  rotateDirection?: 'west-to-east' | 'east-to-west';
+  showStateBorders?: boolean;
+  showGraticule?: boolean;
+  showAtmosphere?: boolean;
+  showStars?: boolean;
+};
+
+const readSavedMapSettings = (): SavedMapSettings => {
+  try {
+    const raw = localStorage.getItem(MAP_SETTINGS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') return parsed as SavedMapSettings;
+    }
+  } catch {
+    // Corrupted or unavailable storage — fall through to defaults
+  }
+  return {};
+};
 
 export default function App() {
   const globeRef = useRef<EarthGlobeRef>(null);
@@ -78,17 +105,67 @@ export default function App() {
   const [embedWidth, setEmbedWidth] = useState<string | number>(initialWidth);
   const [embedHeight, setEmbedHeight] = useState<string | number>(initialHeight);
 
-  // Core configuration states
-  const [theme, setTheme] = useState<string>(defaultInitialTheme);
-  const [onlyIndia, setOnlyIndia] = useState<boolean>(initialOnlyIndia);
-  const [highlightState, setHighlightState] = useState<string | null>(urlParams?.get('state') || null);
-  const [autoRotate, setAutoRotate] = useState<boolean>(urlParams?.get('rotate') !== 'false');
-  const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(isNaN(initialSpeed) ? 1.2 : initialSpeed);
-  const [rotateDirection, setRotateDirection] = useState<'west-to-east' | 'east-to-west'>('west-to-east');
-  const [showStateBorders, setShowStateBorders] = useState<boolean>(urlParams?.get('borders') !== 'false');
-  const [showGraticule, setShowGraticule] = useState<boolean>(urlParams?.get('grid') !== 'false');
-  const [showAtmosphere, setShowAtmosphere] = useState<boolean>(urlParams?.get('atmosphere') !== 'false');
-  const [showStars, setShowStars] = useState<boolean>(urlParams?.get('stars') !== 'false');
+  // Core configuration states — URL params win, then saved settings, then defaults
+  const [savedSettings] = useState<SavedMapSettings>(readSavedMapSettings);
+  const urlThemeSpecified =
+    Boolean(themeParam && themeParam in THEME_PRESETS) || modeParam === 'light' || modeParam === 'dark';
+  const initialTheme =
+    !urlThemeSpecified && savedSettings.theme && savedSettings.theme in THEME_PRESETS
+      ? savedSettings.theme
+      : defaultInitialTheme;
+  const resolveBoolSetting = (urlKey: string, savedValue: unknown, fallback: boolean): boolean => {
+    if (urlParams?.has(urlKey)) return urlParams.get(urlKey) !== 'false';
+    return typeof savedValue === 'boolean' ? savedValue : fallback;
+  };
+  const savedSpeed =
+    typeof savedSettings.autoRotateSpeed === 'number' && Number.isFinite(savedSettings.autoRotateSpeed)
+      ? savedSettings.autoRotateSpeed
+      : 1.2;
+
+  const [theme, setTheme] = useState<string>(initialTheme);
+  const urlOnlyIndia = Boolean(urlParams?.has('onlyIndia') || urlParams?.has('indiaOnly'));
+  const [onlyIndia, setOnlyIndia] = useState<boolean>(
+    urlOnlyIndia
+      ? initialOnlyIndia
+      : typeof savedSettings.onlyIndia === 'boolean'
+        ? savedSettings.onlyIndia
+        : false,
+  );
+  const getInitialHighlightState = (): string | null => {
+    const urlState = urlParams?.get('state');
+    if (urlState) return urlState;
+    try {
+      const saved = localStorage.getItem(HIGHLIGHT_STATE_STORAGE_KEY);
+      if (saved && saved.trim()) return saved;
+    } catch {
+      // Storage unavailable — fall through to no highlight
+    }
+    return null;
+  };
+  const [highlightState, setHighlightState] = useState<string | null>(getInitialHighlightState);
+  const [autoRotate, setAutoRotate] = useState<boolean>(
+    resolveBoolSetting('rotate', savedSettings.autoRotate, true),
+  );
+  const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(
+    urlParams?.get('speed') ? (isNaN(initialSpeed) ? 1.2 : initialSpeed) : savedSpeed,
+  );
+  const [rotateDirection, setRotateDirection] = useState<'west-to-east' | 'east-to-west'>(
+    savedSettings.rotateDirection === 'east-to-west' || savedSettings.rotateDirection === 'west-to-east'
+      ? savedSettings.rotateDirection
+      : 'west-to-east',
+  );
+  const [showStateBorders, setShowStateBorders] = useState<boolean>(
+    resolveBoolSetting('borders', savedSettings.showStateBorders, true),
+  );
+  const [showGraticule, setShowGraticule] = useState<boolean>(
+    resolveBoolSetting('grid', savedSettings.showGraticule, true),
+  );
+  const [showAtmosphere, setShowAtmosphere] = useState<boolean>(
+    resolveBoolSetting('atmosphere', savedSettings.showAtmosphere, true),
+  );
+  const [showStars, setShowStars] = useState<boolean>(
+    resolveBoolSetting('stars', savedSettings.showStars, true),
+  );
   const [showSecondaryMarkers, setShowSecondaryMarkers] = useState<boolean>(false);
 
   // Active marker states
@@ -175,6 +252,54 @@ export default function App() {
       localStorage.removeItem(LAST_LOCATION_STORAGE_KEY);
     }
   }, [activeMarker]);
+
+  // Remember the highlighted state across refreshes (clearing it removes the key)
+  useEffect(() => {
+    try {
+      if (highlightState && highlightState.trim()) {
+        localStorage.setItem(HIGHLIGHT_STATE_STORAGE_KEY, highlightState);
+      } else {
+        localStorage.removeItem(HIGHLIGHT_STATE_STORAGE_KEY);
+      }
+    } catch {
+      // Storage unavailable — ignore
+    }
+  }, [highlightState]);
+
+  // Persist Globe Customizer settings across refreshes (URL params win on load;
+  // embed mode never overwrites the visitor's saved settings)
+  useEffect(() => {
+    if (isEmbedMode) return;
+    try {
+      localStorage.setItem(
+        MAP_SETTINGS_STORAGE_KEY,
+        JSON.stringify({
+          theme,
+          onlyIndia,
+          autoRotate,
+          autoRotateSpeed,
+          rotateDirection,
+          showStateBorders,
+          showGraticule,
+          showAtmosphere,
+          showStars,
+        }),
+      );
+    } catch {
+      // Storage unavailable — ignore
+    }
+  }, [
+    isEmbedMode,
+    theme,
+    onlyIndia,
+    autoRotate,
+    autoRotateSpeed,
+    rotateDirection,
+    showStateBorders,
+    showGraticule,
+    showAtmosphere,
+    showStars,
+  ]);
 
   const currentThemeConfig = THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
 
@@ -399,7 +524,6 @@ export default function App() {
     <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-zinc-100 text-zinc-900">
       {/* 1. Header Navigation Bar - ALWAYS LIGHT MODE */}
       <TopBar
-        activeLocationName={activeMarker?.name || null}
         activeMarker={activeMarker}
         onFocusActiveLocation={() => {
           if (activeMarker) {

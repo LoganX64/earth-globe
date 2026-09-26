@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Navigation,
   Code2,
@@ -13,7 +13,6 @@ import { GlobeMarker } from "./EarthGlobe/types";
 import { LocationSearchBar } from "./LocationSearchBar";
 
 interface TopBarProps {
-  activeLocationName: string | null;
   activeMarker: GlobeMarker | null;
   onFocusActiveLocation: () => void;
   onDeselectLocation: () => void;
@@ -28,7 +27,6 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
-  activeLocationName,
   activeMarker,
   onFocusActiveLocation,
   onDeselectLocation,
@@ -42,25 +40,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   mapThemeIsDark = false,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Live IST clock for the active location chip — ticks only while visible
-  const [localTime, setLocalTime] = useState<string>("");
-  useEffect(() => {
-    if (!activeLocationName) return;
-    const tick = () =>
-      setLocalTime(
-        new Date().toLocaleTimeString("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        }),
-      );
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [activeLocationName]);
 
   const borderClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
 
@@ -184,53 +163,19 @@ export const TopBar: React.FC<TopBarProps> = ({
             </button>
           )}
 
-          {/* Center India / Active Location Pin */}
-          {activeLocationName ? (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={onFocusActiveLocation}
-                className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
-                  isDark
-                    ? "bg-zinc-800 text-white hover:bg-zinc-700 border-zinc-700"
-                    : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-md"
-                }`}
-              >
-                <Navigation className="w-3.5 h-3.5" />
-                <span className="truncate max-w-25 sm:max-w-30">
-                  {activeLocationName}
-                </span>
-                {localTime && (
-                  <span className="hidden sm:inline font-mono text-[10px] tabular-nums opacity-80 whitespace-nowrap">
-                    · {localTime}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={onDeselectLocation}
-                className={`px-2 py-1.5 text-xs font-medium rounded-lg border transition-colors cursor-pointer ${
-                  isDark
-                    ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
-                    : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
-                }`}
-                title="Deselect active pin"
-              >
-                ✕
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={onFocusActiveLocation}
-              className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
-                isDark
-                  ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
-                  : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
-              }`}
-              title="Recenter camera on India"
-            >
-              <Navigation className="w-3.5 h-3.5" />
-              <span>Center</span>
-            </button>
-          )}
+          {/* Recenter India */}
+          <button
+            onClick={onFocusActiveLocation}
+            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
+              isDark
+                ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
+                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
+            }`}
+            title="Recenter camera on India"
+          >
+            <Navigation className="w-3.5 h-3.5" />
+            <span>Center</span>
+          </button>
 
           {/* Mobile Navigation Drawer Toggle */}
           <button
