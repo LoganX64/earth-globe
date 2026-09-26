@@ -12,7 +12,6 @@ import React, {
   useEffect,
   useRef,
   useState,
-  useCallback,
   useImperativeHandle,
   forwardRef,
 } from 'react';
@@ -972,21 +971,23 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       }
     };
 
-    // Wheel Zoom Handler
-    const handleWheel = useCallback(
-      (e: React.WheelEvent<HTMLCanvasElement>) => {
-        if (!enableZoom) return;
+    // Wheel Zoom Handler — native + non-passive so preventDefault() actually
+    // stops the browser from scrolling the page/host document under the map.
+    // (React binds wheel listeners as passive, which silently ignores it.)
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas || !enableZoom) return;
+      const onWheelNative = (e: WheelEvent) => {
         e.preventDefault();
-
         const zoomDelta = e.deltaY < 0 ? 1.08 : 0.92;
-        const newZoom = Math.min(
+        zoomRef.current = Math.min(
           maxZoom,
           Math.max(minZoom, zoomRef.current * zoomDelta)
         );
-        zoomRef.current = newZoom;
-      },
-      [enableZoom, minZoom, maxZoom]
-    );
+      };
+      canvas.addEventListener('wheel', onWheelNative, { passive: false });
+      return () => canvas.removeEventListener('wheel', onWheelNative);
+    }, [enableZoom, minZoom, maxZoom]);
 
     return (
       <div
@@ -1005,7 +1006,6 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onClick={handleClick}
-          onWheel={handleWheel}
           className="w-full h-full block cursor-grab active:cursor-grabbing"
           style={{ width: '100%', height: '100%' }}
         />

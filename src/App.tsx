@@ -187,7 +187,10 @@ export default function App() {
     return (
       <div
         className="w-screen h-screen flex items-center justify-center overflow-hidden relative"
-        style={{ backgroundColor: currentThemeConfig.background }}
+        style={{
+          backgroundColor: currentThemeConfig.background,
+          overscrollBehavior: 'contain',
+        }}
       >
         <div
           style={{
