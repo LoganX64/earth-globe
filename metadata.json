@@ -1,6 +1,0 @@
-{
-  "name": "Earth Globe - Mumbai & India Highlight",
-  "description": "Interactive reusable 3D Earth globe with high-contrast black & white styling, highlighting India with a location pin at Mumbai, Maharashtra.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
