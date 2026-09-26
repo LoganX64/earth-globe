@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navigation,
   Code2,
@@ -42,6 +42,25 @@ export const TopBar: React.FC<TopBarProps> = ({
   mapThemeIsDark = false,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Live IST clock for the active location chip — ticks only while visible
+  const [localTime, setLocalTime] = useState<string>("");
+  useEffect(() => {
+    if (!activeLocationName) return;
+    const tick = () =>
+      setLocalTime(
+        new Date().toLocaleTimeString("en-US", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }),
+      );
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [activeLocationName]);
 
   const borderClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
 
@@ -180,6 +199,11 @@ export const TopBar: React.FC<TopBarProps> = ({
                 <span className="truncate max-w-25 sm:max-w-30">
                   {activeLocationName}
                 </span>
+                {localTime && (
+                  <span className="hidden sm:inline font-mono text-[10px] tabular-nums opacity-80 whitespace-nowrap">
+                    · {localTime}
+                  </span>
+                )}
               </button>
               <button
                 onClick={onDeselectLocation}

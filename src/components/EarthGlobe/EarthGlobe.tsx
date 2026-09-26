@@ -788,8 +788,16 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const titleWidth = ctx.measureText(title).width;
             ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif';
             const subWidth = ctx.measureText(sub).width;
-            const boxWidth = Math.max(titleWidth, subWidth) + 18;
-            const boxHeight = 28;
+            const timeLine = new Date().toLocaleTimeString('en-US', {
+              timeZone: 'Asia/Kolkata',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true,
+            });
+            const timeWidth = ctx.measureText(timeLine).width;
+            const boxWidth = Math.max(titleWidth, subWidth, timeWidth) + 18;
+            const boxHeight = 38;
 
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
@@ -827,6 +835,9 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             ctx.fillStyle = activeTheme.isDark ? '#a1a1aa' : '#52525b';
             ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif';
             ctx.fillText(sub, labelX + 9, labelY + 9);
+
+            // Live local time (IST) — third line of the callout
+            ctx.fillText(timeLine, labelX + 9, labelY + 20);
           } else {
             // === SECONDARY LOCATION MARKERS ===
             const markerR = isHovered || isSelected ? 6.5 : 5;

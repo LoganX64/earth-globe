@@ -35,6 +35,8 @@ import {
   X,
 } from 'lucide-react';
 
+const LAST_LOCATION_STORAGE_KEY = 'bharat-atlas-active-location';
+
 export default function App() {
   const globeRef = useRef<EarthGlobeRef>(null);
 
@@ -114,8 +116,30 @@ export default function App() {
       }
     }
 
-    // 2. Lookup by ID or location name:
-    if (!markerParam) return null;
+    // 2. Fall back to the location saved from the previous session:
+    if (!markerParam) {
+      try {
+        const raw = localStorage.getItem(LAST_LOCATION_STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as Partial<GlobeMarker>;
+          if (
+            typeof saved?.lat === 'number' &&
+            Number.isFinite(saved.lat) &&
+            typeof saved?.lng === 'number' &&
+            Number.isFinite(saved.lng) &&
+            typeof saved?.name === 'string' &&
+            saved.name
+          ) {
+            return { isPrimary: true, country: 'India', ...saved, lat: saved.lat, lng: saved.lng, name: saved.name } as GlobeMarker;
+          }
+        }
+      } catch {
+        // Corrupted storage key — fall through to no selection
+      }
+      return null;
+    }
+
+    // 3. Lookup by ID or location name:
     const lower = markerParam.toLowerCase();
     if (lower === 'ulhasnagar') return ULHASNAGAR_MARKER;
     if (lower === 'thrissur') return THRISSUR_MARKER;
@@ -134,8 +158,23 @@ export default function App() {
   const initialMarkerParam = urlParams?.get('marker') || urlParams?.get('lat');
   const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(getInitialMarker);
   const [isControlsOpen, setIsControlsOpen] = useState<boolean>(true);
-  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(Boolean(initialMarkerParam));
+  const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(
+    Boolean(initialMarkerParam) || activeMarker !== null,
+  );
   const [isCodeModalOpen, setIsCodeModalOpen] = useState<boolean>(false);
+
+  // Remember the selected location across refreshes (deselect clears it)
+  useEffect(() => {
+    if (activeMarker) {
+      try {
+        localStorage.setItem(LAST_LOCATION_STORAGE_KEY, JSON.stringify(activeMarker));
+      } catch {
+        // Storage unavailable (private mode / quota) — ignore
+      }
+    } else {
+      localStorage.removeItem(LAST_LOCATION_STORAGE_KEY);
+    }
+  }, [activeMarker]);
 
   const currentThemeConfig = THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
 
