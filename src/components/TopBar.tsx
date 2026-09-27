@@ -46,8 +46,10 @@ export const TopBar: React.FC<TopBarProps> = ({
   return (
     <div className="relative z-40 shrink-0">
       <header
-        className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors duration-300 gap-3 ${
-          isDark ? "bg-neutral-950/90 text-neutral-100" : "bg-white/90 text-neutral-900"
+        className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-xl transition-colors duration-300 gap-3 ${
+          isDark
+            ? "bg-gradient-to-b from-neutral-950/70 to-neutral-950/40 text-neutral-100"
+            : "bg-gradient-to-b from-white/70 to-white/40 text-neutral-900"
         } ${borderClass}`}
       >
         {/* Left Section: Wordmark Brand */}

@@ -61,20 +61,20 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   };
 
   const bgClass = isDark
-    ? "bg-neutral-950/90 backdrop-blur-md border-neutral-800 text-neutral-100"
-    : "bg-white/95 backdrop-blur-md border-neutral-200 text-neutral-900 shadow-2xl";
+    ? "bg-gradient-to-b from-neutral-950/85 to-neutral-950/70 backdrop-blur-xl border-neutral-800 text-neutral-100"
+    : "bg-gradient-to-b from-white/92 to-white/78 backdrop-blur-xl border-neutral-200 text-neutral-900";
 
-  const subTextClass = isDark ? "text-neutral-400" : "text-neutral-600";
+  const subTextClass = isDark ? "text-neutral-300" : "text-neutral-700";
   const dividerClass = isDark ? "border-neutral-800/80" : "border-neutral-200/80";
 
   return (
     <div
-      className={`rounded-xl border p-5 shadow-2xl transition-all duration-300 max-w-sm w-full ${bgClass}`}
+      className={`rounded-xl border p-5 transition-all duration-300 max-w-sm w-full ${bgClass}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 pb-3 border-b border-inherit">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-600">
             <span
               className={`inline-block w-2 h-2 rounded-full animate-pulse ${
                 isDark ? "bg-white" : "bg-neutral-900"

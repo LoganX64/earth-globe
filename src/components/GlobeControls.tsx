@@ -102,8 +102,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>('all');
 
   const containerClass = isDark
-    ? 'bg-neutral-950/90 backdrop-blur-md border-neutral-800 text-neutral-200'
-    : 'bg-white/95 backdrop-blur-md border-neutral-200 text-neutral-900 shadow-2xl';
+    ? 'bg-gradient-to-b from-neutral-950/85 to-neutral-950/70 backdrop-blur-xl border-neutral-800 text-neutral-100'
+    : 'bg-gradient-to-b from-white/92 to-white/78 backdrop-blur-xl border-neutral-200 text-neutral-900';
 
   const buttonActive = isDark
     ? 'bg-neutral-100 text-neutral-950 shadow-sm border-neutral-100'
@@ -113,8 +113,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
     ? 'bg-neutral-900/70 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border-neutral-800'
     : 'bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950 border-neutral-200 shadow-sm';
 
-  const subLabelClass = isDark ? 'text-neutral-400' : 'text-neutral-600 font-medium';
-  const iconColorClass = isDark ? 'text-neutral-100' : 'text-muted-foreground';
+  const subLabelClass = isDark ? 'text-neutral-300' : 'text-neutral-700 font-medium';
+  const iconColorClass = isDark ? 'text-neutral-100' : 'text-neutral-700';
   const inputBgClass = isDark
     ? 'bg-neutral-950 border-neutral-700 text-white placeholder-neutral-500'
     : 'bg-white border-neutral-300 text-neutral-900 placeholder-neutral-400 shadow-sm';
@@ -162,7 +162,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
 
   return (
     <div
-      className={`rounded-xl border shadow-2xl transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
+      className={`rounded-xl border transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
     >
       {/* Title & Quick Zoom (fixed header) */}
       <div className="flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b border-inherit">
@@ -237,7 +237,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onSelectLocation(null)}
                   className={`text-[10px] underline cursor-pointer ${
-                    isDark ? 'text-neutral-400 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                    isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
                   }`}
                   title="Deselect active pin so no point appears on map"
                 >
@@ -247,7 +247,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <button
                 onClick={() => setShowCustomForm((prev) => !prev)}
                 className={`text-[10px] flex items-center gap-1 underline cursor-pointer ${
-                  isDark ? 'text-neutral-300 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                  isDark ? 'text-neutral-300 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
                 }`}
               >
                 <Plus className="w-3 h-3" />
@@ -418,7 +418,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onHighlightStateChange(null)}
                   className={`text-[9px] underline cursor-pointer ${
-                    isDark ? 'text-neutral-400 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                    isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
                   }`}
                 >
                   Clear
@@ -566,7 +566,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <Palette className={`w-3.5 h-3.5 ${iconColorClass}`} />
               <span>Theme &amp; Contrast</span>
             </label>
-            <span className="text-[10px] text-neutral-500 font-medium">
+            <span className="text-[10px] text-neutral-700 font-medium">
               {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme} · Map Only
             </span>
           </div>
@@ -578,7 +578,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('all')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
-                themeTab === 'all' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
+                themeTab === 'all' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
               All ({Object.keys(THEME_PRESETS).length})
@@ -586,7 +586,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('dark')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'dark' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
+                themeTab === 'dark' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
               <Moon className="w-2.5 h-2.5" />
@@ -595,7 +595,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('light')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'light' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
+                themeTab === 'light' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
               }`}
             >
               <Sun className="w-2.5 h-2.5" />
@@ -651,7 +651,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                     ? isDark
                       ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-neutral-500/20 text-neutral-400'
+                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
                 }`}
               >
                 {showStateBorders ? 'ON' : 'OFF'}
@@ -676,7 +676,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                     ? isDark
                       ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-neutral-500/20 text-neutral-400'
+                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
                 }`}
               >
                 {showGraticule ? 'ON' : 'OFF'}
@@ -701,7 +701,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                     ? isDark
                       ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-neutral-500/20 text-neutral-400'
+                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
                 }`}
               >
                 {showAtmosphere ? 'ON' : 'OFF'}
@@ -726,7 +726,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                     ? isDark
                       ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-neutral-500/20 text-neutral-400'
+                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
                 }`}
               >
                 {showStars ? 'ON' : 'OFF'}
@@ -752,7 +752,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                       ? isDark
                         ? 'bg-neutral-900 text-neutral-100'
                         : 'bg-blue-800/20 text-white'
-                      : 'bg-neutral-500/20 text-neutral-400'
+                      : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
                   }`}
                 >
                   {onlyIndia ? 'ON (ONLY INDIA)' : 'OFF (GLOBAL)'}
