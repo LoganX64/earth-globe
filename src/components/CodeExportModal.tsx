@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Code, Globe, Terminal, ExternalLink, Sun, Moon } from 'lucide-react';
+import { X, Copy, Check, Code, Globe, ExternalLink, Sun, Moon } from 'lucide-react';
 import { GlobeMarker } from './EarthGlobe/types';
 import { THEME_PRESETS, DEFAULT_DARK_THEME_ID, DEFAULT_LIGHT_THEME_ID } from './EarthGlobe/themePresets';
 
@@ -26,7 +26,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   onlyIndia = true,
   isDark = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<'embed' | 'react' | 'vercel' | 'current'>('embed');
+  const [activeTab, setActiveTab] = useState<'embed' | 'react'>('embed');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [embedSize, setEmbedSize] = useState<'500' | '400' | '600' | '100%'>('500');
   const [embedOnlyIndia, setEmbedOnlyIndia] = useState<boolean>(onlyIndia);
@@ -127,28 +127,6 @@ export function IndiaPortfolioGlobe({
   );
 }`;
 
-  const vercelGuide = `# DEPLOY TO VERCEL (100% Free Tier - Zero Backend Needed!)
-# This is a 100% client-side React + Vite SPA.
-# It requires NO Node server, NO database, and runs entirely in the browser at $0 cost.
-
-# Step 1: Push your code to GitHub, or run Vercel CLI locally
-npm i -g vercel
-
-# Step 2: Deploy instantly from your terminal
-vercel
-
-# Vercel will auto-detect Vite:
-# - Build Command: vite build (or npm run build)
-# - Output Directory: dist
-# - Framework Preset: Vite
-
-# Once deployed, your app URL will be:
-# https://your-project.vercel.app
-
-# Step 3: Embed in Light or Dark mode in any website:
-# <iframe src="https://your-project.vercel.app/?embed=true&mode=light" width="500" height="500"></iframe>
-# <iframe src="https://your-project.vercel.app/?embed=true&mode=dark" width="500" height="500"></iframe>`;
-
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedSection(id);
@@ -171,7 +149,7 @@ vercel
             <div>
               <h3 className="text-base font-bold">Embed &amp; Component Integration</h3>
               <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                Light &amp; Dark Mode ready · Zero backend needed · 100% Vercel Free Tier
+                Light &amp; Dark Mode ready
               </p>
             </div>
           </div>
@@ -219,21 +197,6 @@ vercel
             <Code className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">React / Next.js Component</span>
           </button>
-          <button
-            onClick={() => setActiveTab('vercel')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
-              activeTab === 'vercel'
-                ? isDark
-                  ? 'bg-neutral-900 text-white border-neutral-700'
-                  : 'bg-neutral-100 text-foreground border-neutral-300'
-                : isDark
-                ? 'text-neutral-400 hover:text-white border-transparent'
-                : 'text-neutral-600 hover:text-neutral-900 border-transparent'
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Vercel Deploy Guide</span>
-          </button>
         </div>
 
         {/* Content Body */}
@@ -242,7 +205,7 @@ vercel
           style={{ scrollbarGutter: 'stable' }}
         >
           {/* Quick Customizer Bar for Embed & Component */}
-          {activeTab !== 'vercel' && (
+          {(
             <div
               className={`p-4 rounded-xl border space-y-3 text-xs shadow-md ${
                 isDark
@@ -379,7 +342,7 @@ vercel
           )}
 
           {/* Live in-dialog preview at the exact copied size */}
-          {activeTab !== 'vercel' && (
+          {(
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-medium px-0.5">
                 <span className={isDark ? 'text-neutral-300 font-semibold' : 'text-neutral-700 font-semibold'}>
@@ -514,104 +477,6 @@ vercel
             </div>
           )}
 
-          {/* Tab 3: Vercel Free Tier */}
-          {activeTab === 'vercel' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
-                    Deploy on Vercel Free Tier (100% Free)
-                  </h4>
-                  <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                    Does this React app need a backend? <strong>No backend is needed.</strong>
-                  </p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(vercelGuide, 'vercel')}
-                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
-                    isDark
-                      ? 'text-neutral-950 bg-white hover:bg-neutral-200'
-                      : 'text-white bg-neutral-900 hover:bg-neutral-800'
-                  }`}
-                >
-                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'vercel' ? '' : 'invisible'}`}>
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Copied!</span>
-                  </span>
-                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'vercel' ? 'invisible' : ''}`}>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Guide</span>
-                  </span>
-                </button>
-              </div>
-
-              <div
-                className={`p-4 rounded-xl border space-y-3 text-xs ${
-                  isDark
-                    ? 'bg-neutral-900/60 border-neutral-800 text-neutral-300'
-                    : 'bg-neutral-100 border-neutral-200 text-neutral-700'
-                }`}
-              >
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
-                    }`}
-                  >
-                    1
-                  </span>
-                  <div>
-                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
-                      Pure Client-Side React SPA:
-                    </strong>
-                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
-                      All 3D math, canvas rendering, D3 orthographic projections, and Survey of India boundary GeoJSON are bundled client-side. Zero server resources are consumed.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
-                    }`}
-                  >
-                    2
-                  </span>
-                  <div>
-                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
-                      Vercel Build Configuration:
-                    </strong>
-                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
-                      Framework Preset: <code>Vite</code> | Build Command: <code>npm run build</code> | Output: <code>dist</code>. Vercel automatically detects this and deploys in &lt; 30 seconds.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <span
-                    className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
-                    }`}
-                  >
-                    3
-                  </span>
-                  <div>
-                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
-                      Single-Page App Routing:
-                    </strong>
-                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
-                      A <code>vercel.json</code> file is included in your repository root to ensure URL parameters and embeds work seamlessly without 404 errors.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <pre className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-mono overflow-x-auto leading-relaxed">
-                {vercelGuide}
-              </pre>
-            </div>
-          )}
         </div>
 
         {/* Footer */}

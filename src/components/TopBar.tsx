@@ -116,7 +116,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 ? glassSecondaryDashed
                 : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
             }`}
-            title="Embed code, Vercel free tier guide, & React component"
+            title="Embed code & React component"
           >
             <Code2 className="w-3.5 h-3.5" />
             <span>Embed &amp; API</span>
