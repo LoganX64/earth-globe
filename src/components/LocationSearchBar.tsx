@@ -115,7 +115,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
           isDark
             ? 'bg-neutral-900/90 border-neutral-700/80 focus-within:border-neutral-400 text-neutral-100'
-            : 'bg-white border-neutral-300 focus-within:border-neutral-700 text-neutral-900 shadow-sm'
+            : 'bg-white border-neutral-300 focus-within:border-neutral-700 text-neutral-900'
         }`}
       >
         <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
@@ -165,7 +165,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
       {/* Dropdown Results / Suggestions */}
       {isOpen && (
         <div
-          className={`absolute left-0 right-0 top-full mt-1.5 rounded-xl border shadow-2xl z-50 overflow-hidden backdrop-blur-md max-h-80 overflow-y-auto ${
+          className={`absolute left-0 right-0 top-full mt-1.5 rounded-xl border z-50 overflow-hidden backdrop-blur-md max-h-80 overflow-y-auto ${
             isDark ? 'bg-neutral-950/95 border-neutral-800 text-neutral-100' : 'bg-white/95 border-neutral-200 text-neutral-900'
           }`}
         >
