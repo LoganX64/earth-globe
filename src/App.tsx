@@ -522,7 +522,7 @@ export default function App() {
   // =========================================================================
   return (
     <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
-      {/* 1. Header Navigation Bar - ALWAYS LIGHT MODE */}
+      {/* 1. Header Navigation Bar - light chrome, or the dialogs' dark glass in dark mode */}
       <TopBar
         activeMarker={activeMarker}
         onFocusActiveLocation={() => {
@@ -540,7 +540,7 @@ export default function App() {
         onToggleEmbedMode={() => setIsEmbedMode(true)}
         onToggleDarkMode={handleToggleDarkMode}
         mapThemeIsDark={isDark}
-        isDark={false} // Navbar ALWAYS stays in Light Mode UI
+        isDark={isDark} // Navbar matches the dialogs' dark glass when the map is dark
       />
 
       {/* 2. Interactive 3D Canvas Globe Viewport */}
@@ -660,7 +660,11 @@ export default function App() {
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-colors cursor-pointer inline-grid leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
+              className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-colors cursor-pointer inline-grid leading-none ${
+                isDark
+                  ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
+              }`}
               title="Deselect active pin so map is completely clean"
             >
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
@@ -674,7 +678,13 @@ export default function App() {
               </span>
             </button>
           ) : (
-            <div className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-neutral-600 border-neutral-200">
+            <div
+              className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md inline-grid select-none leading-none ${
+                isDark
+                  ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-400'
+                  : 'bg-white/85 border-zinc-200/80 text-zinc-600'
+              }`}
+            >
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none invisible">
                 <span className="w-2 h-2 rounded-full shrink-0" />
                 <span className="leading-none">Deselect Pin</span>
@@ -690,7 +700,11 @@ export default function App() {
           {/* Embed / Pure Mode Button */}
           <button
             onClick={() => setIsEmbedMode(true)}
-            className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-all cursor-pointer inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
+            className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-all cursor-pointer inline-flex items-center gap-1.5 leading-none ${
+              isDark
+                ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
+            }`}
             title="Switch to clean isolated globe view (no UI chrome)"
           >
             <Maximize2 className="w-3.5 h-3.5 shrink-0" />

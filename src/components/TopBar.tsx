@@ -41,16 +41,23 @@ export const TopBar: React.FC<TopBarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const borderClass = isDark ? "border-neutral-800/80" : "border-neutral-200/80";
+  // Dark mode: identical glass tokens to the location/customizer dialogs.
+  // The dialog bg (bg-slate-950/78) only reads as the dialogs' near-black
+  // because they float over the dark map; the wrapper below the header
+  // supplies the same dark backing instead of the white page.
+  const glassSecondary =
+    "rounded-md border bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
+  const glassPrimary =
+    "rounded-md border bg-sky-300 text-slate-950 hover:bg-sky-200 border-sky-200 shadow-[0_4px_14px_rgba(56,189,248,0.28)]";
 
   return (
-    <div className="relative z-40 shrink-0">
+    <div className={`relative z-40 shrink-0 ${isDark ? "bg-slate-950" : ""}`}>
       <header
-        className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-xl transition-colors duration-300 gap-3 ${
+        className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b transition-colors duration-300 gap-3 ${
           isDark
-            ? "bg-gradient-to-b from-neutral-950/70 to-neutral-950/40 text-neutral-100"
-            : "bg-gradient-to-b from-white/70 to-white/40 text-neutral-900"
-        } ${borderClass}`}
+            ? "border-white/15 bg-slate-950/78 text-slate-100 backdrop-blur-2xl shadow-[0_10px_40px_rgba(15,23,42,0.22)]"
+            : "border-neutral-200/80 bg-gradient-to-b from-white/70 to-white/40 text-neutral-900 backdrop-blur-xl"
+        }`}
       >
         {/* Left Section: Wordmark Brand */}
         <div className="flex items-center gap-3">
@@ -71,11 +78,15 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleDarkMode && (
             <button
               onClick={onToggleDarkMode}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border border-dashed transition-colors flex items-center gap-1.5 cursor-pointer bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? glassSecondary
+                  : "rounded-lg border border-dashed bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
+              }`}
               title={
                 mapThemeIsDark
-                  ? "Switch Map to Light Theme (UI stays light)"
-                  : "Switch Map to Dark Theme (UI stays light)"
+                  ? "Switch Map to Light Theme"
+                  : "Switch Map to Dark Theme"
               }
             >
               {mapThemeIsDark ? (
@@ -97,14 +108,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Controls HUD Toggle Button */}
           <button
             onClick={onToggleControls}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border border-dashed transition-colors flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
               isControlsOpen
                 ? isDark
-                  ? "bg-white text-neutral-950 border-white"
-                  : "bg-blue-600 text-white border-blue-600"
+                  ? glassPrimary
+                  : "rounded-lg border border-dashed bg-blue-600 text-white border-blue-600"
                 : isDark
-                ? "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 border-neutral-700"
-                : "bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
+                ? glassSecondary
+                : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
           >
@@ -115,10 +126,10 @@ export const TopBar: React.FC<TopBarProps> = ({
               className={`text-[9px] px-1 py-0.5 leading-none rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
                 isControlsOpen
                   ? isDark
-                    ? "bg-neutral-950 text-white"
+                    ? "bg-slate-950/45 text-slate-950"
                     : "bg-blue-800 text-white"
                   : isDark
-                  ? "bg-neutral-800 text-neutral-300"
+                  ? "bg-white/[0.08] text-slate-400"
                   : "bg-neutral-200 text-neutral-700"
               }`}
             >
@@ -129,10 +140,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Embed & Code Modal Button */}
           <button
             onClick={onOpenCode}
-            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-dashed transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? "border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 hover:text-white"
-                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
+                ? glassSecondary
+                : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
             }`}
             title="Embed code, Vercel free tier guide, & React component"
           >
@@ -144,10 +155,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleEmbedMode && (
             <button
               onClick={onToggleEmbedMode}
-              className={`hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-dashed transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              className={`hidden md:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 isDark
-                  ? "border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 hover:text-white"
-                  : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
+                  ? glassSecondary
+                  : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
               }`}
               title="Preview pure isolated component view (without app chrome)"
             >
@@ -159,10 +170,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Recenter India */}
           <button
             onClick={onFocusActiveLocation}
-            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border border-dashed transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? "border-neutral-700 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950"
+                ? glassSecondary
+                : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950"
             }`}
             title="Recenter camera on India"
           >
@@ -173,10 +184,10 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Mobile Navigation Drawer Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className={`lg:hidden p-1.5 rounded-lg border border-dashed transition-colors cursor-pointer flex items-center justify-center ${
+            className={`lg:hidden p-1.5 transition-colors cursor-pointer flex items-center justify-center ${
               isDark
-                ? "border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white"
-                : "border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950"
+                ? glassSecondary
+                : "rounded-lg border border-dashed border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950"
             }`}
             title="Open quick menu"
           >
@@ -194,6 +205,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClearLocation={onDeselectLocation}
               activeMarker={activeMarker}
               isDark={isDark}
+              variant={isDark ? "glass" : "default"}
               placeholder="Search Indian city or state..."
               className="w-48 lg:w-64"
             />
@@ -204,10 +216,10 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Mobile & Tablet Dropdown Drawer */}
       {isMobileMenuOpen && (
         <div
-          className={`absolute top-full left-0 right-0 z-50 p-4 border-b shadow-2xl backdrop-blur-xl lg:hidden flex flex-col gap-3 ${
+          className={`absolute top-full left-0 right-0 z-50 p-4 border-b shadow-2xl lg:hidden flex flex-col gap-3 ${
             isDark
-              ? "bg-neutral-950/95 border-neutral-800 text-neutral-200"
-              : "bg-white/95 border-neutral-200 text-neutral-900"
+              ? "border-white/15 bg-slate-950/78 text-slate-100 backdrop-blur-2xl"
+              : "border-neutral-200 bg-white/95 text-neutral-900 backdrop-blur-xl"
           }`}
         >
           {/* Mobile Search */}
@@ -220,6 +232,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClearLocation={onDeselectLocation}
               activeMarker={activeMarker}
               isDark={isDark}
+              variant={isDark ? "glass" : "default"}
               placeholder="Search place in India..."
               className="w-full"
             />
@@ -228,7 +241,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Quick Actions */}
           <div
             className={`grid grid-cols-2 gap-2 pt-2 border-t ${
-              isDark ? "border-neutral-800" : "border-neutral-200"
+              isDark ? "border-white/10" : "border-neutral-200"
             }`}
           >
             <button
@@ -236,10 +249,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                 onToggleControls();
                 setIsMobileMenuOpen(false);
               }}
-              className={`px-3 py-2 text-xs font-semibold rounded-lg border border-dashed flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? "bg-neutral-900 hover:bg-neutral-800 border-neutral-700 text-white"
-                  : "bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-900"
+                  ? glassSecondary
+                  : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-900"
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -252,10 +265,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                 onOpenCode();
                 setIsMobileMenuOpen(false);
               }}
-              className={`px-3 py-2 text-xs font-semibold rounded-lg border border-dashed flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? "bg-white text-neutral-950 border-white hover:bg-neutral-200"
-                  : "bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-800"
+                  ? glassPrimary
+                  : "rounded-lg border border-dashed bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-800"
               }`}
             >
               <Code2 className="w-3.5 h-3.5" />
