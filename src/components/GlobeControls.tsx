@@ -181,7 +181,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   ? 'Switch Map to Light Theme (UI stays light)'
                   : 'Switch Map to Dark Theme (UI stays light)'
               }
-              className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
+              className={`p-1.5 rounded-md border text-xs cursor-pointer flex items-center justify-center ${buttonInactive}`}
             >
               {mapThemeIsDark ? (
                 <Sun className="w-3.5 h-3.5" />
@@ -193,21 +193,21 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           <button
             onClick={onZoomOut}
             title="Zoom Out"
-            className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
+            className={`p-1.5 rounded-md border text-xs cursor-pointer flex items-center justify-center ${buttonInactive}`}
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onZoomIn}
             title="Zoom In"
-            className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
+            className={`p-1.5 rounded-md border text-xs cursor-pointer flex items-center justify-center ${buttonInactive}`}
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onReset}
             title="Reset to Initial View"
-            className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
+            className={`p-1.5 rounded-md border text-xs cursor-pointer flex items-center justify-center ${buttonInactive}`}
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -215,7 +215,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={onClose}
               title="Close Menu & Controls"
-              className={`p-1.5 rounded-md border text-xs cursor-pointer ml-1 ${buttonInactive}`}
+              className={`p-1.5 rounded-md border text-xs cursor-pointer ml-1 flex items-center justify-center ${buttonInactive}`}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -308,14 +308,14 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                       value={customLat}
                       onChange={(e) => setCustomLat(e.target.value)}
                       placeholder="Lat"
-                      className={`w-1/2 px-1.5 py-1 text-[11px] rounded border font-mono ${inputBgClass}`}
+                      className={`w-1/2 px-1.5 py-1 text-xs rounded border font-mono ${inputBgClass}`}
                     />
                     <input
                       type="text"
                       value={customLng}
                       onChange={(e) => setCustomLng(e.target.value)}
                       placeholder="Lng"
-                      className={`w-1/2 px-1.5 py-1 text-[11px] rounded border font-mono ${inputBgClass}`}
+                      className={`w-1/2 px-1.5 py-1 text-xs rounded border font-mono ${inputBgClass}`}
                     />
                   </div>
                 </div>
@@ -486,7 +486,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   )
                 }
                 title="Toggle Rotation Direction"
-                className={`px-1.5 py-0.5 rounded border text-[9px] flex items-center gap-1 cursor-pointer ${buttonInactive}`}
+                className={`px-1.5 py-0.5 rounded border text-[10px] flex items-center gap-1 cursor-pointer ${buttonInactive}`}
               >
                 <ArrowRightLeft className="w-2.5 h-2.5" />
                 <span className="inline-grid">

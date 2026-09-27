@@ -121,7 +121,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             <span className="hidden sm:inline">Menu &amp; Controls</span>
             <span className="sm:hidden">Menu</span>
             <span
-              className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
+              className={`text-[9px] px-1 py-0.5 leading-none rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
                 isControlsOpen
                   ? isDark
                     ? "bg-neutral-950 text-white"
@@ -182,7 +182,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Mobile Navigation Drawer Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className={`lg:hidden p-1.5 rounded-lg border transition-colors cursor-pointer ${
+            className={`lg:hidden p-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
               isDark
                 ? "border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white"
                 : "border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950 shadow-sm"

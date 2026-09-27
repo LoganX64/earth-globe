@@ -660,7 +660,7 @@ export default function App() {
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-colors cursor-pointer shadow-md inline-grid leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
+              className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-colors cursor-pointer shadow-md inline-grid leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
               title="Deselect active pin so map is completely clean"
             >
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
@@ -674,7 +674,7 @@ export default function App() {
               </span>
             </button>
           ) : (
-            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-neutral-600 border-neutral-200 shadow-sm">
+            <div className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-neutral-600 border-neutral-200 shadow-sm">
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none invisible">
                 <span className="w-2 h-2 rounded-full shrink-0" />
                 <span className="leading-none">Deselect Pin</span>
@@ -690,7 +690,7 @@ export default function App() {
           {/* Embed / Pure Mode Button */}
           <button
             onClick={() => setIsEmbedMode(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
+            className="h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
             title="Switch to clean isolated globe view (no UI chrome)"
           >
             <Maximize2 className="w-3.5 h-3.5 shrink-0" />

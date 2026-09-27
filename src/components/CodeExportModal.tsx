@@ -177,7 +177,7 @@ vercel
           </div>
           <button
             onClick={onClose}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center ${
               isDark
                 ? 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
                 : 'hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900'
@@ -335,7 +335,7 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedRotate((prev) => !prev)}
-                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-colors grid ${
+                    className={`px-2.5 py-1 rounded-md border text-[11px] cursor-pointer transition-colors grid ${
                       embedRotate
                         ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
@@ -358,7 +358,7 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedDrag((prev) => !prev)}
-                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-colors grid ${
+                    className={`px-2.5 py-1 rounded-md border text-[11px] cursor-pointer transition-colors grid ${
                       embedDrag
                         ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark

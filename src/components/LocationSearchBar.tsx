@@ -143,7 +143,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
                 setQuery('');
                 setResults([]);
               }}
-              className="text-neutral-400 hover:text-neutral-200 cursor-pointer p-0.5 shrink-0"
+              className="text-neutral-400 hover:text-neutral-200 cursor-pointer p-0.5 shrink-0 flex items-center justify-center"
               title="Clear search text"
             >
               <X className="w-3.5 h-3.5" />
@@ -220,13 +220,13 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
                         : 'hover:bg-neutral-50 text-neutral-800'
                     }`}
                   >
-                    <MapPin className="w-4 h-4 text-neutral-400 shrink-0 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs truncate">{item.name}</span>
                         {item.state && (
                           <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded font-medium ${
+                            className={`text-[10px] px-1.5 py-0.5 leading-none rounded font-medium ${
                               isDark ? 'bg-neutral-800 text-neutral-300' : 'bg-neutral-200 text-neutral-800'
                             }`}
                           >
