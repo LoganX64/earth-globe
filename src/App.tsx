@@ -646,7 +646,7 @@ export default function App() {
         {!isControlsOpen && (
           <button
             onClick={() => setIsControlsOpen(true)}
-            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-all hover:scale-105 bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl"
+            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl"
             title="Open Globe Customizer & Layers Menu"
           >
             <SlidersHorizontal className="w-4 h-4 text-zinc-900" />
@@ -660,17 +660,30 @@ export default function App() {
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-colors cursor-pointer shadow-md inline-grid leading-none bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300"
               title="Deselect active pin so map is completely clean"
             >
-              <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-              <span className="leading-none">Deselect Pin</span>
-              <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[X]</span>
+              <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
+                <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                <span className="leading-none">Deselect Pin</span>
+                <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[X]</span>
+              </span>
+              <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none invisible">
+                <span className="w-2 h-2 rounded-full shrink-0" />
+                <span className="leading-none">Clean Map (No Point)</span>
+              </span>
             </button>
           ) : (
-            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-flex items-center gap-1.5 shadow-sm select-none leading-none bg-white/80 text-zinc-600 border-zinc-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
-              <span className="leading-none">Clean Map (No Point)</span>
+            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-zinc-600 border-zinc-200 shadow-sm">
+              <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none invisible">
+                <span className="w-2 h-2 rounded-full shrink-0" />
+                <span className="leading-none">Deselect Pin</span>
+                <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[X]</span>
+              </span>
+              <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
+                <span className="leading-none">Clean Map (No Point)</span>
+              </span>
             </div>
           )}
 

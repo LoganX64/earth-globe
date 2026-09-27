@@ -132,30 +132,34 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
           className="w-full text-xs bg-transparent focus:outline-none placeholder-zinc-500 font-sans"
         />
 
-        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400 shrink-0" />}
+        {/* Trailing action slot: fixed width so the input never resizes when
+            the clear / deselect / loading controls appear or disappear. */}
+        <div className="flex items-center justify-end shrink-0 min-w-[56px]">
+          {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400 shrink-0" />}
 
-        {query && !isLoading && (
-          <button
-            onClick={() => {
-              setQuery('');
-              setResults([]);
-            }}
-            className="text-zinc-400 hover:text-zinc-200 cursor-pointer p-0.5 shrink-0"
-            title="Clear search text"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
+          {!isLoading && query && (
+            <button
+              onClick={() => {
+                setQuery('');
+                setResults([]);
+              }}
+              className="text-zinc-400 hover:text-zinc-200 cursor-pointer p-0.5 shrink-0"
+              title="Clear search text"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
 
-        {activeMarker && !query && onClearLocation && (
-          <button
-            onClick={onClearLocation}
-            className="text-[10px] text-zinc-400 hover:text-red-400 flex items-center gap-1 border-l border-zinc-700 pl-2 shrink-0 cursor-pointer"
-            title="Deselect active pin"
-          >
-            <span>Deselect</span>
-          </button>
-        )}
+          {!isLoading && !query && activeMarker && onClearLocation && (
+            <button
+              onClick={onClearLocation}
+              className="text-[10px] text-zinc-400 hover:text-red-400 flex items-center gap-1 border-l border-zinc-700 pl-2 shrink-0 cursor-pointer whitespace-nowrap"
+              title="Deselect active pin"
+            >
+              <span>Deselect</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Dropdown Results / Suggestions */}

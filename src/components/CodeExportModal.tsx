@@ -191,14 +191,14 @@ vercel
         <div className="flex items-center gap-2 shrink-0 px-6 pt-3 border-b border-inherit">
           <button
             onClick={() => setActiveTab('embed')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'embed'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-t border-x border-zinc-300 font-bold'
+                  ? 'bg-zinc-900 text-white border-zinc-700'
+                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white'
-                : 'text-zinc-600 hover:text-zinc-900'
+                ? 'text-zinc-400 hover:text-white border-transparent'
+                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
             }`}
           >
             <Globe className="w-3.5 h-3.5 shrink-0" />
@@ -206,14 +206,14 @@ vercel
           </button>
           <button
             onClick={() => setActiveTab('react')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'react'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-t border-x border-zinc-300 font-bold'
+                  ? 'bg-zinc-900 text-white border-zinc-700'
+                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white'
-                : 'text-zinc-600 hover:text-zinc-900'
+                ? 'text-zinc-400 hover:text-white border-transparent'
+                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
             }`}
           >
             <Code className="w-3.5 h-3.5 shrink-0" />
@@ -221,14 +221,14 @@ vercel
           </button>
           <button
             onClick={() => setActiveTab('vercel')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'vercel'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-t border-x border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-t border-x border-zinc-300 font-bold'
+                  ? 'bg-zinc-900 text-white border-zinc-700'
+                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white'
-                : 'text-zinc-600 hover:text-zinc-900'
+                ? 'text-zinc-400 hover:text-white border-transparent'
+                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
             }`}
           >
             <Terminal className="w-3.5 h-3.5 shrink-0" />
@@ -257,12 +257,12 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedMode('light')}
-                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                       embedMode === 'light'
-                        ? 'bg-amber-400 text-zinc-950 border-amber-400 font-bold shadow-md'
+                        ? 'bg-amber-400 text-zinc-950 border-amber-400 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                     }`}
                   >
                     <Sun className="w-3.5 h-3.5 text-amber-900" />
@@ -270,12 +270,12 @@ vercel
                   </button>
                   <button
                     onClick={() => setEmbedMode('dark')}
-                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                       embedMode === 'dark'
-                        ? 'bg-indigo-600 text-white border-indigo-500 font-bold shadow-md'
+                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                     }`}
                   >
                     <Moon className="w-3.5 h-3.5 text-indigo-200" />
@@ -289,15 +289,20 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedOnlyIndia((prev) => !prev)}
-                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-all ${
+                    className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-colors grid ${
                       embedOnlyIndia
-                        ? 'bg-blue-600 text-white border-blue-500 shadow-md font-bold'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                     }`}
                   >
-                    {embedOnlyIndia ? '✓ Only India Map' : 'Global (India Featured)'}
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedOnlyIndia ? '' : 'invisible'}`}>
+                      ✓ Only India Map
+                    </span>
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedOnlyIndia ? 'invisible' : ''}`}>
+                      Global (India Featured)
+                    </span>
                   </button>
                 </div>
               </div>
@@ -311,12 +316,12 @@ vercel
                     <button
                       key={sz}
                       onClick={() => setEmbedSize(sz)}
-                      className={`px-2.5 py-1 rounded-md border text-[11px] font-mono cursor-pointer transition-all text-center ${
+                      className={`px-2.5 py-1 rounded-md border text-[11px] font-mono cursor-pointer transition-colors text-center ${
                         embedSize === sz
-                          ? 'bg-blue-600 text-white font-bold border-blue-500 shadow-md'
+                          ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                           : isDark
-                          ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                          : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                          ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                          : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                       }`}
                     >
                       {sz === '100%' ? 'Responsive' : `${sz}px`}
@@ -330,15 +335,20 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedRotate((prev) => !prev)}
-                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-all ${
+                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-colors grid ${
                       embedRotate
-                        ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-md'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                     }`}
                   >
-                    {embedRotate ? '✓ Rotating' : 'Frozen'}
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedRotate ? '' : 'invisible'}`}>
+                      ✓ Rotating
+                    </span>
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedRotate ? 'invisible' : ''}`}>
+                      Frozen
+                    </span>
                   </button>
                 </div>
 
@@ -348,15 +358,20 @@ vercel
                   </span>
                   <button
                     onClick={() => setEmbedDrag((prev) => !prev)}
-                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-all ${
+                    className={`px-2.5 py-1 rounded-md border text-xs cursor-pointer transition-colors grid ${
                       embedDrag
-                        ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-md'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 font-medium'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300 font-medium'
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
+                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
                     }`}
                   >
-                    {embedDrag ? '✓ On' : 'Off'}
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedDrag ? '' : 'invisible'}`}>
+                      ✓ On
+                    </span>
+                    <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedDrag ? 'invisible' : ''}`}>
+                      Off
+                    </span>
                   </button>
                 </div>
               </div>
@@ -413,23 +428,20 @@ vercel
                 </div>
                 <button
                   onClick={() => copyToClipboard(iframeSnippet, 'iframe')}
-                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
+                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
                       ? 'text-zinc-950 bg-white hover:bg-zinc-200'
                       : 'text-white bg-zinc-900 hover:bg-zinc-800'
                   }`}
                 >
-                  {copiedSection === 'iframe' ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Embed Code</span>
-                    </>
-                  )}
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'iframe' ? '' : 'invisible'}`}>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Copied!</span>
+                  </span>
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'iframe' ? 'invisible' : ''}`}>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Embed Code</span>
+                  </span>
                 </button>
               </div>
 
@@ -479,23 +491,20 @@ vercel
                 </div>
                 <button
                   onClick={() => copyToClipboard(reactSnippet, 'react')}
-                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
+                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
                       ? 'text-zinc-950 bg-white hover:bg-zinc-200'
                       : 'text-white bg-zinc-900 hover:bg-zinc-800'
                   }`}
                 >
-                  {copiedSection === 'react' ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Component Code</span>
-                    </>
-                  )}
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'react' ? '' : 'invisible'}`}>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Copied!</span>
+                  </span>
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'react' ? 'invisible' : ''}`}>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Component Code</span>
+                  </span>
                 </button>
               </div>
 
@@ -519,23 +528,20 @@ vercel
                 </div>
                 <button
                   onClick={() => copyToClipboard(vercelGuide, 'vercel')}
-                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
+                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
                       ? 'text-zinc-950 bg-white hover:bg-zinc-200'
                       : 'text-white bg-zinc-900 hover:bg-zinc-800'
                   }`}
                 >
-                  {copiedSection === 'vercel' ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Guide</span>
-                    </>
-                  )}
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'vercel' ? '' : 'invisible'}`}>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Copied!</span>
+                  </span>
+                  <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'vercel' ? 'invisible' : ''}`}>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Guide</span>
+                  </span>
                 </button>
               </div>
 

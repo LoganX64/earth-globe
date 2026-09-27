@@ -106,8 +106,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
     : 'bg-white/95 backdrop-blur-md border-zinc-200 text-zinc-900 shadow-2xl';
 
   const buttonActive = isDark
-    ? 'bg-zinc-100 text-zinc-950 font-bold shadow-sm border-zinc-100'
-    : 'bg-blue-600 text-white font-bold shadow-md border-blue-600 hover:bg-blue-700';
+    ? 'bg-zinc-100 text-zinc-950 shadow-sm border-zinc-100'
+    : 'bg-blue-600 text-white shadow-md border-blue-600 hover:bg-blue-700';
 
   const buttonInactive = isDark
     ? 'bg-zinc-900/70 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border-zinc-800'
@@ -251,7 +251,14 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 }`}
               >
                 <Plus className="w-3 h-3" />
-                <span>{showCustomForm ? 'Cancel' : 'Custom Pin'}</span>
+                <span className="inline-grid">
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${showCustomForm ? '' : 'invisible'}`}>
+                    Cancel
+                  </span>
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${showCustomForm ? 'invisible' : ''}`}>
+                    Custom Pin
+                  </span>
+                </span>
               </button>
             </div>
           </div>
@@ -482,7 +489,14 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 className={`px-1.5 py-0.5 rounded border text-[9px] flex items-center gap-1 cursor-pointer ${buttonInactive}`}
               >
                 <ArrowRightLeft className="w-2.5 h-2.5" />
-                <span>{rotateDirection === 'west-to-east' ? 'Normal' : 'Reverse'}</span>
+                <span className="inline-grid">
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${rotateDirection === 'west-to-east' ? '' : 'invisible'}`}>
+                    Normal
+                  </span>
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${rotateDirection === 'west-to-east' ? 'invisible' : ''}`}>
+                    Reverse
+                  </span>
+                </span>
               </button>
               <button
                 onClick={onToggleAutoRotate}
@@ -490,7 +504,14 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   autoRotate ? buttonActive : buttonInactive
                 }`}
               >
-                {autoRotate ? 'Active' : 'Paused'}
+                <span className="inline-grid">
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${autoRotate ? '' : 'invisible'}`}>
+                    Active
+                  </span>
+                  <span className={`col-start-1 row-start-1 whitespace-nowrap ${autoRotate ? 'invisible' : ''}`}>
+                    Paused
+                  </span>
+                </span>
               </button>
             </div>
           </div>

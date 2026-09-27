@@ -4,3 +4,19 @@
 html {
   color-scheme: light;
 }
+
+/* Buttons must keep a fixed size/shape on hover, active and focus.
+   Written OUTSIDE @layer on purpose: unlayered rules beat Tailwind's layered
+   utilities, so no `transition-all` on a button can animate width/height/
+   padding/border-width/transform anymore. Colors & shadows still animate. */
+button {
+  transition-property: color, background-color, border-color, fill, stroke,
+    box-shadow, opacity, text-decoration-color;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus ring only for keyboard navigation — clicking never restyles a button. */
+button:focus:not(:focus-visible) {
+  outline: none;
+}

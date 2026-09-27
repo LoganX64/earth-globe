@@ -242,8 +242,8 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
                 : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300 shadow-sm"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="min-w-0 truncate whitespace-nowrap">
               {isStateHighlighted
                 ? `Highlighted: ${marker.region} (Click to Clear)`
                 : `Highlight ${marker.region} State on Request`}
@@ -254,10 +254,10 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 1.6)}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
+            className={`px-3 py-2 text-xs font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
               isDark
-                ? "bg-white text-zinc-950 hover:bg-zinc-200"
-                : "bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 shadow-md"
+                ? "bg-white text-zinc-950 hover:bg-zinc-200 border-zinc-300"
+                : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-md"
             }`}
           >
             <Navigation className="w-3.5 h-3.5" />

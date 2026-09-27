@@ -80,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleDarkMode && (
             <button
               onClick={onToggleDarkMode}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
               title={
                 mapThemeIsDark
                   ? "Switch Map to Light Theme (UI stays light)"
@@ -88,27 +88,29 @@ export const TopBar: React.FC<TopBarProps> = ({
               }
             >
               {mapThemeIsDark ? (
-                <>
-                  <Sun className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span className="hidden sm:inline">Light Map</span>
-                </>
+                <Sun className="w-4 h-4 text-amber-500 shrink-0" />
               ) : (
-                <>
-                  <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
-                  <span className="hidden sm:inline">Dark Map</span>
-                </>
+                <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
               )}
+              <span className="hidden sm:inline-grid">
+                <span className={`col-start-1 row-start-1 whitespace-nowrap ${mapThemeIsDark ? '' : 'invisible'}`}>
+                  Light Map
+                </span>
+                <span className={`col-start-1 row-start-1 whitespace-nowrap ${mapThemeIsDark ? 'invisible' : ''}`}>
+                  Dark Map
+                </span>
+              </span>
             </button>
           )}
 
           {/* Controls HUD Toggle Button */}
           <button
             onClick={onToggleControls}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm ${
               isControlsOpen
                 ? isDark
-                  ? "bg-white text-zinc-950 border-white font-bold"
-                  : "bg-blue-600 text-white border-blue-600 font-bold shadow-md"
+                  ? "bg-white text-zinc-950 border-white"
+                  : "bg-blue-600 text-white border-blue-600 shadow-md"
                 : isDark
                 ? "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
                 : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300"
@@ -119,7 +121,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             <span className="hidden sm:inline">Menu &amp; Controls</span>
             <span className="sm:hidden">Menu</span>
             <span
-              className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold ${
+              className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
                 isControlsOpen
                   ? isDark
                     ? "bg-zinc-950 text-white"
