@@ -772,7 +772,7 @@ export default function App() {
         autoRotate={autoRotate}
         theme={theme}
         onlyIndia={onlyIndia}
-        isDark={false} // Export modal chrome ALWAYS stays in Light Mode UI
+        isDark={isDark}
       />
     </div>
   );

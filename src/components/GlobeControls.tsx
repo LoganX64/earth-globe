@@ -478,7 +478,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 3. Speed & Rotation Controls */}
-        <div className="pt-3 border-t border-white/10 space-y-2.5">
+        <div className={`pt-3 border-t ${dividerClass} space-y-2.5`}>
           <div className="flex items-center justify-between">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <RotateCw className={`w-3.5 h-3.5 ${iconColorClass}`} />
