@@ -521,7 +521,7 @@ export default function App() {
   // STANDARD INTERACTIVE APPLICATION DASHBOARD
   // =========================================================================
   return (
-    <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-zinc-100 text-zinc-900">
+    <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
       {/* 1. Header Navigation Bar - ALWAYS LIGHT MODE */}
       <TopBar
         activeMarker={activeMarker}
@@ -646,10 +646,10 @@ export default function App() {
         {!isControlsOpen && (
           <button
             onClick={() => setIsControlsOpen(true)}
-            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors bg-white/95 hover:bg-zinc-100 text-zinc-900 border-zinc-300 shadow-xl"
+            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors bg-white/95 hover:bg-neutral-100 text-neutral-900 border-neutral-300 shadow-xl"
             title="Open Globe Customizer & Layers Menu"
           >
-            <SlidersHorizontal className="w-4 h-4 text-zinc-900" />
+            <SlidersHorizontal className="w-4 h-4 text-neutral-900" />
             <span className="text-xs font-bold">Open Customizer Menu</span>
           </button>
         )}
@@ -660,7 +660,7 @@ export default function App() {
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-colors cursor-pointer shadow-md inline-grid leading-none bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-colors cursor-pointer shadow-md inline-grid leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
               title="Deselect active pin so map is completely clean"
             >
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
@@ -674,14 +674,14 @@ export default function App() {
               </span>
             </button>
           ) : (
-            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-zinc-600 border-zinc-200 shadow-sm">
+            <div className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md inline-grid select-none leading-none bg-white/80 text-neutral-600 border-neutral-200 shadow-sm">
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none invisible">
                 <span className="w-2 h-2 rounded-full shrink-0" />
                 <span className="leading-none">Deselect Pin</span>
                 <span className="inline-flex items-center justify-center text-[10px] opacity-60 font-mono leading-none">[X]</span>
               </span>
               <span className="col-start-1 row-start-1 inline-flex items-center gap-1.5 leading-none">
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-neutral-500 shrink-0" />
                 <span className="leading-none">Clean Map (No Point)</span>
               </span>
             </div>
@@ -690,7 +690,7 @@ export default function App() {
           {/* Embed / Pure Mode Button */}
           <button
             onClick={() => setIsEmbedMode(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950 border-zinc-300"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border backdrop-blur-md transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5 leading-none bg-white/90 hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950 border-neutral-300"
             title="Switch to clean isolated globe view (no UI chrome)"
           >
             <Maximize2 className="w-3.5 h-3.5 shrink-0" />
@@ -699,26 +699,26 @@ export default function App() {
         </div>
 
         {/* 6. Floating Zoom & Orientation HUD */}
-        <div className="absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl bg-white/90 border-zinc-200/80 text-zinc-700">
+        <div className="absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl bg-white/90 border-neutral-200/80 text-neutral-700">
           <button
             onClick={handleZoomIn}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-zinc-200 hover:text-zinc-950"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-neutral-200 hover:text-neutral-950"
             title="Zoom In"
           >
             +
           </button>
-          <div className="w-5 h-px bg-zinc-200" />
+          <div className="w-5 h-px bg-neutral-200" />
           <button
             onClick={handleZoomOut}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-zinc-200 hover:text-zinc-950"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-neutral-200 hover:text-neutral-950"
             title="Zoom Out"
           >
             −
           </button>
-          <div className="w-5 h-px bg-zinc-200" />
+          <div className="w-5 h-px bg-neutral-200" />
           <button
             onClick={handleResetView}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs hover:bg-zinc-200 hover:text-zinc-950"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs hover:bg-neutral-200 hover:text-neutral-950"
             title="Reset to India Center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -726,7 +726,7 @@ export default function App() {
         </div>
 
         {/* 7. Bottom Status Bar & Shortcuts Guide */}
-        <div className="absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none text-zinc-600 font-medium">
+        <div className="absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none text-neutral-600 font-medium">
           <div className="flex items-center gap-3">
             <span>SURVEY OF INDIA CARTOGRAPHY</span>
             <span>·</span>

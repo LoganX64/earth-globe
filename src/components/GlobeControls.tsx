@@ -102,26 +102,26 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>('all');
 
   const containerClass = isDark
-    ? 'bg-zinc-950/90 backdrop-blur-md border-zinc-800 text-zinc-200'
-    : 'bg-white/95 backdrop-blur-md border-zinc-200 text-zinc-900 shadow-2xl';
+    ? 'bg-neutral-950/90 backdrop-blur-md border-neutral-800 text-neutral-200'
+    : 'bg-white/95 backdrop-blur-md border-neutral-200 text-neutral-900 shadow-2xl';
 
   const buttonActive = isDark
-    ? 'bg-zinc-100 text-zinc-950 shadow-sm border-zinc-100'
+    ? 'bg-neutral-100 text-neutral-950 shadow-sm border-neutral-100'
     : 'bg-blue-600 text-white shadow-md border-blue-600 hover:bg-blue-700';
 
   const buttonInactive = isDark
-    ? 'bg-zinc-900/70 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border-zinc-800'
-    : 'bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950 border-zinc-200 shadow-sm';
+    ? 'bg-neutral-900/70 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border-neutral-800'
+    : 'bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950 border-neutral-200 shadow-sm';
 
-  const subLabelClass = isDark ? 'text-zinc-400' : 'text-zinc-600 font-medium';
-  const iconColorClass = isDark ? 'text-zinc-100' : 'text-blue-600';
+  const subLabelClass = isDark ? 'text-neutral-400' : 'text-neutral-600 font-medium';
+  const iconColorClass = isDark ? 'text-neutral-100' : 'text-muted-foreground';
   const inputBgClass = isDark
-    ? 'bg-zinc-950 border-zinc-700 text-white placeholder-zinc-500'
-    : 'bg-white border-zinc-300 text-zinc-900 placeholder-zinc-400 shadow-sm';
+    ? 'bg-neutral-950 border-neutral-700 text-white placeholder-neutral-500'
+    : 'bg-white border-neutral-300 text-neutral-900 placeholder-neutral-400 shadow-sm';
 
   const selectBgClass = isDark
-    ? 'bg-zinc-900/90 border-zinc-700 text-zinc-200'
-    : 'bg-white border-zinc-300 text-zinc-900 shadow-sm';
+    ? 'bg-neutral-900/90 border-neutral-700 text-neutral-200'
+    : 'bg-white border-neutral-300 text-neutral-900 shadow-sm';
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,9 +184,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               className={`p-1.5 rounded-md border text-xs cursor-pointer ${buttonInactive}`}
             >
               {mapThemeIsDark ? (
-                <Sun className="w-3.5 h-3.5 text-amber-500" />
+                <Sun className="w-3.5 h-3.5" />
               ) : (
-                <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                <Moon className="w-3.5 h-3.5" />
               )}
             </button>
           )}
@@ -237,7 +237,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onSelectLocation(null)}
                   className={`text-[10px] underline cursor-pointer ${
-                    isDark ? 'text-zinc-400 hover:text-white' : 'text-blue-600 hover:text-blue-800'
+                    isDark ? 'text-neutral-400 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                   }`}
                   title="Deselect active pin so no point appears on map"
                 >
@@ -247,7 +247,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <button
                 onClick={() => setShowCustomForm((prev) => !prev)}
                 className={`text-[10px] flex items-center gap-1 underline cursor-pointer ${
-                  isDark ? 'text-zinc-300 hover:text-white' : 'text-blue-600 hover:text-blue-800'
+                  isDark ? 'text-neutral-300 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Plus className="w-3 h-3" />
@@ -268,7 +268,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <form
               onSubmit={handleCustomSubmit}
               className={`p-3 mb-2 rounded-lg border space-y-2 text-xs ${
-                isDark ? 'bg-zinc-900 border-zinc-700/80 text-zinc-100' : 'bg-zinc-50 border-zinc-200 text-zinc-900 shadow-sm'
+                isDark ? 'bg-neutral-900 border-neutral-700/80 text-neutral-100' : 'bg-neutral-50 border-neutral-200 text-neutral-900 shadow-sm'
               }`}
             >
               <span className="font-semibold block text-[11px]">
@@ -418,7 +418,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onHighlightStateChange(null)}
                   className={`text-[9px] underline cursor-pointer ${
-                    isDark ? 'text-zinc-400 hover:text-white' : 'text-blue-600 hover:text-blue-800'
+                    isDark ? 'text-neutral-400 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   Clear
@@ -530,7 +530,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               value={autoRotateSpeed}
               onChange={(e) => onSpeedChange(parseFloat(e.target.value))}
               className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer ${
-                isDark ? 'accent-white bg-zinc-800' : 'accent-blue-600 bg-zinc-200'
+                isDark ? 'accent-white bg-neutral-800' : 'accent-blue-600 bg-neutral-200'
               }`}
             />
             {/* Quick speed buttons */}
@@ -566,19 +566,19 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <Palette className={`w-3.5 h-3.5 ${iconColorClass}`} />
               <span>Theme &amp; Contrast</span>
             </label>
-            <span className="text-[10px] text-zinc-500 font-medium">
+            <span className="text-[10px] text-neutral-500 font-medium">
               {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme} · Map Only
             </span>
           </div>
 
           {/* Theme Filter Tabs: All / Dark / Light */}
           <div className={`flex rounded-lg p-0.5 border border-inherit mb-2 text-[10px] ${
-            isDark ? 'bg-zinc-900' : 'bg-zinc-100'
+            isDark ? 'bg-neutral-900' : 'bg-neutral-100'
           }`}>
             <button
               onClick={() => setThemeTab('all')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
-                themeTab === 'all' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
+                themeTab === 'all' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               All ({Object.keys(THEME_PRESETS).length})
@@ -586,7 +586,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('dark')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'dark' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
+                themeTab === 'dark' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Moon className="w-2.5 h-2.5" />
@@ -595,7 +595,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('light')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'light' ? buttonActive : 'text-zinc-500 hover:text-zinc-900'
+                themeTab === 'light' ? buttonActive : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               <Sun className="w-2.5 h-2.5" />
@@ -649,9 +649,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStateBorders
                     ? isDark
-                      ? 'bg-zinc-900 text-zinc-100'
+                      ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-zinc-500/20 text-zinc-400'
+                    : 'bg-neutral-500/20 text-neutral-400'
                 }`}
               >
                 {showStateBorders ? 'ON' : 'OFF'}
@@ -674,9 +674,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showGraticule
                     ? isDark
-                      ? 'bg-zinc-900 text-zinc-100'
+                      ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-zinc-500/20 text-zinc-400'
+                    : 'bg-neutral-500/20 text-neutral-400'
                 }`}
               >
                 {showGraticule ? 'ON' : 'OFF'}
@@ -699,9 +699,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showAtmosphere
                     ? isDark
-                      ? 'bg-zinc-900 text-zinc-100'
+                      ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-zinc-500/20 text-zinc-400'
+                    : 'bg-neutral-500/20 text-neutral-400'
                 }`}
               >
                 {showAtmosphere ? 'ON' : 'OFF'}
@@ -724,9 +724,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStars
                     ? isDark
-                      ? 'bg-zinc-900 text-zinc-100'
+                      ? 'bg-neutral-900 text-neutral-100'
                       : 'bg-blue-800/20 text-white'
-                    : 'bg-zinc-500/20 text-zinc-400'
+                    : 'bg-neutral-500/20 text-neutral-400'
                 }`}
               >
                 {showStars ? 'ON' : 'OFF'}
@@ -750,9 +750,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                     onlyIndia
                       ? isDark
-                        ? 'bg-zinc-900 text-zinc-100'
+                        ? 'bg-neutral-900 text-neutral-100'
                         : 'bg-blue-800/20 text-white'
-                      : 'bg-zinc-500/20 text-zinc-400'
+                      : 'bg-neutral-500/20 text-neutral-400'
                   }`}
                 >
                   {onlyIndia ? 'ON (ONLY INDIA)' : 'OFF (GLOBAL)'}

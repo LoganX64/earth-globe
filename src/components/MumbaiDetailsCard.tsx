@@ -61,11 +61,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   };
 
   const bgClass = isDark
-    ? "bg-zinc-950/90 backdrop-blur-md border-zinc-800 text-zinc-100"
-    : "bg-white/95 backdrop-blur-md border-zinc-200 text-zinc-900 shadow-2xl";
+    ? "bg-neutral-950/90 backdrop-blur-md border-neutral-800 text-neutral-100"
+    : "bg-white/95 backdrop-blur-md border-neutral-200 text-neutral-900 shadow-2xl";
 
-  const subTextClass = isDark ? "text-zinc-400" : "text-zinc-600";
-  const dividerClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
+  const subTextClass = isDark ? "text-neutral-400" : "text-neutral-600";
+  const dividerClass = isDark ? "border-neutral-800/80" : "border-neutral-200/80";
 
   return (
     <div
@@ -74,10 +74,10 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       {/* Header */}
       <div className="flex items-start justify-between gap-3 pb-3 border-b border-inherit">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-zinc-400">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
             <span
               className={`inline-block w-2 h-2 rounded-full animate-pulse ${
-                isDark ? "bg-white" : "bg-zinc-900"
+                isDark ? "bg-white" : "bg-neutral-900"
               }`}
             />
             <span>Active Location Pin</span>
@@ -112,12 +112,12 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             title={`Fly to ${marker.name}`}
             className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
               isDark
-                ? "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-200 border-zinc-700/60"
-                : "bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
+                ? "bg-neutral-800/60 hover:bg-neutral-700 text-neutral-200 border-neutral-700/60"
+                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
             }`}
           >
             <Navigation
-              className={`w-4 h-4 ${isDark ? "text-white" : "text-zinc-900"}`}
+              className={`w-4 h-4 ${isDark ? "text-white" : "text-neutral-900"}`}
             />
           </button>
           {onDeselect && (
@@ -126,8 +126,8 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
               title="Deselect / Remove pin from map"
               className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
                 isDark
-                  ? "bg-zinc-800/60 hover:bg-zinc-700 text-zinc-400 hover:text-white border-zinc-700/60"
-                  : "bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-zinc-950 border-zinc-300"
+                  ? "bg-neutral-800/60 hover:bg-neutral-700 text-neutral-400 hover:text-white border-neutral-700/60"
+                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-950 border-neutral-300"
               }`}
             >
               <X className="w-4 h-4" />
@@ -161,7 +161,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             {copied ? (
               <Check className="w-3 h-3 text-emerald-500" />
             ) : (
-              <Copy className="w-3 h-3 text-zinc-400" />
+              <Copy className="w-3 h-3 text-neutral-400" />
             )}
           </button>
         </div>
@@ -235,11 +235,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             className={`w-full py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
               isStateHighlighted
                 ? isDark
-                  ? "bg-white text-zinc-950 border-white shadow-sm"
+                  ? "bg-white text-neutral-950 border-white shadow-sm"
                   : "bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700"
                 : isDark
-                ? "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
-                : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300 shadow-sm"
+                ? "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 border-neutral-700"
+                : "bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300 shadow-sm"
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -256,7 +256,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             onClick={() => onFlyTo(marker.lat, marker.lng, 1.6)}
             className={`px-3 py-2 text-xs font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
               isDark
-                ? "bg-white text-zinc-950 hover:bg-zinc-200 border-zinc-300"
+                ? "bg-white text-neutral-950 hover:bg-neutral-200 border-neutral-300"
                 : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-md"
             }`}
           >
@@ -267,8 +267,8 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.6)}
             className={`px-3 py-2 text-xs font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               isDark
-                ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200"
-                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 shadow-sm"
+                ? "border-neutral-700 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-200"
+                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 shadow-sm"
             }`}
           >
             <Maximize2 className="w-3.5 h-3.5" />

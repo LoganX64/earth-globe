@@ -156,8 +156,8 @@ vercel
   };
 
   const bgClass = isDark
-    ? 'bg-zinc-950 border-zinc-800 text-zinc-100'
-    : 'bg-white border-zinc-200 text-zinc-900 shadow-2xl';
+    ? 'bg-neutral-950 border-neutral-800 text-neutral-100'
+    : 'bg-white border-neutral-200 text-neutral-900 shadow-2xl';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -167,10 +167,10 @@ vercel
         {/* Header */}
         <div className="flex items-center justify-between shrink-0 px-6 py-4 border-b border-inherit">
           <div className="flex items-center gap-2.5">
-            <Globe className="w-5 h-5 text-blue-500" />
+            <Globe className="w-5 h-5 text-muted-foreground" />
             <div>
               <h3 className="text-base font-bold">Embed &amp; Component Integration</h3>
-              <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+              <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                 Light &amp; Dark Mode ready · Zero backend needed · 100% Vercel Free Tier
               </p>
             </div>
@@ -179,8 +179,8 @@ vercel
             onClick={onClose}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               isDark
-                ? 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
-                : 'hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900'
+                ? 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
+                : 'hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900'
             }`}
           >
             <X className="w-5 h-5" />
@@ -194,11 +194,11 @@ vercel
             className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'embed'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
+                  ? 'bg-neutral-900 text-white border-neutral-700'
+                  : 'bg-neutral-100 text-foreground border-neutral-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
+                ? 'text-neutral-400 hover:text-white border-transparent'
+                : 'text-neutral-600 hover:text-neutral-900 border-transparent'
             }`}
           >
             <Globe className="w-3.5 h-3.5 shrink-0" />
@@ -209,11 +209,11 @@ vercel
             className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'react'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
+                  ? 'bg-neutral-900 text-white border-neutral-700'
+                  : 'bg-neutral-100 text-foreground border-neutral-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
+                ? 'text-neutral-400 hover:text-white border-transparent'
+                : 'text-neutral-600 hover:text-neutral-900 border-transparent'
             }`}
           >
             <Code className="w-3.5 h-3.5 shrink-0" />
@@ -224,11 +224,11 @@ vercel
             className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x ${
               activeTab === 'vercel'
                 ? isDark
-                  ? 'bg-zinc-900 text-white border-zinc-700'
-                  : 'bg-zinc-100 text-blue-600 border-zinc-300'
+                  ? 'bg-neutral-900 text-white border-neutral-700'
+                  : 'bg-neutral-100 text-foreground border-neutral-300'
                 : isDark
-                ? 'text-zinc-400 hover:text-white border-transparent'
-                : 'text-zinc-600 hover:text-zinc-900 border-transparent'
+                ? 'text-neutral-400 hover:text-white border-transparent'
+                : 'text-neutral-600 hover:text-neutral-900 border-transparent'
             }`}
           >
             <Terminal className="w-3.5 h-3.5 shrink-0" />
@@ -246,45 +246,45 @@ vercel
             <div
               className={`p-4 rounded-xl border space-y-3 text-xs shadow-md ${
                 isDark
-                  ? 'bg-zinc-900/90 border-zinc-700/80'
-                  : 'bg-zinc-100/90 border-zinc-300'
+                  ? 'bg-neutral-900/90 border-neutral-700/80'
+                  : 'bg-neutral-100/90 border-neutral-300'
               }`}
             >
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
                 <div className="flex items-center gap-2">
-                  <span className={isDark ? 'text-zinc-200 font-semibold' : 'text-zinc-800 font-semibold'}>
+                  <span className={isDark ? 'text-neutral-200 font-semibold' : 'text-neutral-800 font-semibold'}>
                     App / Map Mode:
                   </span>
                   <button
                     onClick={() => setEmbedMode('light')}
                     className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                       embedMode === 'light'
-                        ? 'bg-amber-400 text-zinc-950 border-amber-400 shadow-md'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                        : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                     }`}
                   >
-                    <Sun className="w-3.5 h-3.5 text-amber-900" />
+                    <Sun className="w-3.5 h-3.5" />
                     <span>Light Mode Map</span>
                   </button>
                   <button
                     onClick={() => setEmbedMode('dark')}
                     className={`px-3 py-1.5 rounded-lg border font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
                       embedMode === 'dark'
-                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                        : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                     }`}
                   >
-                    <Moon className="w-3.5 h-3.5 text-indigo-200" />
+                    <Moon className="w-3.5 h-3.5" />
                     <span>Dark Mode Map</span>
                   </button>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={isDark ? 'text-zinc-200 font-semibold' : 'text-zinc-800 font-semibold'}>
+                  <span className={isDark ? 'text-neutral-200 font-semibold' : 'text-neutral-800 font-semibold'}>
                     Map Isolation:
                   </span>
                   <button
@@ -293,8 +293,8 @@ vercel
                       embedOnlyIndia
                         ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                        : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                     }`}
                   >
                     <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedOnlyIndia ? '' : 'invisible'}`}>
@@ -309,7 +309,7 @@ vercel
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
                 <div className="flex items-center gap-2">
-                  <span className={isDark ? 'text-zinc-200 font-semibold' : 'text-zinc-800 font-semibold'}>
+                  <span className={isDark ? 'text-neutral-200 font-semibold' : 'text-neutral-800 font-semibold'}>
                     Size:
                   </span>
                   {(['400', '500', '600', '100%'] as const).map((sz) => (
@@ -320,8 +320,8 @@ vercel
                         embedSize === sz
                           ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                           : isDark
-                          ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                          : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                          ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                          : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                       }`}
                     >
                       {sz === '100%' ? 'Responsive' : `${sz}px`}
@@ -330,7 +330,7 @@ vercel
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={isDark ? 'text-zinc-200 font-semibold' : 'text-zinc-800 font-semibold'}>
+                  <span className={isDark ? 'text-neutral-200 font-semibold' : 'text-neutral-800 font-semibold'}>
                     Rotation:
                   </span>
                   <button
@@ -339,8 +339,8 @@ vercel
                       embedRotate
                         ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                        : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                     }`}
                   >
                     <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedRotate ? '' : 'invisible'}`}>
@@ -353,7 +353,7 @@ vercel
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={isDark ? 'text-zinc-200 font-semibold' : 'text-zinc-800 font-semibold'}>
+                  <span className={isDark ? 'text-neutral-200 font-semibold' : 'text-neutral-800 font-semibold'}>
                     Drag:
                   </span>
                   <button
@@ -362,8 +362,8 @@ vercel
                       embedDrag
                         ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                         : isDark
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600'
-                        : 'bg-white hover:bg-zinc-50 text-zinc-800 border-zinc-300'
+                        ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600'
+                        : 'bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300'
                     }`}
                   >
                     <span className={`col-start-1 row-start-1 whitespace-nowrap ${embedDrag ? '' : 'invisible'}`}>
@@ -382,18 +382,18 @@ vercel
           {activeTab !== 'vercel' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-medium px-0.5">
-                <span className={isDark ? 'text-zinc-300 font-semibold' : 'text-zinc-700 font-semibold'}>
+                <span className={isDark ? 'text-neutral-300 font-semibold' : 'text-neutral-700 font-semibold'}>
                   Live Preview — {embedMode === 'light' ? 'Light Mode Map & UI' : 'Dark Mode Map & UI'} ({activeEmbedTheme})
                 </span>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-mono text-[11px] text-zinc-400">
+                  <span className="font-mono text-[11px] text-neutral-400">
                     {embedSize === '100%' ? '100% × 600px' : `${embedSize} × ${embedSize}px`}
                   </span>
                   <a
                     href={embedSrc}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-600 font-bold underline underline-offset-2 shrink-0"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-bold underline underline-offset-2 shrink-0"
                   >
                     <span>{activeTab === 'embed' ? 'Test Embed URL' : 'Test Preview URL'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -402,7 +402,7 @@ vercel
               </div>
               <div
                 className={`rounded-xl overflow-hidden border shadow-inner transition-colors ${
-                  embedMode === 'light' ? 'border-zinc-300 bg-slate-100' : 'border-zinc-800 bg-black'
+                  embedMode === 'light' ? 'border-neutral-300 bg-slate-100' : 'border-neutral-800 bg-black'
                 }`}
                 style={{
                   width: embedSize === '100%' ? '100%' : `${embedSize}px`,
@@ -419,10 +419,10 @@ vercel
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
                     Embed in Any Website or Portfolio
                   </h4>
-                  <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                     Supports Light Mode &amp; Dark Mode out of the box via <code>?mode=light</code> or <code>?mode=dark</code> query param.
                   </p>
                 </div>
@@ -430,8 +430,8 @@ vercel
                   onClick={() => copyToClipboard(iframeSnippet, 'iframe')}
                   className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
-                      ? 'text-zinc-950 bg-white hover:bg-zinc-200'
-                      : 'text-white bg-zinc-900 hover:bg-zinc-800'
+                      ? 'text-neutral-950 bg-white hover:bg-neutral-200'
+                      : 'text-white bg-neutral-900 hover:bg-neutral-800'
                   }`}
                 >
                   <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'iframe' ? '' : 'invisible'}`}>
@@ -445,23 +445,23 @@ vercel
                 </button>
               </div>
 
-              <pre className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono overflow-x-auto leading-relaxed">
+              <pre className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-mono overflow-x-auto leading-relaxed">
                 {iframeSnippet}
               </pre>
 
               <div
                 className={`p-3 rounded-lg border text-xs space-y-1 ${
                   isDark
-                    ? 'bg-zinc-900/40 border-zinc-800 text-zinc-300'
-                    : 'bg-blue-50/60 border-blue-200 text-zinc-800'
+                    ? 'bg-neutral-900/40 border-neutral-800 text-neutral-300'
+                    : 'bg-muted border-border text-neutral-800'
                 }`}
               >
-                <span className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                <span className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
                   Supported Query Parameters for Your Website:
                 </span>
                 <ul
                   className={`list-disc pl-4 space-y-0.5 font-mono text-[11px] ${
-                    isDark ? 'text-zinc-400' : 'text-zinc-600'
+                    isDark ? 'text-neutral-400' : 'text-neutral-600'
                   }`}
                 >
                   <li><code>?mode=light</code> | <code>?mode=dark</code> - Toggles Light Map &amp; UI vs Dark Map &amp; UI</li>
@@ -482,10 +482,10 @@ vercel
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
                     React / Next.js Component
                   </h4>
-                  <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                     Use directly in your React, Next.js, or Vite codebase. Pass <code>mode="light"</code> or <code>mode="dark"</code> (or hook to <code>next-themes</code>).
                   </p>
                 </div>
@@ -493,8 +493,8 @@ vercel
                   onClick={() => copyToClipboard(reactSnippet, 'react')}
                   className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
-                      ? 'text-zinc-950 bg-white hover:bg-zinc-200'
-                      : 'text-white bg-zinc-900 hover:bg-zinc-800'
+                      ? 'text-neutral-950 bg-white hover:bg-neutral-200'
+                      : 'text-white bg-neutral-900 hover:bg-neutral-800'
                   }`}
                 >
                   <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'react' ? '' : 'invisible'}`}>
@@ -508,7 +508,7 @@ vercel
                 </button>
               </div>
 
-              <pre className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono overflow-x-auto leading-relaxed">
+              <pre className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-mono overflow-x-auto leading-relaxed">
                 {reactSnippet}
               </pre>
             </div>
@@ -519,10 +519,10 @@ vercel
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                  <h4 className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
                     Deploy on Vercel Free Tier (100% Free)
                   </h4>
-                  <p className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                  <p className={`text-xs ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`}>
                     Does this React app need a backend? <strong>No backend is needed.</strong>
                   </p>
                 </div>
@@ -530,8 +530,8 @@ vercel
                   onClick={() => copyToClipboard(vercelGuide, 'vercel')}
                   className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shadow-sm shrink-0 ${
                     isDark
-                      ? 'text-zinc-950 bg-white hover:bg-zinc-200'
-                      : 'text-white bg-zinc-900 hover:bg-zinc-800'
+                      ? 'text-neutral-950 bg-white hover:bg-neutral-200'
+                      : 'text-white bg-neutral-900 hover:bg-neutral-800'
                   }`}
                 >
                   <span className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === 'vercel' ? '' : 'invisible'}`}>
@@ -548,23 +548,23 @@ vercel
               <div
                 className={`p-4 rounded-xl border space-y-3 text-xs ${
                   isDark
-                    ? 'bg-zinc-900/60 border-zinc-800 text-zinc-300'
-                    : 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                    ? 'bg-neutral-900/60 border-neutral-800 text-neutral-300'
+                    : 'bg-neutral-100 border-neutral-200 text-neutral-700'
                 }`}
               >
                 <div className="flex items-start gap-2">
                   <span
                     className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-zinc-800' : 'text-zinc-900 bg-zinc-200'
+                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
                     }`}
                   >
                     1
                   </span>
                   <div>
-                    <strong className={isDark ? 'text-white' : 'text-zinc-900'}>
+                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
                       Pure Client-Side React SPA:
                     </strong>
-                    <p className={isDark ? 'text-zinc-400' : 'text-zinc-600'}>
+                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
                       All 3D math, canvas rendering, D3 orthographic projections, and Survey of India boundary GeoJSON are bundled client-side. Zero server resources are consumed.
                     </p>
                   </div>
@@ -573,16 +573,16 @@ vercel
                 <div className="flex items-start gap-2">
                   <span
                     className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-zinc-800' : 'text-zinc-900 bg-zinc-200'
+                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
                     }`}
                   >
                     2
                   </span>
                   <div>
-                    <strong className={isDark ? 'text-white' : 'text-zinc-900'}>
+                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
                       Vercel Build Configuration:
                     </strong>
-                    <p className={isDark ? 'text-zinc-400' : 'text-zinc-600'}>
+                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
                       Framework Preset: <code>Vite</code> | Build Command: <code>npm run build</code> | Output: <code>dist</code>. Vercel automatically detects this and deploys in &lt; 30 seconds.
                     </p>
                   </div>
@@ -591,23 +591,23 @@ vercel
                 <div className="flex items-start gap-2">
                   <span
                     className={`font-bold px-1.5 py-0.5 rounded ${
-                      isDark ? 'text-white bg-zinc-800' : 'text-zinc-900 bg-zinc-200'
+                      isDark ? 'text-white bg-neutral-800' : 'text-neutral-900 bg-neutral-200'
                     }`}
                   >
                     3
                   </span>
                   <div>
-                    <strong className={isDark ? 'text-white' : 'text-zinc-900'}>
+                    <strong className={isDark ? 'text-white' : 'text-neutral-900'}>
                       Single-Page App Routing:
                     </strong>
-                    <p className={isDark ? 'text-zinc-400' : 'text-zinc-600'}>
+                    <p className={isDark ? 'text-neutral-400' : 'text-neutral-600'}>
                       A <code>vercel.json</code> file is included in your repository root to ensure URL parameters and embeds work seamlessly without 404 errors.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <pre className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs font-mono overflow-x-auto leading-relaxed">
+              <pre className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-mono overflow-x-auto leading-relaxed">
                 {vercelGuide}
               </pre>
             </div>
@@ -617,7 +617,7 @@ vercel
         {/* Footer */}
         <div
           className={`flex items-center justify-between shrink-0 px-6 py-3 border-t border-inherit ${
-            isDark ? 'bg-zinc-900/40 text-zinc-400' : 'bg-zinc-100/60 text-zinc-500'
+            isDark ? 'bg-neutral-900/40 text-neutral-400' : 'bg-neutral-100/60 text-neutral-500'
           }`}
         >
           <span className="text-xs">
@@ -627,8 +627,8 @@ vercel
             onClick={onClose}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
               isDark
-                ? 'bg-white text-zinc-950 hover:bg-zinc-200'
-                : 'bg-zinc-900 text-white hover:bg-zinc-800'
+                ? 'bg-white text-neutral-950 hover:bg-neutral-200'
+                : 'bg-neutral-900 text-white hover:bg-neutral-800'
             }`}
           >
             Done

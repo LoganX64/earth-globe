@@ -41,13 +41,13 @@ export const TopBar: React.FC<TopBarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const borderClass = isDark ? "border-zinc-800/80" : "border-zinc-200/80";
+  const borderClass = isDark ? "border-neutral-800/80" : "border-neutral-200/80";
 
   return (
     <div className="relative z-40 shrink-0">
       <header
         className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b backdrop-blur-md transition-colors duration-300 gap-3 ${
-          isDark ? "bg-zinc-950/90 text-zinc-100" : "bg-white/90 text-zinc-900"
+          isDark ? "bg-neutral-950/90 text-neutral-100" : "bg-white/90 text-neutral-900"
         } ${borderClass}`}
       >
         {/* Left Section: Wordmark Brand & Search */}
@@ -55,7 +55,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <div className="flex items-center gap-2">
             <span
               className={`text-sm sm:text-base font-extrabold tracking-tight whitespace-nowrap ${
-                isDark ? "text-white" : "text-zinc-900"
+                isDark ? "text-white" : "text-neutral-900"
               }`}
             >
               BHARAT // ATLAS
@@ -80,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleDarkMode && (
             <button
               onClick={onToggleDarkMode}
-              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border-zinc-300"
+              className="p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
               title={
                 mapThemeIsDark
                   ? "Switch Map to Light Theme (UI stays light)"
@@ -88,9 +88,9 @@ export const TopBar: React.FC<TopBarProps> = ({
               }
             >
               {mapThemeIsDark ? (
-                <Sun className="w-4 h-4 text-amber-500 shrink-0" />
+                <Sun className="w-4 h-4 shrink-0" />
               ) : (
-                <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
+                <Moon className="w-4 h-4 shrink-0" />
               )}
               <span className="hidden sm:inline-grid">
                 <span className={`col-start-1 row-start-1 whitespace-nowrap ${mapThemeIsDark ? '' : 'invisible'}`}>
@@ -109,11 +109,11 @@ export const TopBar: React.FC<TopBarProps> = ({
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm ${
               isControlsOpen
                 ? isDark
-                  ? "bg-white text-zinc-950 border-white"
+                  ? "bg-white text-neutral-950 border-white"
                   : "bg-blue-600 text-white border-blue-600 shadow-md"
                 : isDark
-                ? "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 border-zinc-700"
-                : "bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-300"
+                ? "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 border-neutral-700"
+                : "bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
           >
@@ -124,11 +124,11 @@ export const TopBar: React.FC<TopBarProps> = ({
               className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
                 isControlsOpen
                   ? isDark
-                    ? "bg-zinc-950 text-white"
+                    ? "bg-neutral-950 text-white"
                     : "bg-blue-800 text-white"
                   : isDark
-                  ? "bg-zinc-800 text-zinc-300"
-                  : "bg-zinc-200 text-zinc-700"
+                  ? "bg-neutral-800 text-neutral-300"
+                  : "bg-neutral-200 text-neutral-700"
               }`}
             >
               {isControlsOpen ? "ON" : "OFF"}
@@ -140,8 +140,8 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={onOpenCode}
             className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
               isDark
-                ? "border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 hover:text-white"
-                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950"
+                ? "border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 hover:text-white"
+                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
             }`}
             title="Embed code, Vercel free tier guide, & React component"
           >
@@ -155,8 +155,8 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClick={onToggleEmbedMode}
               className={`hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
                 isDark
-                  ? "border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 hover:text-white"
-                  : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-800 hover:text-zinc-950"
+                  ? "border-neutral-700 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 hover:text-white"
+                  : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
               }`}
               title="Preview pure isolated component view (without app chrome)"
             >
@@ -170,8 +170,8 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={onFocusActiveLocation}
             className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm ${
               isDark
-                ? "border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white"
-                : "border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-950"
+                ? "border-neutral-700 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-300 hover:text-white"
+                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950"
             }`}
             title="Recenter camera on India"
           >
@@ -184,8 +184,8 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             className={`lg:hidden p-1.5 rounded-lg border transition-colors cursor-pointer ${
               isDark
-                ? "border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white"
-                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 shadow-sm"
+                ? "border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white"
+                : "border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950 shadow-sm"
             }`}
             title="Open quick menu"
           >
@@ -203,8 +203,8 @@ export const TopBar: React.FC<TopBarProps> = ({
         <div
           className={`absolute top-full left-0 right-0 z-50 p-4 border-b shadow-2xl backdrop-blur-xl lg:hidden flex flex-col gap-3 ${
             isDark
-              ? "bg-zinc-950/95 border-zinc-800 text-zinc-200"
-              : "bg-white/95 border-zinc-200 text-zinc-900"
+              ? "bg-neutral-950/95 border-neutral-800 text-neutral-200"
+              : "bg-white/95 border-neutral-200 text-neutral-900"
           }`}
         >
           {/* Mobile Search */}
@@ -225,7 +225,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Quick Actions */}
           <div
             className={`grid grid-cols-2 gap-2 pt-2 border-t ${
-              isDark ? "border-zinc-800" : "border-zinc-200"
+              isDark ? "border-neutral-800" : "border-neutral-200"
             }`}
           >
             <button
@@ -235,8 +235,8 @@ export const TopBar: React.FC<TopBarProps> = ({
               }}
               className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white"
-                  : "bg-white hover:bg-zinc-100 border-zinc-300 text-zinc-900 shadow-sm"
+                  ? "bg-neutral-900 hover:bg-neutral-800 border-neutral-700 text-white"
+                  : "bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-900 shadow-sm"
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -251,8 +251,8 @@ export const TopBar: React.FC<TopBarProps> = ({
               }}
               className={`px-3 py-2 text-xs font-semibold rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? "bg-white text-zinc-950 border-white hover:bg-zinc-200"
-                  : "bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800 shadow-sm"
+                  ? "bg-white text-neutral-950 border-white hover:bg-neutral-200"
+                  : "bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-800 shadow-sm"
               }`}
             >
               <Code2 className="w-3.5 h-3.5" />
