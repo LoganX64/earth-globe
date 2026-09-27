@@ -105,11 +105,11 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
     ? 'bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]'
     : 'bg-white/85 backdrop-blur-xl border-neutral-200 text-neutral-900 shadow-2xl';
   const buttonActive = isDark
-    ? 'bg-sky-300 text-slate-950 shadow-[0_4px_14px_rgba(56,189,248,0.28)] border-sky-200 hover:bg-sky-200 border-dashed'
-    : 'bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.28)] border-blue-600 hover:bg-blue-500 border-dashed';
+    ? 'bg-sky-300 text-slate-950 border-sky-200 hover:bg-sky-200 border-dashed'
+    : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-500 border-dashed';
   const buttonInactive = isDark
-    ? 'bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] shadow-sm border-dashed'
-    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 border-neutral-300 shadow-sm border-dashed';
+    ? 'bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] border-dashed'
+    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 border-neutral-300 border-dashed';
   const subLabelClass = isDark ? 'text-slate-100 font-semibold' : 'text-neutral-900 font-semibold';
   const subTextClass = isDark ? 'text-slate-300' : 'text-neutral-500';
   const iconColorClass = isDark ? 'text-sky-300' : 'text-blue-600';
@@ -123,8 +123,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const dividerClass = isDark ? 'border-white/10' : 'border-neutral-200';
   const headerStripClass = isDark ? 'bg-white/[0.04]' : 'bg-neutral-100/70';
   const formBgClass = isDark
-    ? 'bg-black/20 border-white/[0.12] text-slate-100 shadow-inner shadow-black/10'
-    : 'bg-neutral-50 border-neutral-200 text-neutral-900 shadow-inner shadow-black/5';
+    ? 'bg-black/20 border-white/[0.12] text-slate-100'
+    : 'bg-neutral-50 border-neutral-200 text-neutral-900';
   const tabContainerClass = isDark ? 'border-white/[0.12] bg-black/20' : 'border-neutral-300 bg-neutral-100';
   const tabInactiveClass = isDark ? 'text-slate-400 hover:text-white' : 'text-neutral-500 hover:text-neutral-900';
   const rangeClass = isDark ? 'accent-sky-300 bg-white/20' : 'accent-blue-600 bg-neutral-300';
@@ -619,7 +619,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   title={`${t.name} (${t.isDark ? 'Dark Mode' : 'Light Mode'})`}
                 >
                   <span
-                    className="w-3 h-3 rounded-full shrink-0 border border-black/20 shadow-sm"
+                    className="w-3 h-3 rounded-full shrink-0 border border-black/20"
                     style={{ backgroundColor: t.highlightLand }}
                   />
                   <span className="truncate">{t.name.split('(')[0]}</span>
