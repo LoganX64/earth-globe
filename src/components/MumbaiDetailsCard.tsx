@@ -4,7 +4,6 @@ import {
   Navigation,
   Compass,
   Clock,
-  MapPin,
   Building2,
   Copy,
   Check,
@@ -69,23 +68,30 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-5 transition-all duration-300 max-w-sm w-full ${bgClass}`}
+      className={`w-[22.5rem] max-w-[calc(100vw-3rem)] min-h-[27rem] rounded-xl border p-5 transition-all duration-300 ${bgClass}`}
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 pb-3 border-b border-inherit">
+      <div className="relative pb-3 border-b border-inherit">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-600">
+          <div className="hidden">
             <span
-              className={`inline-block w-2 h-2 rounded-full animate-pulse ${
+              className={`inline-block w-1.5 h-1.5 rounded-full animate-pulse ${
                 isDark ? "bg-white" : "bg-neutral-900"
               }`}
             />
             <span>Active Location Pin</span>
             <span aria-hidden="true">·</span>
-            <span>{marker.region || "India"}</span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight mt-1 text-inherit">
-            {marker.name}
+          <h2 className="flex items-center gap-2 pr-20 text-xl font-bold tracking-tight text-inherit">
+            <span>{marker.name}</span>
+            <span
+              className="relative h-[13px] w-[13px] shrink-0"
+              aria-label="Active map marker"
+            >
+              <span className="relative block h-[13px] w-[13px] rounded-full border-[2.2px] border-red-600 bg-white/95">
+                <span className="absolute top-1/2 left-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600" />
+              </span>
+            </span>
           </h2>
           <div className={`text-xs mt-0.5 ${subTextClass}`}>
             <span>{marker.region || "State"}</span>
@@ -93,20 +99,20 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
               ·
             </span>
             <span>{marker.country || "India"}</span>
-            {marker.data?.role && (
+            {/*
               <>
                 <span aria-hidden="true" className="mx-1.5">
                   ·
                 </span>
-                <span className="truncate max-w-30 inline-block align-bottom">
+                <span className="inline align-bottom">
                   {marker.data.role}
                 </span>
               </>
-            )}
+            */}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="absolute top-0 right-0 flex items-center gap-1.5">
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.0)}
             title={`Fly to ${marker.name}`}
