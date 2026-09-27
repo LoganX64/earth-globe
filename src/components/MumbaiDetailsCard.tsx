@@ -59,19 +59,23 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const bgClass = isDark
-    ? "bg-gradient-to-b from-neutral-950/85 to-neutral-950/70 backdrop-blur-xl border-neutral-800 text-neutral-100"
-    : "bg-gradient-to-b from-white/92 to-white/78 backdrop-blur-xl border-neutral-200 text-neutral-900";
-
-  const subTextClass = isDark ? "text-neutral-300" : "text-neutral-700";
-  const dividerClass = isDark ? "border-neutral-800/80" : "border-neutral-200/80";
+  const bgClass =
+    "bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]";
+  const subTextClass = "text-slate-300";
+  const dividerClass = "border-white/10";
+  const iconButtonClass =
+    "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
+  const primaryButtonClass =
+    "bg-sky-300 text-slate-950 hover:bg-sky-200 border-sky-200 shadow-[0_4px_14px_rgba(56,189,248,0.28)]";
+  const secondaryButtonClass =
+    "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
 
   return (
     <div
-      className={`w-[22.5rem] max-w-[calc(100vw-3rem)] min-h-[27rem] rounded-xl border p-5 transition-all duration-300 ${bgClass}`}
+      className={`w-[22.5rem] max-w-[calc(100vw-3rem)] min-h-[27rem] rounded-lg border p-5 transition-all duration-300 ${bgClass}`}
     >
       {/* Header */}
-      <div className="relative pb-3 border-b border-inherit">
+      <div className="relative pb-3 border-b border-white/10">
         <div>
           <div className="hidden">
             <span
@@ -82,7 +86,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span>Active Location Pin</span>
             <span aria-hidden="true">·</span>
           </div>
-          <h2 className="flex items-center gap-2 pr-20 text-xl font-bold tracking-tight text-inherit">
+          <h2 className="flex items-center gap-2 pr-20 text-xl font-bold text-inherit">
             <span>{marker.name}</span>
             <span
               className="relative h-[13px] w-[13px] shrink-0"
@@ -116,25 +120,17 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.0)}
             title={`Fly to ${marker.name}`}
-            className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
-              isDark
-                ? "bg-neutral-800/60 hover:bg-neutral-700 text-neutral-200 border-neutral-700/60"
-                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
-            }`}
+              className={`p-2 rounded-md transition-colors border flex items-center justify-center cursor-pointer ${iconButtonClass}`}
           >
             <Navigation
-              className={`w-4 h-4 ${isDark ? "text-white" : "text-neutral-900"}`}
+              className="w-4 h-4 text-sky-300"
             />
           </button>
           {onDeselect && (
             <button
               onClick={onDeselect}
               title="Deselect / Remove pin from map"
-              className={`p-2 rounded-lg transition-colors border flex items-center justify-center cursor-pointer ${
-                isDark
-                  ? "bg-neutral-800/60 hover:bg-neutral-700 text-neutral-400 hover:text-white border-neutral-700/60"
-                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-950 border-neutral-300"
-              }`}
+              className={`p-2 rounded-md transition-colors border flex items-center justify-center cursor-pointer ${iconButtonClass}`}
             >
               <X className="w-4 h-4" />
             </button>
@@ -153,7 +149,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       <div className="py-3.5 space-y-2.5">
         <div className="flex items-center justify-between text-xs">
           <span className={`flex items-center gap-1.5 ${subTextClass}`}>
-            <Compass className="w-3.5 h-3.5" />
+            <Compass className="w-3.5 h-3.5 text-sky-300" />
             <span>Coordinates</span>
           </span>
           <button
@@ -167,14 +163,14 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             {copied ? (
               <Check className="w-3 h-3 text-emerald-500" />
             ) : (
-              <Copy className="w-3 h-3 text-neutral-400" />
+              <Copy className="w-3 h-3 text-slate-400" />
             )}
           </button>
         </div>
 
         <div className="flex items-center justify-between text-xs">
           <span className={`flex items-center gap-1.5 ${subTextClass}`}>
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 text-sky-300" />
             <span>Local Time (IST)</span>
           </span>
           <span className="font-mono text-xs font-semibold tabular-nums">
@@ -222,7 +218,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-1 border-t border-inherit/40 text-[11px]">
+        <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[11px]">
           <span className={`${subTextClass} flex items-center gap-1.5`}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
             <span>Map Cartography</span>
@@ -234,18 +230,12 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-4 pt-3 border-t border-inherit space-y-2">
+      <div className="mt-4 pt-3 border-t border-white/10 space-y-2">
         {marker.region && onToggleStateHighlight && (
           <button
             onClick={onToggleStateHighlight}
-            className={`w-full py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-              isStateHighlighted
-                ? isDark
-                  ? "bg-white text-neutral-950 border-white shadow-sm"
-                  : "bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700"
-                : isDark
-                ? "bg-neutral-900/80 hover:bg-neutral-800 text-neutral-200 border-neutral-700"
-                : "bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300 shadow-sm"
+            className={`w-full py-2 px-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              isStateHighlighted ? primaryButtonClass : secondaryButtonClass
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 shrink-0" />
@@ -260,22 +250,14 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 1.6)}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
-              isDark
-                ? "bg-white text-neutral-950 hover:bg-neutral-200 border-neutral-300"
-                : "bg-blue-600 text-white hover:bg-blue-700 border-blue-600 shadow-md"
-            }`}
+            className={`px-3 py-2 text-xs font-semibold rounded-md border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${primaryButtonClass}`}
           >
             <Navigation className="w-3.5 h-3.5" />
             <span>Center Pin</span>
           </button>
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.6)}
-            className={`px-3 py-2 text-xs font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              isDark
-                ? "border-neutral-700 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-200"
-                : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 shadow-sm"
-            }`}
+            className={`px-3 py-2 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${secondaryButtonClass}`}
           >
             <Maximize2 className="w-3.5 h-3.5" />
             <span>Close Up</span>

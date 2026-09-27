@@ -11,6 +11,7 @@ interface LocationSearchBarProps {
   isDark?: boolean;
   className?: string;
   compact?: boolean;
+  variant?: 'default' | 'glass';
 }
 
 const QUICK_SUGGESTIONS = [
@@ -30,6 +31,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   isDark = false,
   className = '',
   compact = false,
+  variant = 'default',
 }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -38,6 +40,17 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isGlass = variant === 'glass';
+  const fieldClass = isGlass
+    ? 'bg-black/20 border-white/[0.14] focus-within:border-sky-300/75 text-slate-100 shadow-inner shadow-black/10'
+    : isDark
+    ? 'bg-neutral-900/90 border-neutral-700/80 focus-within:border-neutral-400 text-neutral-100'
+    : 'bg-white border-neutral-300 focus-within:border-neutral-700 text-neutral-900';
+  const dropdownClass = isGlass
+    ? 'border-white/[0.14] backdrop-blur-2xl bg-slate-950/95 text-slate-100 shadow-2xl'
+    : isDark
+    ? 'border-neutral-800 backdrop-blur-md bg-neutral-950/95 text-neutral-100'
+    : 'border-neutral-200 backdrop-blur-md bg-white/95 text-neutral-900';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -112,13 +125,9 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Search Input Box */}
       <div
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
-          isDark
-            ? 'bg-neutral-900/90 border-neutral-700/80 focus-within:border-neutral-400 text-neutral-100'
-            : 'bg-white border-neutral-300 focus-within:border-neutral-700 text-neutral-900'
-        }`}
+        className={`flex items-center gap-2 px-3 py-1.5 ${isGlass ? 'rounded-md' : 'rounded-lg'} border transition-all ${fieldClass}`}
       >
-        <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+        <Search className={`w-3.5 h-3.5 shrink-0 ${isGlass ? 'text-sky-300' : 'text-neutral-400'}`} />
         <input
           type="text"
           value={query}
@@ -129,7 +138,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full text-xs bg-transparent focus:outline-none placeholder-neutral-500 font-sans"
+          className={`w-full text-xs bg-transparent focus:outline-none font-sans ${isGlass ? 'placeholder-slate-400 text-slate-100' : 'placeholder-neutral-500'}`}
         />
 
         {/* Trailing action slot: fixed width so the input never resizes when
@@ -143,7 +152,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
                 setQuery('');
                 setResults([]);
               }}
-              className="text-neutral-400 hover:text-neutral-200 cursor-pointer p-0.5 shrink-0 flex items-center justify-center"
+              className={`cursor-pointer p-0.5 shrink-0 flex items-center justify-center ${isGlass ? 'text-slate-400 hover:text-sky-200' : 'text-neutral-400 hover:text-neutral-200'}`}
               title="Clear search text"
             >
               <X className="w-3.5 h-3.5" />
@@ -153,7 +162,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
           {!isLoading && !query && activeMarker && onClearLocation && (
             <button
               onClick={onClearLocation}
-              className="text-[10px] text-neutral-400 hover:text-red-400 flex items-center gap-1 border-l border-neutral-700 pl-2 shrink-0 cursor-pointer whitespace-nowrap"
+              className={`text-[10px] flex items-center gap-1 border-l pl-2 shrink-0 cursor-pointer whitespace-nowrap ${isGlass ? 'text-slate-400 hover:text-sky-200 border-white/10' : 'text-neutral-400 hover:text-red-400 border-neutral-700'}`}
               title="Deselect active pin"
             >
               <span>Deselect</span>
@@ -165,14 +174,16 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
       {/* Dropdown Results / Suggestions */}
       {isOpen && (
         <div
-          className={`absolute left-0 right-0 top-full mt-1.5 rounded-xl border z-50 overflow-hidden backdrop-blur-md max-h-80 overflow-y-auto ${
-            isDark ? 'bg-neutral-950/95 border-neutral-800 text-neutral-100' : 'bg-white/95 border-neutral-200 text-neutral-900'
-          }`}
+          className={`absolute left-0 right-0 top-full mt-1.5 ${isGlass ? 'rounded-lg' : 'rounded-xl'} border z-50 overflow-hidden max-h-80 overflow-y-auto ${dropdownClass}`}
         >
           {/* Quick suggestions when input is empty */}
           {!query && (
             <div className="p-3">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 block mb-2">
+              <span
+                className={`text-[10px] font-semibold uppercase tracking-wider block mb-2 ${
+                  isGlass ? 'text-slate-400' : 'text-neutral-400'
+                }`}
+              >
                 Quick Place Suggestions
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -184,7 +195,9 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
                       setIsOpen(true);
                     }}
                     className={`px-2 py-1 rounded text-xs border text-left cursor-pointer transition-colors ${
-                      isDark
+                      isGlass
+                        ? 'bg-white/[0.07] border-white/[0.1] hover:bg-white/[0.13] text-slate-300 hover:text-white'
+                        : isDark
                         ? 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white'
                         : 'bg-neutral-100 border-neutral-200 hover:bg-neutral-200 text-neutral-700'
                     }`}
@@ -210,34 +223,56 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
                     key={item.id}
                     onClick={() => handlePick(item)}
                     onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`w-full text-left px-3 py-2 flex items-start gap-2.5 transition-colors cursor-pointer border-b border-neutral-900/40 last:border-0 ${
+                    className={`w-full text-left px-3 py-2 flex items-start gap-2.5 transition-colors cursor-pointer border-b last:border-0 ${
+                      isGlass ? 'border-white/10' : 'border-neutral-900/40'
+                    } ${
                       isSelected
-                        ? isDark
+                        ? isGlass
+                          ? 'bg-sky-300/18 text-white'
+                          : isDark
                           ? 'bg-neutral-800 text-white'
                           : 'bg-neutral-100 text-neutral-950'
+                        : isGlass
+                        ? 'hover:bg-white/[0.08] text-slate-200'
                         : isDark
                         ? 'hover:bg-neutral-900/80 text-neutral-200'
                         : 'hover:bg-neutral-50 text-neutral-800'
                     }`}
                   >
-                    <MapPin className="w-4 h-4 text-neutral-400 shrink-0" />
+                    <MapPin
+                      className={`w-4 h-4 shrink-0 ${isGlass ? 'text-sky-300' : 'text-neutral-400'}`}
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs truncate">{item.name}</span>
                         {item.state && (
                           <span
                             className={`text-[10px] px-1.5 py-0.5 leading-none rounded font-medium ${
-                              isDark ? 'bg-neutral-800 text-neutral-300' : 'bg-neutral-200 text-neutral-800'
+                              isGlass
+                                ? 'bg-white/[0.09] text-slate-300 border border-white/10'
+                                : isDark
+                                ? 'bg-neutral-800 text-neutral-300'
+                                : 'bg-neutral-200 text-neutral-800'
                             }`}
                           >
                             {item.state}
                           </span>
                         )}
-                        <span className="text-[10px] text-neutral-400 font-mono ml-auto shrink-0">
+                        <span
+                          className={`text-[10px] font-mono ml-auto shrink-0 ${
+                            isGlass ? 'text-slate-400' : 'text-neutral-400'
+                          }`}
+                        >
                           {item.lat.toFixed(2)}°, {item.lng.toFixed(2)}°
                         </span>
                       </div>
-                      <p className="text-[11px] text-neutral-400 truncate mt-0.5">{item.displayName}</p>
+                      <p
+                        className={`text-[11px] truncate mt-0.5 ${
+                          isGlass ? 'text-slate-400' : 'text-neutral-400'
+                        }`}
+                      >
+                        {item.displayName}
+                      </p>
                     </div>
                   </button>
                 );
@@ -247,9 +282,17 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
 
           {/* No results notice */}
           {query && !isLoading && results.length === 0 && (
-            <div className="p-4 text-center text-xs text-neutral-400">
+            <div
+              className={`p-4 text-center text-xs ${
+                isGlass ? 'text-slate-300' : 'text-neutral-400'
+              }`}
+            >
               <p>No location found for &ldquo;{query}&rdquo;</p>
-              <p className="text-[11px] mt-1 text-neutral-500">
+              <p
+                className={`text-[11px] mt-1 ${
+                  isGlass ? 'text-slate-400' : 'text-neutral-500'
+                }`}
+              >
                 Try searching with city and state, e.g. &ldquo;Ulhasnagar, Maharashtra&rdquo;
               </p>
             </div>

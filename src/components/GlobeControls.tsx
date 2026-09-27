@@ -101,27 +101,17 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const [customLng, setCustomLng] = useState('76.2144');
   const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>('all');
 
-  const containerClass = isDark
-    ? 'bg-gradient-to-b from-neutral-950/85 to-neutral-950/70 backdrop-blur-xl border-neutral-800 text-neutral-100'
-    : 'bg-gradient-to-b from-white/92 to-white/78 backdrop-blur-xl border-neutral-200 text-neutral-900';
-
-  const buttonActive = isDark
-    ? 'bg-neutral-100 text-neutral-950 shadow-sm border-neutral-100'
-    : 'bg-blue-600 text-white shadow-md border-blue-600 hover:bg-blue-700';
-
-  const buttonInactive = isDark
-    ? 'bg-neutral-900/70 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 border-neutral-800'
-    : 'bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950 border-neutral-200 shadow-sm';
-
-  const subLabelClass = isDark ? 'text-neutral-300' : 'text-neutral-700 font-medium';
-  const iconColorClass = isDark ? 'text-neutral-100' : 'text-neutral-700';
-  const inputBgClass = isDark
-    ? 'bg-neutral-950 border-neutral-700 text-white placeholder-neutral-500'
-    : 'bg-white border-neutral-300 text-neutral-900 placeholder-neutral-400 shadow-sm';
-
-  const selectBgClass = isDark
-    ? 'bg-neutral-900/90 border-neutral-700 text-neutral-200'
-    : 'bg-white border-neutral-300 text-neutral-900 shadow-sm';
+  const containerClass =
+    'bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]';
+  const buttonActive =
+    'bg-sky-300 text-slate-950 shadow-[0_4px_14px_rgba(56,189,248,0.28)] border-sky-200 hover:bg-sky-200';
+  const buttonInactive =
+    'bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] shadow-sm';
+  const subLabelClass = 'text-slate-100 font-semibold';
+  const iconColorClass = 'text-sky-300';
+  const inputBgClass = 'bg-black/20 border-white/[0.14] text-white placeholder-slate-400 focus:border-sky-300/75';
+  const selectBgClass = 'bg-black/20 border-white/[0.14] text-slate-100 focus:border-sky-300/75';
+  const actionLinkClass = 'text-slate-300 hover:text-sky-200';
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,13 +152,13 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
 
   return (
     <div
-      className={`rounded-xl border transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
+      className={`rounded-lg border transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
     >
       {/* Title & Quick Zoom (fixed header) */}
-      <div className="flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b border-inherit">
+      <div className="flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b border-white/10 bg-white/[0.04]">
         <div className="flex items-center gap-2">
           <GlobeIcon className={`w-4 h-4 ${iconColorClass}`} />
-          <span className="text-xs font-bold uppercase tracking-wider">
+          <span className="text-xs font-bold uppercase tracking-[0.12em]">
             Globe Customizer
           </span>
         </div>
@@ -237,7 +227,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onSelectLocation(null)}
                   className={`text-[10px] underline cursor-pointer ${
-                    isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
+                    actionLinkClass
                   }`}
                   title="Deselect active pin so no point appears on map"
                 >
@@ -247,7 +237,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <button
                 onClick={() => setShowCustomForm((prev) => !prev)}
                 className={`text-[10px] flex items-center gap-1 underline cursor-pointer ${
-                  isDark ? 'text-neutral-300 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
+                  actionLinkClass
                 }`}
               >
                 <Plus className="w-3 h-3" />
@@ -268,7 +258,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <form
               onSubmit={handleCustomSubmit}
               className={`p-3 mb-2 rounded-lg border space-y-2 text-xs ${
-                isDark ? 'bg-neutral-900 border-neutral-700/80 text-neutral-100' : 'bg-neutral-50 border-neutral-200 text-neutral-900 shadow-sm'
+                'bg-black/20 border-white/[0.12] text-slate-100 shadow-inner shadow-black/10'
               }`}
             >
               <span className="font-semibold block text-[11px]">
@@ -339,6 +329,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               onClearLocation={() => onSelectLocation(null)}
               placeholder="Search place (e.g. Ulhasnagar, MH)..."
               isDark={isDark}
+              variant="glass"
               className="w-full"
             />
           </div>
@@ -404,7 +395,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 2. On-Request Indian State Highlight */}
-        <div className="pt-2 border-t border-inherit">
+        <div className="pt-3 border-t border-white/10">
           <div className="flex items-center justify-between mb-2">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Compass className={`w-3.5 h-3.5 ${iconColorClass}`} />
@@ -418,7 +409,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   onClick={() => onHighlightStateChange(null)}
                   className={`text-[9px] underline cursor-pointer ${
-                    isDark ? 'text-neutral-400 hover:text-white' : 'text-neutral-700 hover:text-neutral-950'
+                    actionLinkClass
                   }`}
                 >
                   Clear
@@ -472,7 +463,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 3. Speed & Rotation Controls */}
-        <div className="pt-2 border-t border-inherit space-y-2.5">
+        <div className="pt-3 border-t border-white/10 space-y-2.5">
           <div className="flex items-center justify-between">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <RotateCw className={`w-3.5 h-3.5 ${iconColorClass}`} />
@@ -530,7 +521,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               value={autoRotateSpeed}
               onChange={(e) => onSpeedChange(parseFloat(e.target.value))}
               className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer ${
-                isDark ? 'accent-white bg-neutral-800' : 'accent-blue-600 bg-neutral-200'
+                'accent-sky-300 bg-white/20'
               }`}
             />
             {/* Quick speed buttons */}
@@ -560,25 +551,23 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 4. Theme & Contrast Selection (Dark Mode & Light Mode Globe Presets) */}
-        <div className="pt-2 border-t border-inherit">
+        <div className="pt-3 border-t border-white/10">
           <div className="flex items-center justify-between mb-2">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Palette className={`w-3.5 h-3.5 ${iconColorClass}`} />
               <span>Theme &amp; Contrast</span>
             </label>
-            <span className="text-[10px] text-neutral-700 font-medium">
+            <span className="text-[10px] text-slate-300 font-medium">
               {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme} · Map Only
             </span>
           </div>
 
           {/* Theme Filter Tabs: All / Dark / Light */}
-          <div className={`flex rounded-lg p-0.5 border border-inherit mb-2 text-[10px] ${
-            isDark ? 'bg-neutral-900' : 'bg-neutral-100'
-          }`}>
+          <div className="flex rounded-md p-0.5 border border-white/[0.12] bg-black/20 mb-2 text-[10px]">
             <button
               onClick={() => setThemeTab('all')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
-                themeTab === 'all' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
+                themeTab === 'all' ? buttonActive : 'text-slate-400 hover:text-white'
               }`}
             >
               All ({Object.keys(THEME_PRESETS).length})
@@ -586,7 +575,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('dark')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'dark' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
+                themeTab === 'dark' ? buttonActive : 'text-slate-400 hover:text-white'
               }`}
             >
               <Moon className="w-2.5 h-2.5" />
@@ -595,7 +584,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('light')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'light' ? buttonActive : 'text-neutral-700 hover:text-neutral-950'
+                themeTab === 'light' ? buttonActive : 'text-slate-400 hover:text-white'
               }`}
             >
               <Sun className="w-2.5 h-2.5" />
@@ -628,7 +617,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 5. Visual Cartography Layers */}
-        <div className="pt-2 border-t border-inherit space-y-2">
+        <div className="pt-3 border-t border-white/10 space-y-2">
           <div className="flex items-center justify-between mb-1">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Layers className={`w-3.5 h-3.5 ${iconColorClass}`} />
@@ -648,10 +637,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStateBorders
-                    ? isDark
-                      ? 'bg-neutral-900 text-neutral-100'
-                      : 'bg-blue-800/20 text-white'
-                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-white/[0.08] text-slate-400'
                 }`}
               >
                 {showStateBorders ? 'ON' : 'OFF'}
@@ -673,10 +660,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showGraticule
-                    ? isDark
-                      ? 'bg-neutral-900 text-neutral-100'
-                      : 'bg-blue-800/20 text-white'
-                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-white/[0.08] text-slate-400'
                 }`}
               >
                 {showGraticule ? 'ON' : 'OFF'}
@@ -698,10 +683,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showAtmosphere
-                    ? isDark
-                      ? 'bg-neutral-900 text-neutral-100'
-                      : 'bg-blue-800/20 text-white'
-                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-white/[0.08] text-slate-400'
                 }`}
               >
                 {showAtmosphere ? 'ON' : 'OFF'}
@@ -723,10 +706,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStars
-                    ? isDark
-                      ? 'bg-neutral-900 text-neutral-100'
-                      : 'bg-blue-800/20 text-white'
-                    : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-white/[0.08] text-slate-400'
                 }`}
               >
                 {showStars ? 'ON' : 'OFF'}
@@ -749,10 +730,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <span
                   className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                     onlyIndia
-                      ? isDark
-                        ? 'bg-neutral-900 text-neutral-100'
-                        : 'bg-blue-800/20 text-white'
-                      : (isDark ? 'bg-neutral-500/20 text-neutral-400' : 'bg-neutral-500/20 text-neutral-600')
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-white/[0.08] text-slate-400'
                   }`}
                 >
                   {onlyIndia ? 'ON (ONLY INDIA)' : 'OFF (GLOBAL)'}
