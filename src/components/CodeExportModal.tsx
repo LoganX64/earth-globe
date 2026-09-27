@@ -411,32 +411,6 @@ export function IndiaPortfolioGlobe({
               <pre className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-200 text-xs font-mono overflow-x-auto leading-relaxed">
                 {iframeSnippet}
               </pre>
-
-              <div
-                className={`p-3 rounded-lg border text-xs space-y-1 ${
-                  isDark
-                    ? 'bg-neutral-900/40 border-neutral-800 text-neutral-300'
-                    : 'bg-muted border-border text-neutral-800'
-                }`}
-              >
-                <span className={`font-semibold ${isDark ? 'text-white' : 'text-neutral-900'}`}>
-                  Supported Query Parameters for Your Website:
-                </span>
-                <ul
-                  className={`list-disc pl-4 space-y-0.5 font-mono text-[11px] ${
-                    isDark ? 'text-neutral-400' : 'text-neutral-600'
-                  }`}
-                >
-                  <li><code>?mode=light</code> | <code>?mode=dark</code> - Toggles Light Map &amp; UI vs Dark Map &amp; UI</li>
-                  <li><code>?embed=true</code> - Shows ONLY the 3D map canvas (no navbar, no menus, no settings)</li>
-                  <li><code>?onlyIndia=true</code> - Shows ONLY the sovereign Indian territory on the globe</li>
-                  <li><code>?drag=false</code> - Disable globe dragging (default: enabled)</li>
-                  <li><code>?zoom=false</code> - Disable scroll + <code>±</code> zoom buttons (default: enabled)</li>
-                  <li><code>?rotate=false</code> - Freeze rotation (default: enabled)</li>
-                  <li><code>?speed=1.5</code> - Custom planetary rotation speed</li>
-                  <li><code>?marker=ulhasnagar</code> | <code>thrissur</code> | <code>mumbai</code> - Pre-select pin</li>
-                </ul>
-              </div>
             </div>
           )}
 
@@ -481,13 +455,10 @@ export function IndiaPortfolioGlobe({
 
         {/* Footer */}
         <div
-          className={`flex items-center justify-between shrink-0 px-6 py-3 border-t border-inherit ${
-            isDark ? 'bg-neutral-900/40 text-neutral-400' : 'bg-neutral-100/60 text-neutral-500'
+          className={`flex items-center justify-end shrink-0 px-6 py-3 border-t border-inherit ${
+            isDark ? 'bg-neutral-900/40' : 'bg-neutral-100/60'
           }`}
         >
-          <span className="text-xs">
-            Survey of India compliant · Official borders including J&amp;K and Ladakh
-          </span>
           <button
             onClick={onClose}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
