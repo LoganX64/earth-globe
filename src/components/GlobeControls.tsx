@@ -101,17 +101,34 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const [customLng, setCustomLng] = useState('76.2144');
   const [themeTab, setThemeTab] = useState<'all' | 'dark' | 'light'>('all');
 
-  const containerClass =
-    'bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]';
-  const buttonActive =
-    'bg-sky-300 text-slate-950 shadow-[0_4px_14px_rgba(56,189,248,0.28)] border-sky-200 hover:bg-sky-200';
-  const buttonInactive =
-    'bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] shadow-sm';
-  const subLabelClass = 'text-slate-100 font-semibold';
-  const iconColorClass = 'text-sky-300';
-  const inputBgClass = 'bg-black/20 border-white/[0.14] text-white placeholder-slate-400 focus:border-sky-300/75';
-  const selectBgClass = 'bg-black/20 border-white/[0.14] text-slate-100 focus:border-sky-300/75';
-  const actionLinkClass = 'text-slate-300 hover:text-sky-200';
+  const containerClass = isDark
+    ? 'bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]'
+    : 'bg-white/85 backdrop-blur-xl border-neutral-200 text-neutral-900 shadow-2xl';
+  const buttonActive = isDark
+    ? 'bg-sky-300 text-slate-950 shadow-[0_4px_14px_rgba(56,189,248,0.28)] border-sky-200 hover:bg-sky-200 border-dashed'
+    : 'bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.28)] border-blue-600 hover:bg-blue-500 border-dashed';
+  const buttonInactive = isDark
+    ? 'bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] shadow-sm border-dashed'
+    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 border-neutral-300 shadow-sm border-dashed';
+  const subLabelClass = isDark ? 'text-slate-100 font-semibold' : 'text-neutral-900 font-semibold';
+  const subTextClass = isDark ? 'text-slate-300' : 'text-neutral-500';
+  const iconColorClass = isDark ? 'text-sky-300' : 'text-blue-600';
+  const inputBgClass = isDark
+    ? 'bg-black/20 border-white/[0.14] text-white placeholder-slate-400 focus:border-sky-300/75'
+    : 'bg-white border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:border-blue-500';
+  const selectBgClass = isDark
+    ? 'bg-black/20 border-white/[0.14] text-slate-100 focus:border-sky-300/75'
+    : 'bg-white border-neutral-300 text-neutral-900 focus:border-blue-500';
+  const actionLinkClass = isDark ? 'text-slate-300 hover:text-sky-200' : 'text-neutral-600 hover:text-blue-600';
+  const dividerClass = isDark ? 'border-white/10' : 'border-neutral-200';
+  const headerStripClass = isDark ? 'bg-white/[0.04]' : 'bg-neutral-100/70';
+  const formBgClass = isDark
+    ? 'bg-black/20 border-white/[0.12] text-slate-100 shadow-inner shadow-black/10'
+    : 'bg-neutral-50 border-neutral-200 text-neutral-900 shadow-inner shadow-black/5';
+  const tabContainerClass = isDark ? 'border-white/[0.12] bg-black/20' : 'border-neutral-300 bg-neutral-100';
+  const tabInactiveClass = isDark ? 'text-slate-400 hover:text-white' : 'text-neutral-500 hover:text-neutral-900';
+  const rangeClass = isDark ? 'accent-sky-300 bg-white/20' : 'accent-blue-600 bg-neutral-300';
+  const badgeOffClass = isDark ? 'bg-white/[0.08] text-slate-400' : 'bg-neutral-200 text-neutral-600';
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,7 +172,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
       className={`rounded-lg border transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
     >
       {/* Title & Quick Zoom (fixed header) */}
-      <div className="flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b border-white/10 bg-white/[0.04]">
+      <div className={`flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b ${dividerClass} ${headerStripClass}`}>
         <div className="flex items-center gap-2">
           <GlobeIcon className={`w-4 h-4 ${iconColorClass}`} />
           <span className="text-xs font-bold uppercase tracking-[0.12em]">
@@ -257,9 +274,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           {showCustomForm && (
             <form
               onSubmit={handleCustomSubmit}
-              className={`p-3 mb-2 rounded-lg border space-y-2 text-xs ${
-                'bg-black/20 border-white/[0.12] text-slate-100 shadow-inner shadow-black/10'
-              }`}
+              className={`p-3 mb-2 rounded-lg border space-y-2 text-xs ${formBgClass}`}
             >
               <span className="font-semibold block text-[11px]">
                 Drop Pin on Any City
@@ -329,7 +344,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               onClearLocation={() => onSelectLocation(null)}
               placeholder="Search place (e.g. Ulhasnagar, MH)..."
               isDark={isDark}
-              variant="glass"
+              variant={isDark ? 'glass' : 'default'}
               className="w-full"
             />
           </div>
@@ -395,7 +410,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 2. On-Request Indian State Highlight */}
-        <div className="pt-3 border-t border-white/10">
+          <div className={`pt-3 border-t ${dividerClass}`}>
           <div className="flex items-center justify-between mb-2">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Compass className={`w-3.5 h-3.5 ${iconColorClass}`} />
@@ -520,9 +535,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               step="0.2"
               value={autoRotateSpeed}
               onChange={(e) => onSpeedChange(parseFloat(e.target.value))}
-              className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer ${
-                'accent-sky-300 bg-white/20'
-              }`}
+              className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer ${rangeClass}`}
             />
             {/* Quick speed buttons */}
             <div className="flex justify-between gap-1 pt-1">
@@ -551,23 +564,23 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 4. Theme & Contrast Selection (Dark Mode & Light Mode Globe Presets) */}
-        <div className="pt-3 border-t border-white/10">
+          <div className={`pt-3 border-t ${dividerClass}`}>
           <div className="flex items-center justify-between mb-2">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Palette className={`w-3.5 h-3.5 ${iconColorClass}`} />
               <span>Theme &amp; Contrast</span>
             </label>
-            <span className="text-[10px] text-slate-300 font-medium">
+            <span className={`text-[10px] ${subTextClass} font-medium`}>
               {THEME_PRESETS[currentTheme]?.name.split('(')[0] || currentTheme} · Map Only
             </span>
           </div>
 
           {/* Theme Filter Tabs: All / Dark / Light */}
-          <div className="flex rounded-md p-0.5 border border-white/[0.12] bg-black/20 mb-2 text-[10px]">
+          <div className={`flex rounded-md p-0.5 border ${tabContainerClass} mb-2 text-[10px]`}>
             <button
               onClick={() => setThemeTab('all')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
-                themeTab === 'all' ? buttonActive : 'text-slate-400 hover:text-white'
+                themeTab === 'all' ? buttonActive : tabInactiveClass
               }`}
             >
               All ({Object.keys(THEME_PRESETS).length})
@@ -575,7 +588,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('dark')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'dark' ? buttonActive : 'text-slate-400 hover:text-white'
+                themeTab === 'dark' ? buttonActive : tabInactiveClass
               }`}
             >
               <Moon className="w-2.5 h-2.5" />
@@ -584,7 +597,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             <button
               onClick={() => setThemeTab('light')}
               className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                themeTab === 'light' ? buttonActive : 'text-slate-400 hover:text-white'
+                themeTab === 'light' ? buttonActive : tabInactiveClass
               }`}
             >
               <Sun className="w-2.5 h-2.5" />
@@ -617,7 +630,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
         </div>
 
         {/* 5. Visual Cartography Layers */}
-        <div className="pt-3 border-t border-white/10 space-y-2">
+          <div className={`pt-3 border-t ${dividerClass} space-y-2`}>
           <div className="flex items-center justify-between mb-1">
             <label className={`text-xs font-semibold flex items-center gap-1.5 ${subLabelClass}`}>
               <Layers className={`w-3.5 h-3.5 ${iconColorClass}`} />
@@ -637,8 +650,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStateBorders
+                    ? isDark
                       ? 'bg-slate-950/45 text-slate-950'
-                      : 'bg-white/[0.08] text-slate-400'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
                 }`}
               >
                 {showStateBorders ? 'ON' : 'OFF'}
@@ -660,8 +675,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showGraticule
+                    ? isDark
                       ? 'bg-slate-950/45 text-slate-950'
-                      : 'bg-white/[0.08] text-slate-400'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
                 }`}
               >
                 {showGraticule ? 'ON' : 'OFF'}
@@ -683,8 +700,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showAtmosphere
+                    ? isDark
                       ? 'bg-slate-950/45 text-slate-950'
-                      : 'bg-white/[0.08] text-slate-400'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
                 }`}
               >
                 {showAtmosphere ? 'ON' : 'OFF'}
@@ -706,8 +725,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                   showStars
+                    ? isDark
                       ? 'bg-slate-950/45 text-slate-950'
-                      : 'bg-white/[0.08] text-slate-400'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
                 }`}
               >
                 {showStars ? 'ON' : 'OFF'}
@@ -730,8 +751,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <span
                   className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
                     onlyIndia
+                    ? isDark
                       ? 'bg-slate-950/45 text-slate-950'
-                      : 'bg-white/[0.08] text-slate-400'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
                   }`}
                 >
                   {onlyIndia ? 'ON (ONLY INDIA)' : 'OFF (GLOBAL)'}

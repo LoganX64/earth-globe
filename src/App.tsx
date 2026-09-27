@@ -596,7 +596,7 @@ export default function App() {
                   handleHighlightStateChange(activeMarker.region);
                 }
               }}
-              isDark={false}
+              isDark={isDark}
             />
           </div>
         )}
@@ -637,7 +637,7 @@ export default function App() {
               onClose={() => setIsControlsOpen(false)}
               onToggleDarkMode={handleToggleDarkMode}
               mapThemeIsDark={isDark}
-              isDark={false}
+              isDark={isDark}
             />
           </div>
         )}

@@ -49,6 +49,8 @@ export const TopBar: React.FC<TopBarProps> = ({
     "rounded-md border bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
   const glassPrimary =
     "rounded-md border bg-sky-300 text-slate-950 hover:bg-sky-200 border-sky-200 shadow-[0_4px_14px_rgba(56,189,248,0.28)]";
+  const glassSecondaryDashed = `${glassSecondary} border-dashed`;
+  const glassPrimaryDashed = `${glassPrimary} border-dashed`;
 
   return (
     <div className={`relative z-40 shrink-0 ${isDark ? "bg-slate-950" : ""}`}>
@@ -74,47 +76,16 @@ export const TopBar: React.FC<TopBarProps> = ({
 
         {/* Right Section: Search, Controls, Map Theme Switch, Embed, & Mobile Hamburger */}
         <div className="flex items-center gap-2">
-          {/* Map Theme Toggle (Sun / Moon) — switches ONLY the globe theme, never the site UI */}
-          {onToggleDarkMode && (
-            <button
-              onClick={onToggleDarkMode}
-              className={`p-1.5 sm:px-2.5 sm:py-1.5 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                isDark
-                  ? glassSecondary
-                  : "rounded-lg border border-dashed bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
-              }`}
-              title={
-                mapThemeIsDark
-                  ? "Switch Map to Light Theme"
-                  : "Switch Map to Dark Theme"
-              }
-            >
-              {mapThemeIsDark ? (
-                <Sun className="w-4 h-4 shrink-0" />
-              ) : (
-                <Moon className="w-4 h-4 shrink-0" />
-              )}
-              <span className="hidden sm:inline-grid">
-                <span className={`col-start-1 row-start-1 whitespace-nowrap ${mapThemeIsDark ? '' : 'invisible'}`}>
-                  Light Map
-                </span>
-                <span className={`col-start-1 row-start-1 whitespace-nowrap ${mapThemeIsDark ? 'invisible' : ''}`}>
-                  Dark Map
-                </span>
-              </span>
-            </button>
-          )}
-
           {/* Controls HUD Toggle Button */}
           <button
             onClick={onToggleControls}
             className={`px-3 py-1.5 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
               isControlsOpen
                 ? isDark
-                  ? glassPrimary
+                  ? glassPrimaryDashed
                   : "rounded-lg border border-dashed bg-blue-600 text-white border-blue-600"
                 : isDark
-                ? glassSecondary
+                ? glassSecondaryDashed
                 : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
@@ -142,7 +113,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={onOpenCode}
             className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? glassSecondary
+                ? glassSecondaryDashed
                 : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
             }`}
             title="Embed code, Vercel free tier guide, & React component"
@@ -157,7 +128,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               onClick={onToggleEmbedMode}
               className={`hidden md:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 isDark
-                  ? glassSecondary
+                  ? glassSecondaryDashed
                   : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-neutral-950"
               }`}
               title="Preview pure isolated component view (without app chrome)"
@@ -172,7 +143,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={onFocusActiveLocation}
             className={`hidden sm:flex px-2.5 py-1.5 text-xs font-medium transition-colors items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               isDark
-                ? glassSecondary
+                ? glassSecondaryDashed
                 : "rounded-lg border border-dashed border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-950"
             }`}
             title="Recenter camera on India"
@@ -186,7 +157,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
             className={`lg:hidden p-1.5 transition-colors cursor-pointer flex items-center justify-center ${
               isDark
-                ? glassSecondary
+                ? glassSecondaryDashed
                 : "rounded-lg border border-dashed border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950"
             }`}
             title="Open quick menu"
@@ -210,6 +181,29 @@ export const TopBar: React.FC<TopBarProps> = ({
               className="w-48 lg:w-64"
             />
           </div>
+
+          {/* Map Theme Toggle (Sun / Moon) — switches ONLY the globe theme, never the site UI */}
+          {onToggleDarkMode && (
+            <button
+              onClick={onToggleDarkMode}
+              className={`p-1.5 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                isDark
+                  ? glassSecondaryDashed
+                  : "rounded-lg border border-dashed bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
+              }`}
+              title={
+                mapThemeIsDark
+                  ? "Switch Map to Light Theme"
+                  : "Switch Map to Dark Theme"
+              }
+            >
+              {mapThemeIsDark ? (
+                <Sun className="w-4 h-4 shrink-0" />
+              ) : (
+                <Moon className="w-4 h-4 shrink-0" />
+              )}
+            </button>
+          )}
         </div>
       </header>
 
@@ -251,7 +245,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               }}
               className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? glassSecondary
+                  ? glassSecondaryDashed
                   : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 border-neutral-300 text-neutral-900"
               }`}
             >
@@ -267,7 +261,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               }}
               className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                 isDark
-                  ? glassPrimary
+                  ? glassPrimaryDashed
                   : "rounded-lg border border-dashed bg-neutral-900 text-white border-neutral-900 hover:bg-neutral-800"
               }`}
             >

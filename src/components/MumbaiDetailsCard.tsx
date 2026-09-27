@@ -59,23 +59,27 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const bgClass =
-    "bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]";
-  const subTextClass = "text-slate-300";
-  const dividerClass = "border-white/10";
-  const iconButtonClass =
-    "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
-  const primaryButtonClass =
-    "bg-sky-300 text-slate-950 hover:bg-sky-200 border-sky-200 shadow-[0_4px_14px_rgba(56,189,248,0.28)]";
-  const secondaryButtonClass =
-    "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12]";
+  const bgClass = isDark
+    ? "bg-slate-950/78 backdrop-blur-2xl border-white/15 text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.36)]"
+    : "bg-white/85 backdrop-blur-xl border-neutral-200 text-neutral-900 shadow-2xl";
+  const subTextClass = isDark ? "text-slate-300" : "text-neutral-500";
+  const dividerClass = isDark ? "border-white/10" : "border-neutral-200";
+  const iconButtonClass = isDark
+    ? "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] border-dashed"
+    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 border-neutral-300 border-dashed";
+  const primaryButtonClass = isDark
+    ? "bg-sky-300 text-slate-950 hover:bg-sky-200 border-sky-200 shadow-[0_4px_14px_rgba(56,189,248,0.28)] border-dashed"
+    : "bg-blue-600 text-white hover:bg-blue-500 border-blue-600 shadow-[0_4px_14px_rgba(37,99,235,0.28)] border-dashed";
+  const secondaryButtonClass = isDark
+    ? "bg-white/[0.07] hover:bg-white/[0.13] text-slate-200 hover:text-white border-white/[0.12] border-dashed"
+    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 border-neutral-300 border-dashed";
 
   return (
     <div
       className={`w-[22.5rem] max-w-[calc(100vw-3rem)] min-h-[27rem] rounded-lg border p-5 transition-all duration-300 ${bgClass}`}
     >
       {/* Header */}
-      <div className="relative pb-3 border-b border-white/10">
+      <div className={`relative pb-3 border-b ${dividerClass}`}>
         <div>
           <div className="hidden">
             <span
@@ -218,19 +222,19 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[11px]">
+        <div className={`flex items-center justify-between pt-1 text-[11px]`}>
           <span className={`${subTextClass} flex items-center gap-1.5`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
             <span>Map Cartography</span>
           </span>
-          <span className="font-medium">
+          <span className="font-medium flex items-center">
             Survey of India (Official)
           </span>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-4 pt-3 border-t border-white/10 space-y-2">
+      <div className={`mt-4 pt-3 border-t ${dividerClass} space-y-2`}>
         {marker.region && onToggleStateHighlight && (
           <button
             onClick={onToggleStateHighlight}
