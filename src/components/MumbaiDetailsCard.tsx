@@ -14,6 +14,9 @@ import {
 interface LocationDetailsCardProps {
   marker: GlobeMarker;
   onFlyTo: (lat: number, lng: number, zoom?: number) => void;
+  /** Hide the card but leave the pin on the globe */
+  onClose?: () => void;
+  /** Remove the pin from the globe entirely */
   onDeselect?: () => void;
   isStateHighlighted?: boolean;
   onToggleStateHighlight?: () => void;
@@ -23,6 +26,7 @@ interface LocationDetailsCardProps {
 export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   marker,
   onFlyTo,
+  onClose,
   onDeselect,
   isStateHighlighted = false,
   onToggleStateHighlight,
@@ -129,10 +133,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
               className="w-4 h-4 text-sky-300"
             />
           </button>
-          {onDeselect && (
+          {onClose && (
             <button
-              onClick={onDeselect}
-              title="Deselect / Remove pin from map"
+              onClick={onClose}
+              title="Close this panel and keep the pin"
+              aria-label="Close details panel"
               className={`p-2 rounded-md transition-colors border flex items-center justify-center cursor-pointer ${iconButtonClass}`}
             >
               <X className="w-4 h-4" />
@@ -266,6 +271,17 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span>Close Up</span>
           </button>
         </div>
+
+        {onDeselect && (
+          <button
+            onClick={onDeselect}
+            title="Remove this pin from the globe"
+            className={`w-full py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${secondaryButtonClass}`}
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Deselect Pin</span>
+          </button>
+        )}
       </div>
     </div>
   );

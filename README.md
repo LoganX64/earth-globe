@@ -13,7 +13,7 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 - **Location pins & search** — built-in Indian cities plus worldwide geocoding via OpenStreetMap Nominatim, with an offline fallback list
 - **Layer toggles** — graticule, atmosphere, starfield, state borders, isolated India map
 - **Embeddable** — zero-chrome iframe with configurable size, mode, layers and zoom behaviour
-- **Keyboard shortcuts** — `SPACE` pause/rotate · `X` clear pin · `C` customizer · `T` light/dark · `R` reset view
+- **Keyboard shortcuts** — `SPACE` pause/rotate · `X` clear pin · `ESC` close panel · `C` customizer · `T` light/dark · `R` reset view
 
 ## Tech stack
 

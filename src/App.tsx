@@ -361,7 +361,7 @@ export default function App() {
     return showSecondaryMarkers ? POPULAR_INDIAN_LOCATIONS : [];
   }, [activeMarker, showSecondaryMarkers]);
 
-  // Handle location selection - toggles off if already selected, or selects new marker
+  // Handle location selection - selecting the active pin again just reopens its card
   const handleSelectLocation = useCallback((marker: GlobeMarker | null) => {
     if (!marker) {
       setActiveMarker(null);
@@ -369,14 +369,10 @@ export default function App() {
       return;
     }
 
-    setActiveMarker((current) => {
-      if (current?.id === marker.id) {
-        setIsDetailsOpen(false);
-        return null;
-      }
-      setIsDetailsOpen(true);
-      return marker;
-    });
+    // Re-clicking the active pin reopens its panel. Removing the pin is an
+    // explicit action (the card's Deselect button, the HUD, or the X key).
+    setActiveMarker((current) => (current?.id === marker.id ? current : marker));
+    setIsDetailsOpen(true);
 
     globeRef.current?.flyTo(marker.lat, marker.lng, 1.8);
   }, []);
@@ -437,7 +433,12 @@ export default function App() {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
       } else if (e.key === 'x' || e.key === 'X' || e.key === 'Escape') {
-        handleSelectLocation(null);
+        if (e.key === 'Escape') {
+          // Escape only dismisses the panel, matching the card's close button
+          setIsDetailsOpen(false);
+        } else {
+          handleSelectLocation(null);
+        }
       } else if (e.key === 'r' || e.key === 'R') {
         handleResetView();
       } else if (e.key === 'c' || e.key === 'C') {
@@ -648,6 +649,7 @@ export default function App() {
             <LocationDetailsCard
               marker={activeMarker}
               onFlyTo={(lat, lng, zoom) => globeRef.current?.flyTo(lat, lng, zoom)}
+              onClose={() => setIsDetailsOpen(false)}
               onDeselect={() => handleSelectLocation(null)}
               isStateHighlighted={Boolean(
                 highlightState &&
