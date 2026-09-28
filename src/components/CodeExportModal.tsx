@@ -69,14 +69,15 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
       ? window.location.origin
       : "https://your-domain.vercel.app";
 
-  // Ensure embed theme matches mode selection
+  // Ensure embed theme matches mode selection, falling back to the theme bound
+  // to that polarity in the Globe Customizer
   const activeEmbedTheme = (() => {
     const isSelectedThemeDark = THEME_PRESETS[theme]?.isDark ?? true;
     if (embedMode === "dark" && !isSelectedThemeDark) {
-      return DEFAULT_DARK_THEME_ID;
+      return darkTheme;
     }
     if (embedMode === "light" && isSelectedThemeDark) {
-      return DEFAULT_LIGHT_THEME_ID;
+      return lightTheme;
     }
     return theme;
   })();

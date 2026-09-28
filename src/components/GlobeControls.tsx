@@ -22,6 +22,8 @@ import {
   THEME_PRESETS,
   DARK_THEME_PRESETS,
   LIGHT_THEME_PRESETS,
+  DEFAULT_DARK_THEME_ID,
+  DEFAULT_LIGHT_THEME_ID,
 } from './EarthGlobe/themePresets';
 import { GlobeMarker } from './EarthGlobe/types';
 import { ALL_INDIAN_STATES, POPULAR_INDIAN_LOCATIONS } from '../data/defaultLocations';
@@ -30,6 +32,8 @@ import { LocationSearchBar } from './LocationSearchBar';
 interface GlobeControlsProps {
   currentTheme: string;
   onThemeChange: (themeId: string) => void;
+  lightTheme?: string;
+  darkTheme?: string;
   autoRotate: boolean;
   onToggleAutoRotate: () => void;
   autoRotateSpeed: number;
@@ -64,6 +68,8 @@ interface GlobeControlsProps {
 export const GlobeControls: React.FC<GlobeControlsProps> = ({
   currentTheme,
   onThemeChange,
+  lightTheme = DEFAULT_LIGHT_THEME_ID,
+  darkTheme = DEFAULT_DARK_THEME_ID,
   autoRotate,
   onToggleAutoRotate,
   autoRotateSpeed,
@@ -129,6 +135,9 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   const tabInactiveClass = isDark ? 'text-slate-400 hover:text-white' : 'text-neutral-500 hover:text-neutral-900';
   const rangeClass = isDark ? 'accent-sky-300 bg-white/20' : 'accent-blue-600 bg-neutral-300';
   const badgeOffClass = isDark ? 'bg-white/[0.08] text-slate-400' : 'bg-neutral-200 text-neutral-600';
+  const boundRingClass = isDark
+    ? 'ring-1 ring-inset ring-sky-300/70'
+    : 'ring-1 ring-inset ring-blue-500/70';
 
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -609,23 +618,41 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           <div className="grid grid-cols-2 gap-1.5 text-xs">
             {displayedThemes.map((t) => {
               const isSelected = currentTheme === t.id;
+              const isBound = t.id === (t.isDark ? darkTheme : lightTheme);
+              const roleLabel = t.isDark ? 'Dark' : 'Light';
               return (
                 <button
                   key={t.id}
                   onClick={() => onThemeChange(t.id)}
                   className={`px-2.5 py-1.5 rounded-md border text-left text-[11px] truncate transition-all cursor-pointer flex items-center gap-2 ${
                     isSelected ? buttonActive : buttonInactive
+                  } ${!isSelected && isBound ? boundRingClass : ''}`}
+                  title={`${t.name} (${t.isDark ? 'Dark Mode' : 'Light Mode'})${
+                    isBound ? ` — ${roleLabel} mode theme` : ''
                   }`}
-                  title={`${t.name} (${t.isDark ? 'Dark Mode' : 'Light Mode'})`}
                 >
                   <span
                     className="w-3 h-3 rounded-full shrink-0 border border-black/20"
                     style={{ backgroundColor: t.highlightLand }}
                   />
                   <span className="truncate">{t.name.split('(')[0]}</span>
+                  {isBound && (
+                    <span className="ml-auto shrink-0 text-[8px] font-bold uppercase tracking-wide opacity-70">
+                      {roleLabel}
+                    </span>
+                  )}
                 </button>
               );
             })}
+          </div>
+
+          {/* Bound theme pairing — what the dark/light switchers will flip between */}
+          <div className={`mt-2 text-[10px] font-medium ${subTextClass}`}>
+            <span className={iconColorClass}>Dark</span> ·{' '}
+            {THEME_PRESETS[darkTheme]?.name.split('(')[0] || darkTheme}
+            <span className="opacity-40 mx-1">/</span>
+            <span className={iconColorClass}>Light</span> ·{' '}
+            {THEME_PRESETS[lightTheme]?.name.split('(')[0] || lightTheme}
           </div>
         </div>
 

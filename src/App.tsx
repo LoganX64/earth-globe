@@ -41,6 +41,8 @@ const MAP_SETTINGS_STORAGE_KEY = 'bharat-atlas-map-settings';
 
 type SavedMapSettings = {
   theme?: string;
+  lightTheme?: string;
+  darkTheme?: string;
   onlyIndia?: boolean;
   autoRotate?: boolean;
   autoRotateSpeed?: number;
@@ -123,8 +125,24 @@ export default function App() {
       : 1.2;
 
   const [theme, setTheme] = useState<string>(initialTheme);
-  const [lightTheme, setLightTheme] = useState<string>(DEFAULT_LIGHT_THEME_ID);
-  const [darkTheme, setDarkTheme] = useState<string>(DEFAULT_DARK_THEME_ID);
+  // Resolve which preset is bound to a given polarity. Precedence:
+  // URL param (embed) > saved settings > the active theme when it already
+  // matches the polarity > the built-in default for that polarity.
+  const resolveBoundTheme = (urlKey: string, savedId: string | undefined, wantsDark: boolean): string => {
+    const fallback = wantsDark ? DEFAULT_DARK_THEME_ID : DEFAULT_LIGHT_THEME_ID;
+    for (const candidate of [urlParams?.get(urlKey), savedId, initialTheme, fallback]) {
+      if (candidate && candidate in THEME_PRESETS && THEME_PRESETS[candidate].isDark === wantsDark) {
+        return candidate;
+      }
+    }
+    return fallback;
+  };
+  const [lightTheme, setLightTheme] = useState<string>(
+    resolveBoundTheme('lightTheme', savedSettings.lightTheme, false),
+  );
+  const [darkTheme, setDarkTheme] = useState<string>(
+    resolveBoundTheme('darkTheme', savedSettings.darkTheme, true),
+  );
   const urlOnlyIndia = Boolean(urlParams?.has('onlyIndia') || urlParams?.has('indiaOnly'));
   const [onlyIndia, setOnlyIndia] = useState<boolean>(
     urlOnlyIndia
@@ -277,6 +295,8 @@ export default function App() {
         MAP_SETTINGS_STORAGE_KEY,
         JSON.stringify({
           theme,
+          lightTheme,
+          darkTheme,
           onlyIndia,
           autoRotate,
           autoRotateSpeed,
@@ -293,6 +313,8 @@ export default function App() {
   }, [
     isEmbedMode,
     theme,
+    lightTheme,
+    darkTheme,
     onlyIndia,
     autoRotate,
     autoRotateSpeed,
@@ -309,12 +331,41 @@ export default function App() {
   // The site chrome itself is always light mode.
   const isDark = currentThemeConfig.isDark;
 
-  // Theme switch changes ONLY the map theme; website UI never leaves light mode
+  // Theme switch changes ONLY the map theme; website UI never leaves light mode.
+  // Flips between the two palettes bound in the Globe Customizer, falling back to
+  // the built-in defaults if a binding is somehow unusable.
   const handleToggleDarkMode = useCallback(() => {
     setTheme((prevTheme) => {
       const currentIsDark = THEME_PRESETS[prevTheme]?.isDark ?? false;
-      return currentIsDark ? DEFAULT_LIGHT_THEME_ID : DEFAULT_DARK_THEME_ID;
+      const nextThemeId = currentIsDark ? lightTheme : darkTheme;
+      return nextThemeId in THEME_PRESETS ? nextThemeId : currentIsDark
+        ? DEFAULT_LIGHT_THEME_ID
+        : DEFAULT_DARK_THEME_ID;
     });
+  }, [lightTheme, darkTheme]);
+
+  // Picking a palette from the Globe Customizer applies it and binds it to its
+  // own polarity, so the dark/light switchers land on the user's own choices.
+  const handleThemeChange = useCallback((themeId: string) => {
+    if (!(themeId in THEME_PRESETS)) return;
+    setTheme(themeId);
+    if (THEME_PRESETS[themeId].isDark) setDarkTheme(themeId);
+    else setLightTheme(themeId);
+  }, []);
+
+  // The embed pickers drive the same live state as the customizer — changing the
+  // bound theme for the polarity currently on screen re-skins the globe. Guards
+  // match the `in THEME_PRESETS` validation already used on load.
+  const handleLightThemeChange = useCallback((themeId: string) => {
+    if (!(themeId in THEME_PRESETS) || THEME_PRESETS[themeId].isDark) return;
+    setLightTheme(themeId);
+    setTheme((prevTheme) => (THEME_PRESETS[prevTheme]?.isDark ? prevTheme : themeId));
+  }, []);
+
+  const handleDarkThemeChange = useCallback((themeId: string) => {
+    if (!(themeId in THEME_PRESETS) || !THEME_PRESETS[themeId].isDark) return;
+    setDarkTheme(themeId);
+    setTheme((prevTheme) => (THEME_PRESETS[prevTheme]?.isDark ? themeId : prevTheme));
   }, []);
 
   // Active markers passed to the globe
@@ -637,7 +688,9 @@ export default function App() {
           <div className="absolute top-6 right-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300">
             <GlobeControls
               currentTheme={theme}
-              onThemeChange={setTheme}
+              onThemeChange={handleThemeChange}
+              lightTheme={lightTheme}
+              darkTheme={darkTheme}
               autoRotate={autoRotate}
               onToggleAutoRotate={() => setAutoRotate((prev) => !prev)}
               autoRotateSpeed={autoRotateSpeed}
@@ -824,8 +877,8 @@ export default function App() {
         theme={theme}
         lightTheme={lightTheme}
         darkTheme={darkTheme}
-        onLightThemeChange={setLightTheme}
-        onDarkThemeChange={setDarkTheme}
+        onLightThemeChange={handleLightThemeChange}
+        onDarkThemeChange={handleDarkThemeChange}
         onlyIndia={onlyIndia}
         isDark={isDark}
       />
