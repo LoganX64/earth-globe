@@ -114,6 +114,26 @@ All configuration is done via URL query parameters. No JavaScript required.
 
 Control the globe in real-time from the parent page.
 
+### Who Can Send Commands
+
+This is a **public, unauthenticated API.** Anyone may embed `embed.html` and
+script it — there is no key, token, or session. Do not treat it as a
+confidential channel or send anything through it that must stay private.
+
+The embed accepts a message **only from the window that actually framed it**
+(`event.source === window.parent`). A pop-up, opener, or any other frame cannot
+drive the globe even though it shares the same origin policy.
+
+Self-hosting and want to lock this down to specific sites? Set
+`EMBED_ALLOWED_PARENT_ORIGINS` in `src/embed.tsx` to a list of origins, e.g.
+`['https://your-site.com']`. Leave it empty to allow any parent page.
+
+Always pass the target origin rather than `'*'` in your own calls:
+
+```javascript
+iframe.contentWindow.postMessage(message, 'https://your-site.com');
+```
+
 ### Sending Commands
 
 ```javascript
@@ -257,20 +277,20 @@ window.addEventListener('message', (event) => {
 
 The hosting server must allow the globe to be embedded in iframes. Configure one of:
 
-**Option A: Allow all domains**
-```
-X-Frame-Options: ALLOWALL
-```
-
-**Option B: Content Security Policy (recommended)**
+**Option A: Content Security Policy (recommended)**
 ```
 Content-Security-Policy: frame-ancestors *;
 ```
 
-**Option C: Allow specific domains**
+**Option B: Allow specific domains**
 ```
 Content-Security-Policy: frame-ancestors https://your-site.com https://another-site.com;
 ```
+
+> **Note:** `X-Frame-Options` is **not** a valid alternative here. It only accepts
+> `DENY`, `SAMEORIGIN`, or `ALLOW-FROM <uri>` — there is no `ALLOWALL` value, and
+> `ALLOW-FROM` is deprecated and ignored by all modern browsers. Use
+> `frame-ancestors` above.
 
 ---
 

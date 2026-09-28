@@ -10,6 +10,36 @@ import {
 } from './components/EarthGlobe/themePresets';
 import './index.css';
 
+// ---------------------------------------------------------------------------
+// postMessage trust boundary
+// ---------------------------------------------------------------------------
+// Driving the embed from a host page is a PUBLIC, UNAUTHENTICATED API: anyone
+// may embed embed.html and script it. What is not allowed is a third party
+// messaging an embed that is already on screen, so commands are accepted only
+// from window.parent itself.
+//
+// To additionally restrict which sites may drive the embed, list their origins
+// here. Empty (the default) means "any parent page may script its own embed".
+const EMBED_ALLOWED_PARENT_ORIGINS: string[] = [];
+
+const isTrustedHostMessage = (event: MessageEvent): boolean => {
+  // Must come from the window that actually framed us. This is what stops a
+  // pop-up, opener, or any other frame from driving the globe.
+  if (event.source !== window.parent) return false;
+  if (EMBED_ALLOWED_PARENT_ORIGINS.length === 0) return true;
+  return EMBED_ALLOWED_PARENT_ORIGINS.includes(event.origin);
+};
+
+// Origin of the page that framed us, when the browser tells us. Used to scope
+// the outbound 'ready' handshake instead of broadcasting it to any parent.
+const getParentOrigin = (): string => {
+  try {
+    return document.referrer ? new URL(document.referrer).origin : '';
+  } catch {
+    return '';
+  }
+};
+
 const urlParams = new URLSearchParams(window.location.search);
 
 const modeParam = urlParams.get('mode')?.toLowerCase();
@@ -135,6 +165,7 @@ function EmbedApp() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (!isTrustedHostMessage(event)) return;
       if (event.data?.type !== 'earth-globe') return;
 
       const { command, payload } = event.data;
@@ -218,7 +249,11 @@ function EmbedApp() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.parent !== window) {
-      window.parent.postMessage({ type: 'earth-globe', command: 'ready' }, '*');
+      const parentOrigin = getParentOrigin();
+      window.parent.postMessage(
+        { type: 'earth-globe', command: 'ready' },
+        parentOrigin || '*',
+      );
     }
   }, []);
 
