@@ -245,7 +245,7 @@ function EmbedApp() {
           showAtmosphere={showAtmosphere}
           showStars={showStars}
           initialCenter={activeMarker ? [activeMarker.lng, activeMarker.lat] : [78.9629, 20.5937]}
-          initialZoom={1.2}
+          initialZoom={1.1}
           className="w-full h-full"
         />
 
