@@ -1219,11 +1219,10 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     return (
       <div
         ref={containerRef}
-        className={`relative w-full h-full select-none overflow-hidden ${className}`}
+        className={`relative w-full h-full select-none overflow-hidden touch-none ${className}`}
         style={{
           width: width || '100%',
           height: height || '100%',
-          touchAction: 'none',
         }}
       >
         <canvas
@@ -1234,7 +1233,6 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           onPointerCancel={handlePointerUp}
           onClick={handleClick}
           className="w-full h-full block cursor-grab active:cursor-grabbing"
-          style={{ width: '100%', height: '100%' }}
         />
       </div>
     );

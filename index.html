@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scheme-light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -34,9 +34,10 @@
     <!--
       The globe is canvas-rendered, so crawlers and link-preview bots that do not
       execute JavaScript would otherwise see an empty page. This static copy states
-      what the app is; it is visually hidden but remains in the accessibility tree.
+      what the app is; `sr-only` keeps it visually hidden (1px, clipped) but still
+      in the accessibility tree.
     -->
-    <main class="seo-content">
+    <main class="sr-only">
       <h1>BHARAT ATLAS - Interactive 3D India Globe</h1>
       <p>
         An interactive 3D globe of India, rendered in the browser on an HTML canvas

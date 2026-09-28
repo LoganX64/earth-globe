@@ -1,20 +1,20 @@
-import { StrictMode, useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { EarthGlobe, EarthGlobeRef } from './components/EarthGlobe';
+import { StrictMode, useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { EarthGlobe, EarthGlobeRef } from "./components/EarthGlobe";
 import {
   GlobeMarker,
   MIN_ZOOM_LEVEL,
   MAX_ZOOM_LEVEL,
   DEFAULT_EMBED_ZOOM,
-} from './components/EarthGlobe/types';
+} from "./components/EarthGlobe/types";
 import {
   THEME_PRESETS,
   DEFAULT_THEME_ID,
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
-} from './components/EarthGlobe/themePresets';
-import { inject } from '@vercel/analytics';
-import './index.css';
+} from "./components/EarthGlobe/themePresets";
+import { inject } from "@vercel/analytics";
+import "./index.css";
 
 // Vercel Analytics — auto-tracks pageviews and custom events when hosted on Vercel
 inject();
@@ -43,26 +43,34 @@ const isTrustedHostMessage = (event: MessageEvent): boolean => {
 // the outbound 'ready' handshake instead of broadcasting it to any parent.
 const getParentOrigin = (): string => {
   try {
-    return document.referrer ? new URL(document.referrer).origin : '';
+    return document.referrer ? new URL(document.referrer).origin : "";
   } catch {
-    return '';
+    return "";
   }
 };
 
 const urlParams = new URLSearchParams(window.location.search);
 
-const modeParam = urlParams.get('mode')?.toLowerCase();
-const themeParam = urlParams.get('theme');
+const modeParam = urlParams.get("mode")?.toLowerCase();
+const themeParam = urlParams.get("theme");
 
 let initialTheme = DEFAULT_THEME_ID;
-if (modeParam === 'light') {
-  if (themeParam && themeParam in THEME_PRESETS && !THEME_PRESETS[themeParam].isDark) {
+if (modeParam === "light") {
+  if (
+    themeParam &&
+    themeParam in THEME_PRESETS &&
+    !THEME_PRESETS[themeParam].isDark
+  ) {
     initialTheme = themeParam;
   } else {
     initialTheme = DEFAULT_LIGHT_THEME_ID;
   }
-} else if (modeParam === 'dark') {
-  if (themeParam && themeParam in THEME_PRESETS && THEME_PRESETS[themeParam].isDark) {
+} else if (modeParam === "dark") {
+  if (
+    themeParam &&
+    themeParam in THEME_PRESETS &&
+    THEME_PRESETS[themeParam].isDark
+  ) {
     initialTheme = themeParam;
   } else {
     initialTheme = DEFAULT_DARK_THEME_ID;
@@ -71,52 +79,61 @@ if (modeParam === 'light') {
   initialTheme = themeParam;
 }
 
-const lightThemeParam = urlParams.get('lightTheme');
-const darkThemeParam = urlParams.get('darkTheme');
+const lightThemeParam = urlParams.get("lightTheme");
+const darkThemeParam = urlParams.get("darkTheme");
 
 const initialLightTheme =
-  lightThemeParam && lightThemeParam in THEME_PRESETS && !THEME_PRESETS[lightThemeParam].isDark
+  lightThemeParam &&
+  lightThemeParam in THEME_PRESETS &&
+  !THEME_PRESETS[lightThemeParam].isDark
     ? lightThemeParam
     : DEFAULT_LIGHT_THEME_ID;
 
 const initialDarkTheme =
-  darkThemeParam && darkThemeParam in THEME_PRESETS && THEME_PRESETS[darkThemeParam].isDark
+  darkThemeParam &&
+  darkThemeParam in THEME_PRESETS &&
+  THEME_PRESETS[darkThemeParam].isDark
     ? darkThemeParam
     : DEFAULT_DARK_THEME_ID;
 
-const initialOnlyIndia = urlParams.get('onlyIndia') === 'true' || urlParams.get('indiaOnly') === 'true';
-const initialWidth = urlParams.get('width') || urlParams.get('size') || '100%';
-const initialHeight = urlParams.get('height') || urlParams.get('size') || '100%';
-const initialSpeed = urlParams.get('speed') ? parseFloat(urlParams.get('speed')!) : 1.2;
-const embedDragEnabled = urlParams.get('drag') !== 'false';
+const initialOnlyIndia =
+  urlParams.get("onlyIndia") === "true" ||
+  urlParams.get("indiaOnly") === "true";
+const initialWidth = urlParams.get("width") || urlParams.get("size") || "100%";
+const initialHeight =
+  urlParams.get("height") || urlParams.get("size") || "100%";
+const initialSpeed = urlParams.get("speed")
+  ? parseFloat(urlParams.get("speed")!)
+  : 1.2;
+const embedDragEnabled = urlParams.get("drag") !== "false";
 // `zoom` is the master off-switch for zooming; the two granular params let a host
 // keep one input path and drop the other, but never re-enable what zoom=false killed.
-const embedZoomEnabled = urlParams.get('zoom') !== 'false';
+const embedZoomEnabled = urlParams.get("zoom") !== "false";
 const embedZoomButtonsEnabled =
-  embedZoomEnabled && urlParams.get('zoomButtons') !== 'false';
+  embedZoomEnabled && urlParams.get("zoomButtons") !== "false";
 const embedScrollZoomEnabled =
-  embedZoomEnabled && urlParams.get('scrollZoom') !== 'false';
+  embedZoomEnabled && urlParams.get("scrollZoom") !== "false";
 
 // Zoom bounds live in types.ts so the globe and the generator stay in step.
-const parsedZoomLevel = urlParams.get('zoomLevel')
-  ? parseFloat(urlParams.get('zoomLevel')!)
+const parsedZoomLevel = urlParams.get("zoomLevel")
+  ? parseFloat(urlParams.get("zoomLevel")!)
   : NaN;
 const initialZoomLevel = isNaN(parsedZoomLevel)
   ? DEFAULT_EMBED_ZOOM
   : Math.min(MAX_ZOOM_LEVEL, Math.max(MIN_ZOOM_LEVEL, parsedZoomLevel));
-const initialAutoRotate = urlParams.get('rotate') !== 'false';
-const initialHighlightState = urlParams.get('state') || null;
-const initialShowStateBorders = urlParams.get('borders') !== 'false';
-const initialShowGraticule = urlParams.get('grid') !== 'false';
-const initialShowAtmosphere = urlParams.get('atmosphere') !== 'false';
-const initialShowStars = urlParams.get('stars') !== 'false';
+const initialAutoRotate = urlParams.get("rotate") !== "false";
+const initialHighlightState = urlParams.get("state") || null;
+const initialShowStateBorders = urlParams.get("borders") !== "false";
+const initialShowGraticule = urlParams.get("grid") !== "false";
+const initialShowAtmosphere = urlParams.get("atmosphere") !== "false";
+const initialShowStars = urlParams.get("stars") !== "false";
 
 const getInitialMarker = (): GlobeMarker | null => {
-  const markerParam = urlParams.get('marker');
-  const latParam = urlParams.get('lat');
-  const lngParam = urlParams.get('lng');
-  const nameParam = urlParams.get('name');
-  const regionParam = urlParams.get('region');
+  const markerParam = urlParams.get("marker");
+  const latParam = urlParams.get("lat");
+  const lngParam = urlParams.get("lng");
+  const nameParam = urlParams.get("name");
+  const regionParam = urlParams.get("region");
 
   if (latParam && lngParam) {
     const lat = parseFloat(latParam);
@@ -124,9 +141,9 @@ const getInitialMarker = (): GlobeMarker | null => {
     if (!isNaN(lat) && !isNaN(lng)) {
       return {
         id: markerParam || `embed-marker-${lat}-${lng}`,
-        name: nameParam || 'Location',
+        name: nameParam || "Location",
         region: regionParam || undefined,
-        country: 'India',
+        country: "India",
         lat,
         lng,
         isPrimary: true,
@@ -139,7 +156,7 @@ const getInitialMarker = (): GlobeMarker | null => {
       id: markerParam,
       name: nameParam || markerParam,
       region: regionParam || undefined,
-      country: 'India',
+      country: "India",
       lat: 20.5937,
       lng: 78.9629,
       isPrimary: true,
@@ -153,20 +170,34 @@ function EmbedApp() {
   const globeRef = useRef<EarthGlobeRef>(null);
   const [theme, setTheme] = useState<string>(initialTheme);
   const [onlyIndia, setOnlyIndia] = useState<boolean>(initialOnlyIndia);
-  const [highlightState, setHighlightState] = useState<string | null>(initialHighlightState);
+  const [highlightState, setHighlightState] = useState<string | null>(
+    initialHighlightState,
+  );
   const [autoRotate, setAutoRotate] = useState<boolean>(initialAutoRotate);
-  const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(isNaN(initialSpeed) ? 1.2 : initialSpeed);
-  const [showStateBorders, setShowStateBorders] = useState<boolean>(initialShowStateBorders);
-  const [showGraticule, setShowGraticule] = useState<boolean>(initialShowGraticule);
-  const [showAtmosphere, setShowAtmosphere] = useState<boolean>(initialShowAtmosphere);
+  const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(
+    isNaN(initialSpeed) ? 1.2 : initialSpeed,
+  );
+  const [showStateBorders, setShowStateBorders] = useState<boolean>(
+    initialShowStateBorders,
+  );
+  const [showGraticule, setShowGraticule] =
+    useState<boolean>(initialShowGraticule);
+  const [showAtmosphere, setShowAtmosphere] = useState<boolean>(
+    initialShowAtmosphere,
+  );
   const [showStars, setShowStars] = useState<boolean>(initialShowStars);
-  const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(getInitialMarker);
+  const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(
+    getInitialMarker,
+  );
 
-  const currentThemeConfig = THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
+  const currentThemeConfig =
+    THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
   const isDark = currentThemeConfig.isDark;
 
-  const formattedWidth = typeof initialWidth === 'number' ? `${initialWidth}px` : initialWidth;
-  const formattedHeight = typeof initialHeight === 'number' ? `${initialHeight}px` : initialHeight;
+  const formattedWidth =
+    typeof initialWidth === "number" ? `${initialWidth}px` : initialWidth;
+  const formattedHeight =
+    typeof initialHeight === "number" ? `${initialHeight}px` : initialHeight;
 
   const handleZoomIn = () => {
     const z = globeRef.current?.getZoom() || 1.0;
@@ -180,123 +211,125 @@ function EmbedApp() {
 
   useEffect(() => {
     const handleResize = () => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (!isTrustedHostMessage(event)) return;
-      if (event.data?.type !== 'earth-globe') return;
+      if (event.data?.type !== "earth-globe") return;
 
       const { command, payload } = event.data;
 
       switch (command) {
-        case 'flyTo':
+        case "flyTo":
           if (payload?.lat != null && payload?.lng != null) {
-            globeRef.current?.flyTo(payload.lat, payload.lng, payload.zoomMultiplier);
+            globeRef.current?.flyTo(
+              payload.lat,
+              payload.lng,
+              payload.zoomMultiplier,
+            );
           }
           break;
-        case 'focusState':
+        case "focusState":
           if (payload?.stateName) {
-            globeRef.current?.focusState(payload.stateName, payload.zoomMultiplier);
+            globeRef.current?.focusState(
+              payload.stateName,
+              payload.zoomMultiplier,
+            );
             setHighlightState(payload.stateName);
           }
           break;
-        case 'setMarker':
+        case "setMarker":
           if (payload?.marker) {
             setActiveMarker(payload.marker);
-            globeRef.current?.flyTo(payload.marker.lat, payload.marker.lng, 1.8);
+            globeRef.current?.flyTo(
+              payload.marker.lat,
+              payload.marker.lng,
+              1.8,
+            );
           } else {
             setActiveMarker(null);
           }
           break;
-        case 'clearMarker':
+        case "clearMarker":
           setActiveMarker(null);
           break;
-        case 'setHighlightState':
+        case "setHighlightState":
           setHighlightState(payload?.stateName || null);
           if (payload?.stateName) {
             globeRef.current?.focusState(payload.stateName, 2.2);
           }
           break;
-        case 'clearHighlightState':
+        case "clearHighlightState":
           setHighlightState(null);
           break;
-        case 'setTheme':
+        case "setTheme":
           if (payload?.themeId && payload.themeId in THEME_PRESETS) {
             setTheme(payload.themeId);
           }
           break;
-        case 'resetView':
+        case "resetView":
           globeRef.current?.resetView();
           break;
-        case 'toggleAutoRotate':
+        case "toggleAutoRotate":
           globeRef.current?.toggleAutoRotate();
           setAutoRotate(globeRef.current?.getRotation ? true : true);
           break;
-        case 'setZoom':
+        case "setZoom":
           if (payload?.zoom != null) {
             globeRef.current?.setZoom(payload.zoom);
           }
           break;
-        case 'setOnlyIndia':
+        case "setOnlyIndia":
           setOnlyIndia(payload?.onlyIndia ?? false);
           break;
-        case 'setShowStateBorders':
+        case "setShowStateBorders":
           setShowStateBorders(payload?.show ?? true);
           break;
-        case 'setShowGraticule':
+        case "setShowGraticule":
           setShowGraticule(payload?.show ?? true);
           break;
-        case 'setShowAtmosphere':
+        case "setShowAtmosphere":
           setShowAtmosphere(payload?.show ?? true);
           break;
-        case 'setShowStars':
+        case "setShowStars":
           setShowStars(payload?.show ?? true);
           break;
-        case 'setAutoRotate':
+        case "setAutoRotate":
           setAutoRotate(payload?.enabled ?? true);
           break;
-        case 'setAutoRotateSpeed':
+        case "setAutoRotateSpeed":
           setAutoRotateSpeed(payload?.speed ?? 1.2);
           break;
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.parent !== window) {
+    if (typeof window !== "undefined" && window.parent !== window) {
       const parentOrigin = getParentOrigin();
       window.parent.postMessage(
-        { type: 'earth-globe', command: 'ready' },
-        parentOrigin || '*',
+        { type: "earth-globe", command: "ready" },
+        parentOrigin || "*",
       );
     }
   }, []);
 
   return (
     <div
-      className="w-full h-[100dvh] flex items-center justify-center overflow-hidden relative transition-colors duration-500"
-      style={{
-        backgroundColor: currentThemeConfig.background,
-        overscrollBehavior: 'contain',
-      }}
+      className="w-full h-dvh flex items-center justify-center overflow-hidden relative transition-colors duration-500 overscroll-contain"
+      style={{ backgroundColor: currentThemeConfig.background }}
     >
       <div
-        style={{
-          width: formattedWidth,
-          height: formattedHeight,
-          maxWidth: '100%',
-          maxHeight: '100%',
-          position: 'relative',
-        }}
-        className="flex items-center justify-center overflow-hidden"
+        style={{ width: formattedWidth, height: formattedHeight }}
+        className="flex items-center justify-center overflow-hidden max-w-full max-h-full relative"
       >
         <EarthGlobe
           ref={globeRef}
@@ -315,39 +348,45 @@ function EmbedApp() {
           showGraticule={showGraticule}
           showAtmosphere={showAtmosphere}
           showStars={showStars}
-          initialCenter={activeMarker ? [activeMarker.lng, activeMarker.lat] : [78.9629, 20.5937]}
+          initialCenter={
+            activeMarker
+              ? [activeMarker.lng, activeMarker.lat]
+              : [78.9629, 20.5937]
+          }
           initialZoom={initialZoomLevel}
           className="w-full h-full"
         />
 
         {embedZoomButtonsEnabled && (
           <div
-            className={`hud-bottom absolute right-2 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl sm:right-6 ${
+              className={`bottom-hud absolute right-2 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl sm:right-6 ${
               /* Same glass surface as the app's floating HUD and customizer. */
               isDark
-                ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
-                : 'bg-white/85 border-neutral-200/80 text-neutral-700'
+                ? "bg-zinc-950/80 border-zinc-800/80 text-zinc-300"
+                : "bg-white/85 border-neutral-200/80 text-neutral-700"
             }`}
           >
             <button
               onClick={handleZoomIn}
               className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                 isDark
-                  ? 'hover:bg-zinc-800 hover:text-white'
-                  : 'hover:bg-neutral-200 hover:text-neutral-950'
+                  ? "hover:bg-zinc-800 hover:text-white"
+                  : "hover:bg-neutral-200 hover:text-neutral-950"
               }`}
               title="Zoom In"
               aria-label="Zoom In"
             >
               +
             </button>
-            <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
+            <div
+              className={`w-5 h-px ${isDark ? "bg-zinc-800" : "bg-neutral-200"}`}
+            />
             <button
               onClick={handleZoomOut}
               className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                 isDark
-                  ? 'hover:bg-zinc-800 hover:text-white'
-                  : 'hover:bg-neutral-200 hover:text-neutral-950'
+                  ? "hover:bg-zinc-800 hover:text-white"
+                  : "hover:bg-neutral-200 hover:text-neutral-950"
               }`}
               title="Zoom Out"
               aria-label="Zoom Out"
@@ -361,7 +400,7 @@ function EmbedApp() {
   );
 }
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <EmbedApp />
   </StrictMode>,

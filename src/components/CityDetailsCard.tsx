@@ -81,7 +81,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
     <div
       /* Phones get a denser card (no min-height, tighter padding) so it fits
          without a scrollbar; sm and up keep the roomier original density. */
-      className={`w-[22.5rem] max-w-full max-h-[min(70dvh,30rem)] sm:max-h-[32rem] overflow-y-auto overscroll-contain rounded-lg border p-3.5 sm:min-h-[27rem] sm:p-5 transition-all duration-300 ${bgClass}`}
+      className={`w-90 max-w-full max-h-[min(70dvh,30rem)] sm:max-h-128 overflow-y-auto overscroll-contain rounded-lg border p-3.5 sm:min-h-108 sm:p-5 transition-all duration-300 ${bgClass}`}
     >
       {/* Header */}
       <div className={`relative pb-2 sm:pb-3 border-b ${dividerClass}`}>
@@ -98,11 +98,11 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
           <h2 className="flex items-center gap-2 pr-20 text-lg sm:text-xl font-bold text-inherit">
             <span>{marker.name}</span>
             <span
-              className="relative h-[13px] w-[13px] shrink-0"
+              className="relative h-3.25 w-3.25 shrink-0"
               aria-label="Active map marker"
             >
-              <span className="relative block h-[13px] w-[13px] rounded-full border-[2.2px] border-red-600 bg-white/95">
-                <span className="absolute top-1/2 left-1/2 h-[5px] w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600" />
+              <span className="relative block h-3.25 w-3.25 rounded-full border-[2.2px] border-red-600 bg-white/95">
+                <span className="absolute top-1/2 left-1/2 h-1.25 w-1.25 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600" />
               </span>
             </span>
           </h2>
@@ -129,11 +129,9 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.0)}
             title={`Fly to ${marker.name}`}
-              className={`p-2 rounded-md transition-colors border flex items-center justify-center cursor-pointer ${iconButtonClass}`}
+            className={`p-2 rounded-md transition-colors border flex items-center justify-center cursor-pointer ${iconButtonClass}`}
           >
-            <Navigation
-              className="w-4 h-4 text-sky-300"
-            />
+            <Navigation className="w-4 h-4 text-sky-300" />
           </button>
           {onClose && (
             <button
@@ -167,7 +165,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
           </span>
           <button
             onClick={copyCoords}
-            className="flex items-center gap-1 font-mono text-[11px] tabular-nums hover:underline cursor-pointer"
+            className="flex items-center gap-1 font-mono text-[11px] tabular-nums hover:underline cursor-pointer transition-colors"
             title="Click to copy coordinates"
           >
             <span>
@@ -193,7 +191,9 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
       </div>
 
       {/* Geographic & Regional Facts */}
-      <div className={`pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2 text-xs`}>
+      <div
+        className={`pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2 text-xs`}
+      >
         <div className="flex items-center justify-between">
           <span className={subTextClass}>State / Territory</span>
           <span className="font-medium text-right">
@@ -243,11 +243,13 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className={`mt-3 sm:mt-4 pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2`}>
+      <div
+        className={`mt-3 sm:mt-4 pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2`}
+      >
         {marker.region && onToggleStateHighlight && (
           <button
             onClick={onToggleStateHighlight}
-            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               isStateHighlighted ? primaryButtonClass : secondaryButtonClass
             }`}
           >
@@ -270,7 +272,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
           </button>
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.6)}
-            className={`px-3 py-1.5 sm:py-2 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${secondaryButtonClass}`}
+            className={`px-3 py-1.5 sm:py-2 text-xs font-medium rounded-md border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${secondaryButtonClass}`}
           >
             <Maximize2 className="w-3.5 h-3.5" />
             <span>Close Up</span>
@@ -281,7 +283,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
           <button
             onClick={onDeselect}
             title="Remove this pin from the globe"
-            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${secondaryButtonClass}`}
+            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${secondaryButtonClass}`}
           >
             <X className="w-3.5 h-3.5" />
             <span>Deselect Pin</span>

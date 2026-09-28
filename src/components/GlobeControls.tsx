@@ -359,7 +359,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           <div className="grid grid-cols-3 gap-1.5 text-xs mb-2">
             <button
               onClick={() => onSelectLocation(null)}
-              className={`px-2 py-1.5 rounded-md border text-center text-[11px] truncate transition-all cursor-pointer ${
+              className={`px-2 py-1.5 rounded-md border text-center text-[11px] truncate transition-colors cursor-pointer ${
                 !selectedLocationId ? buttonActive : buttonInactive
               }`}
               title="Clean map: No pin on the globe"
@@ -375,7 +375,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   onClick={() => {
                     onSelectLocation(isSelected ? null : loc);
                   }}
-                  className={`px-2 py-1.5 rounded-md border text-left text-[11px] truncate transition-all cursor-pointer ${
+                  className={`px-2 py-1.5 rounded-md border text-left text-[11px] truncate transition-colors cursor-pointer ${
                     isSelected ? buttonActive : buttonInactive
                   }`}
                   title={isSelected ? `Click to deselect ${loc.name}` : `Pin ${loc.name}, ${loc.region}`}
@@ -585,7 +585,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
           <div className={`flex rounded-md p-0.5 border ${tabContainerClass} mb-2 text-[10px]`}>
             <button
               onClick={() => setThemeTab('all')}
-              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all ${
+              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-colors ${
                 themeTab === 'all' ? buttonActive : tabInactiveClass
               }`}
             >
@@ -593,7 +593,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             </button>
             <button
               onClick={() => setThemeTab('dark')}
-              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
+              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-colors flex items-center justify-center gap-1 ${
                 themeTab === 'dark' ? buttonActive : tabInactiveClass
               }`}
             >
@@ -602,7 +602,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             </button>
             <button
               onClick={() => setThemeTab('light')}
-              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-all flex items-center justify-center gap-1 ${
+              className={`flex-1 py-1 font-semibold rounded text-center cursor-pointer transition-colors flex items-center justify-center gap-1 ${
                 themeTab === 'light' ? buttonActive : tabInactiveClass
               }`}
             >
@@ -621,7 +621,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 <button
                   key={t.id}
                   onClick={() => onThemeChange(t.id)}
-                  className={`px-2.5 py-1.5 rounded-md border text-left text-[11px] truncate transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-2.5 py-1.5 rounded-md border text-left text-[11px] truncate transition-colors cursor-pointer flex items-center gap-2 ${
                     isSelected ? buttonActive : buttonInactive
                   } ${!isSelected && isBound ? boundRingClass : ''}`}
                   title={`${t.name} (${t.isDark ? 'Dark Mode' : 'Light Mode'})${
@@ -665,7 +665,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             {/* State Borders */}
             <button
               onClick={onToggleStateBorders}
-              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
+              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                 showStateBorders ? buttonActive : buttonInactive
               }`}
               title="Toggle India internal state borders"
@@ -687,7 +687,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             {/* Lat/Long Grid */}
             <button
               onClick={onToggleGraticule}
-              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
+              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                 showGraticule ? buttonActive : buttonInactive
               }`}
               title="Toggle latitude and longitude graticule mesh"
@@ -712,7 +712,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             {/* Atmosphere */}
             <button
               onClick={onToggleAtmosphere}
-              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
+              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                 showAtmosphere ? buttonActive : buttonInactive
               }`}
               title="Toggle outer atmospheric corona and planetary limb glow"
@@ -737,7 +737,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             {/* Starfield */}
             <button
               onClick={onToggleStars}
-              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
+              className={`px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                 showStars ? buttonActive : buttonInactive
               }`}
               title="Toggle deep cosmic starfield background"
@@ -763,7 +763,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
             {onToggleOnlyIndia && (
               <button
                 onClick={onToggleOnlyIndia}
-                className={`col-span-2 px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-all ${
+                className={`col-span-2 px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
                   onlyIndia ? buttonActive : buttonInactive
                 }`}
                 title="Show only India sovereign landmass, omitting other world countries"

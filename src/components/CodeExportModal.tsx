@@ -284,8 +284,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
         {/* Content Body */}
         <div
-          className="flex-1 min-h-0 min-w-0 p-3 sm:p-6 overflow-y-auto space-y-5 text-sm"
-          style={{ scrollbarGutter: "stable" }}
+          className="flex-1 min-h-0 min-w-0 p-3 sm:p-6 overflow-y-auto space-y-5 text-sm scrollbar-gutter-stable"
         >
           {/* Quick Customizer Bar for Embed & Component */}
           {
@@ -597,12 +596,12 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                 style={{ height: previewScaledHeight }}
               >
                 <div
+                  className="origin-top-left"
                   style={{
                     width: previewNaturalWidthCss,
                     height: previewNaturalHeightCss,
                     transform:
                       previewScale < 1 ? `scale(${previewScale})` : undefined,
-                    transformOrigin: "top left",
                   }}
                 >
                   <div
