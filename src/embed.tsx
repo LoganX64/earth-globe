@@ -8,7 +8,11 @@ import {
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
 } from './components/EarthGlobe/themePresets';
+import { inject } from '@vercel/analytics';
 import './index.css';
+
+// Vercel Analytics — auto-tracks pageviews and custom events when hosted on Vercel
+inject();
 
 // ---------------------------------------------------------------------------
 // postMessage trust boundary
