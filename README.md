@@ -2,6 +2,8 @@
 
 An interactive 3D globe of India, drawn on a 2D canvas with the country's official Survey of India boundaries. Built for embedding: the same build serves a full customizer UI and a chrome-free iframe you can drop into any site.
 
+**Live site:** [earth-globe-nine.vercel.app](https://earth-globe-nine.vercel.app)
+
 ## Features
 
 - **Orthographic 3D globe** rendered per-frame on canvas — official state borders, J&K, Ladakh and the outer boundary
@@ -47,7 +49,7 @@ The only network call is keyless geocoding against the public OSM Nominatim serv
 `embed.html` is a standalone entrypoint with no site chrome, configured entirely through query parameters. A `postMessage` API lets a host page drive it at runtime — see [EMBED.md](EMBED.md) for the full reference.
 
 ```html
-<iframe src="https://your-domain.vercel.app/embed.html?onlyIndia=true&mode=dark"
+<iframe src="https://earth-globe-nine.vercel.app/embed.html?onlyIndia=true&mode=dark"
         width="500" height="500" style="border: none; border-radius: 16px;"></iframe>
 ```
 
