@@ -498,7 +498,7 @@ export default function App() {
           {!initialEmbed && (
             <button
               onClick={() => setIsEmbedMode(false)}
-              className={`absolute bottom-6 left-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold backdrop-blur-md shadow-xl transition-colors cursor-pointer ${
+              className={`absolute bottom-6 left-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed text-xs font-semibold backdrop-blur-md shadow-xl transition-colors cursor-pointer ${
                 isDark
                   ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
                   : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
@@ -646,10 +646,14 @@ export default function App() {
         {!isControlsOpen && (
           <button
             onClick={() => setIsControlsOpen(true)}
-            className="absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors bg-white/95 hover:bg-neutral-100 text-neutral-900 border-neutral-300 shadow-xl"
+            className={`absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors ${
+              isDark
+                ? 'bg-zinc-950/80 hover:bg-zinc-800 text-zinc-300 border-zinc-800/80'
+                : 'bg-white/95 hover:bg-neutral-100 text-neutral-900 border-neutral-300'
+            } shadow-xl`}
             title="Open Globe Customizer & Layers Menu"
           >
-            <SlidersHorizontal className="w-4 h-4 text-neutral-900" />
+            <SlidersHorizontal className={`w-4 h-4 ${isDark ? 'text-zinc-300' : 'text-neutral-900'}`} />
             <span className="text-xs font-bold">Open Customizer Menu</span>
           </button>
         )}
@@ -713,26 +717,42 @@ export default function App() {
         </div>
 
         {/* 6. Floating Zoom & Orientation HUD */}
-        <div className="absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl bg-white/90 border-neutral-200/80 text-neutral-700">
+        <div className={`absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
+          isDark
+            ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
+            : 'bg-white/90 border-neutral-200/80 text-neutral-700'
+        }`}>
           <button
             onClick={handleZoomIn}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-neutral-200 hover:text-neutral-950"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              isDark
+                ? 'hover:bg-zinc-800 hover:text-white'
+                : 'hover:bg-neutral-200 hover:text-neutral-950'
+            }`}
             title="Zoom In"
           >
             +
           </button>
-          <div className="w-5 h-px bg-neutral-200" />
+          <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
           <button
             onClick={handleZoomOut}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold hover:bg-neutral-200 hover:text-neutral-950"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              isDark
+                ? 'hover:bg-zinc-800 hover:text-white'
+                : 'hover:bg-neutral-200 hover:text-neutral-950'
+            }`}
             title="Zoom Out"
           >
             −
           </button>
-          <div className="w-5 h-px bg-neutral-200" />
+          <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
           <button
             onClick={handleResetView}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs hover:bg-neutral-200 hover:text-neutral-950"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs ${
+              isDark
+                ? 'hover:bg-zinc-800 hover:text-white'
+                : 'hover:bg-neutral-200 hover:text-neutral-950'
+            }`}
             title="Reset to India Center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -740,7 +760,7 @@ export default function App() {
         </div>
 
         {/* 7. Bottom Status Bar & Shortcuts Guide */}
-        <div className="absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none text-neutral-600 font-medium">
+        <div className={`absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none font-medium ${isDark ? 'text-zinc-500' : 'text-neutral-600'}`}>
           <div className="flex items-center gap-3">
             <span>SURVEY OF INDIA CARTOGRAPHY</span>
             <span>·</span>
