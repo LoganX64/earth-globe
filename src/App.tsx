@@ -866,6 +866,10 @@ export default function App() {
         darkTheme={darkTheme}
         onlyIndia={onlyIndia}
         isDark={isDark}
+        showStars={showStars}
+        showGraticule={showGraticule}
+        showAtmosphere={showAtmosphere}
+        showStateBorders={showStateBorders}
       />
     </div>
   );

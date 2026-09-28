@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   X,
   Copy,
@@ -27,6 +27,10 @@ interface CodeExportModalProps {
   darkTheme?: string;
   onlyIndia?: boolean;
   isDark?: boolean;
+  showStars?: boolean;
+  showGraticule?: boolean;
+  showAtmosphere?: boolean;
+  showStateBorders?: boolean;
 }
 
 export const CodeExportModal: React.FC<CodeExportModalProps> = ({
@@ -41,6 +45,10 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   darkTheme = DEFAULT_DARK_THEME_ID,
   onlyIndia = true,
   isDark = false,
+  showStars = true,
+  showGraticule = true,
+  showAtmosphere = true,
+  showStateBorders = true,
 }) => {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [embedSize, setEmbedSize] = useState<"500" | "400" | "600" | "100%">(
@@ -55,6 +63,49 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   const [embedDrag, setEmbedDrag] = useState<boolean>(true);
   const [embedZoom, setEmbedZoom] = useState<boolean>(true);
   const [embedRotate, setEmbedRotate] = useState<boolean>(autoRotate);
+  // Map layers — seeded from the globe currently on screen so the preview matches
+  // the main app, then freely overridable per embed
+  const [embedStars, setEmbedStars] = useState<boolean>(showStars);
+  const [embedGrid, setEmbedGrid] = useState<boolean>(showGraticule);
+  const [embedAtmosphere, setEmbedAtmosphere] = useState<boolean>(showAtmosphere);
+  const [embedBorders, setEmbedBorders] = useState<boolean>(showStateBorders);
+
+  // Re-sync layers from the globe whenever the dialog opens, so previewing an
+  // embed after toggling Starfield in the app reflects the change
+  useEffect(() => {
+    if (!isOpen) return;
+    setEmbedStars(showStars);
+    setEmbedGrid(showGraticule);
+    setEmbedAtmosphere(showAtmosphere);
+    setEmbedBorders(showStateBorders);
+  }, [isOpen, showStars, showGraticule, showAtmosphere, showStateBorders]);
+
+  const layerToggles = [
+    {
+      key: "stars",
+      label: "Starfield",
+      value: embedStars,
+      toggle: () => setEmbedStars((prev) => !prev),
+    },
+    {
+      key: "grid",
+      label: "Grid",
+      value: embedGrid,
+      toggle: () => setEmbedGrid((prev) => !prev),
+    },
+    {
+      key: "atmosphere",
+      label: "Atmosphere",
+      value: embedAtmosphere,
+      toggle: () => setEmbedAtmosphere((prev) => !prev),
+    },
+    {
+      key: "borders",
+      label: "Borders",
+      value: embedBorders,
+      toggle: () => setEmbedBorders((prev) => !prev),
+    },
+  ];
 
   if (!isOpen) return null;
 
@@ -81,7 +132,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
   const baseSrc = `${currentHost}/embed.html?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}&lightTheme=${lightTheme}&darkTheme=${darkTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
-  }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
+  }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
   // Shared by both tabs — mirrors the component's current config
   const embedSrc = `${baseSrc}${
@@ -327,6 +378,42 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                       Off
                     </span>
                   </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={
+                      isDark
+                        ? "text-neutral-200 font-semibold"
+                        : "text-neutral-800 font-semibold"
+                    }
+                  >
+                    Layers:
+                  </span>
+                  {layerToggles.map((layer) => (
+                    <button
+                      key={layer.key}
+                      onClick={layer.toggle}
+                      className={`px-2.5 py-1 rounded-md border border-dashed text-[11px] cursor-pointer transition-colors grid ${
+                        layer.value
+                          ? "bg-blue-600 text-white border-blue-500"
+                          : isDark
+                            ? "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600"
+                            : "bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300"
+                      }`}
+                    >
+                      <span
+                        className={`col-start-1 row-start-1 whitespace-nowrap ${layer.value ? "" : "invisible"}`}
+                      >
+                        ✓ {layer.label}
+                      </span>
+                      <span
+                        className={`col-start-1 row-start-1 whitespace-nowrap ${layer.value ? "invisible" : ""}`}
+                      >
+                        {layer.label}
+                      </span>
+                    </button>
+                  ))}
                 </div>
 
               </div>
