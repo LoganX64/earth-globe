@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, MapPin, X, Navigation } from 'lucide-react';
+import { Search, Loader2, MapPin, X } from 'lucide-react';
 import { searchLocation, GeocodeResult } from '../services/geocoding';
 import { GlobeMarker } from './EarthGlobe/types';
 
@@ -10,7 +10,6 @@ interface LocationSearchBarProps {
   placeholder?: string;
   isDark?: boolean;
   className?: string;
-  compact?: boolean;
   variant?: 'default' | 'glass';
 }
 
@@ -30,7 +29,6 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   placeholder = 'Search place (e.g. Ulhasnagar, MH)...',
   isDark = false,
   className = '',
-  compact = false,
   variant = 'default',
 }) => {
   const [query, setQuery] = useState('');

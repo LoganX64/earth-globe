@@ -11,7 +11,6 @@ import {
   Globe as GlobeIcon,
   Palette,
   MapPin,
-  SlidersHorizontal,
   Plus,
   Compass,
   ArrowRightLeft,
@@ -58,7 +57,6 @@ interface GlobeControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
-  onFlyToPreset: (name: string, lat: number, lng: number, zoom?: number) => void;
   onClose?: () => void;
   onToggleDarkMode?: () => void;
   isDark?: boolean;
@@ -94,7 +92,6 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   onZoomIn,
   onZoomOut,
   onReset,
-  onFlyToPreset,
   onClose,
   onToggleDarkMode,
   isDark = false,

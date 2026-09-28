@@ -6,7 +6,7 @@
  * 100% Client-side React + Vite SPA (Zero backend needed, Vercel Free Tier ready).
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   EarthGlobe,
   EarthGlobeRef,
@@ -28,9 +28,7 @@ import { Navbar } from './components/Navbar';
 import { CodeExportModal } from './components/CodeExportModal';
 import {
   SlidersHorizontal,
-  MapPin,
   RotateCcw,
-  Sparkles,
   Maximize2,
   X,
 } from 'lucide-react';
@@ -700,9 +698,6 @@ export default function App() {
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               onReset={handleResetView}
-              onFlyToPreset={(_name, lat, lng, zoom = 1.6) =>
-                globeRef.current?.flyTo(lat, lng, zoom)
-              }
               onClose={() => setIsControlsOpen(false)}
               onToggleDarkMode={handleToggleDarkMode}
               mapThemeIsDark={isDark}

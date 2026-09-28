@@ -4,7 +4,6 @@ import {
   Navigation,
   Compass,
   Clock,
-  Building2,
   Copy,
   Check,
   Maximize2,

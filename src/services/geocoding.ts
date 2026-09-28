@@ -1,5 +1,4 @@
 import { GlobeMarker } from '../components/EarthGlobe/types';
-import { POPULAR_INDIAN_LOCATIONS } from '../data/defaultLocations';
 
 export interface GeocodeResult {
   id: string;

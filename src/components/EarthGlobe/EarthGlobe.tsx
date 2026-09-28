@@ -1068,7 +1068,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       }
     };
 
-    const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const handleClick = () => {
       if (hoveredMarkerRef.current) {
         onMarkerClick?.(hoveredMarkerRef.current);
       } else if (hoveredStateRef.current) {

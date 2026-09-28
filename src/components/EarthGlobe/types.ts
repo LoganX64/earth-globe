@@ -26,8 +26,6 @@ export interface GlobeThemeColors {
   highlightLand: string;
   highlightLandBorder: string;
   highlightGlow: string;
-  graticule: string;
-  equator: string;
   atmosphereInner: string;
   atmosphereOuter: string;
   markerPrimary: string;
@@ -35,7 +33,6 @@ export interface GlobeThemeColors {
   markerPulse: string;
   background: string;
   isDark: boolean;
-  uiAccent?: string;
 }
 
 export interface EarthGlobeProps {
