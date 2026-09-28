@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         className={`relative z-40 flex items-center justify-between px-4 sm:px-6 py-2.5 border-b transition-colors duration-300 gap-3 ${
           isDark
             ? "border-white/15 bg-slate-950/78 text-slate-100 backdrop-blur-2xl shadow-[0_10px_40px_rgba(15,23,42,0.22)]"
-            : "border-neutral-200/80 bg-gradient-to-b from-white/70 to-white/40 text-neutral-900 backdrop-blur-xl"
+            : "border-neutral-200/80 bg-linear-to-b from-white/70 to-white/40 text-neutral-900 backdrop-blur-xl"
         }`}
       >
         {/* Left Section: Wordmark Brand */}
@@ -85,8 +85,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? glassPrimaryDashed
                   : "rounded-lg border border-dashed bg-blue-600 text-white border-blue-600"
                 : isDark
-                ? glassSecondaryDashed
-                : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
+                  ? glassSecondaryDashed
+                  : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
             aria-label="Toggle Globe Customizer and Cartography HUD"
@@ -95,14 +95,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="hidden sm:inline">Menu &amp; Controls</span>
             <span className="sm:hidden">Menu</span>
             <span
-              className={`text-[9px] px-1 py-0.5 leading-none rounded font-mono font-bold min-w-[calc(3ch_+_0.5rem)] text-center inline-block ${
+              className={`text-[9px] px-1 py-0.5 leading-none rounded font-mono font-bold min-w-[calc(3ch+0.5rem)] text-center inline-block ${
                 isControlsOpen
                   ? isDark
                     ? "bg-slate-950/45 text-slate-950"
                     : "bg-blue-800 text-white"
                   : isDark
-                  ? "bg-white/[0.08] text-slate-400"
-                  : "bg-neutral-200 text-neutral-700"
+                    ? "bg-white/8 text-slate-400"
+                    : "bg-neutral-200 text-neutral-700"
               }`}
             >
               {isControlsOpen ? "ON" : "OFF"}
