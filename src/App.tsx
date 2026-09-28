@@ -24,7 +24,7 @@ import {
 } from './data/defaultLocations';
 import { LocationDetailsCard } from './components/MumbaiDetailsCard';
 import { GlobeControls } from './components/GlobeControls';
-import { TopBar } from './components/TopBar';
+import { Navbar } from './components/Navbar';
 import { CodeExportModal } from './components/CodeExportModal';
 import {
   SlidersHorizontal,
@@ -605,7 +605,7 @@ export default function App() {
   return (
     <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
       {/* 1. Header Navigation Bar - light chrome, or the dialogs' dark glass in dark mode */}
-      <TopBar
+      <Navbar
         activeMarker={activeMarker}
         onFocusActiveLocation={() => {
           if (activeMarker) {

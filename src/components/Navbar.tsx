@@ -12,7 +12,7 @@ import {
 import { GlobeMarker } from "./EarthGlobe/types";
 import { LocationSearchBar } from "./LocationSearchBar";
 
-interface TopBarProps {
+interface NavbarProps {
   activeMarker: GlobeMarker | null;
   onFocusActiveLocation: () => void;
   onDeselectLocation: () => void;
@@ -26,7 +26,7 @@ interface TopBarProps {
   mapThemeIsDark?: boolean;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({
+export const Navbar: React.FC<NavbarProps> = ({
   activeMarker,
   onFocusActiveLocation,
   onDeselectLocation,
@@ -275,4 +275,4 @@ export const TopBar: React.FC<TopBarProps> = ({
   );
 };
 
-export default TopBar;
+export default Navbar;

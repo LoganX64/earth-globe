@@ -68,7 +68,7 @@ src/
 ├── App.tsx                     # App shell, routing of state, keyboard shortcuts
 ├── components/
 │   ├── EarthGlobe/             # Canvas globe renderer (projection, markers, themes)
-│   ├── TopBar.tsx              # Header, search, controls toggle
+│   ├── Navbar.tsx              # Header, search, controls toggle
 │   ├── GlobeControls.tsx       # Customizer HUD (layers, rotation, states, pins)
 │   ├── LocationSearchBar.tsx   # Search input + Nominatim client
 │   ├── MumbaiDetailsCard.tsx   # Active location details card
