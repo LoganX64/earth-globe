@@ -22,7 +22,7 @@ import {
   ULHASNAGAR_MARKER,
   POPULAR_INDIAN_LOCATIONS,
 } from './data/defaultLocations';
-import { LocationDetailsCard } from './components/MumbaiDetailsCard';
+import { CityDetailsCard } from './components/CityDetailsCard';
 import { GlobeControls } from './components/GlobeControls';
 import { Navbar } from './components/Navbar';
 import { CodeExportModal } from './components/CodeExportModal';
@@ -36,6 +36,11 @@ import {
 const LAST_LOCATION_STORAGE_KEY = 'bharat-atlas-active-location';
 const HIGHLIGHT_STATE_STORAGE_KEY = 'bharat-atlas-highlight-state';
 const MAP_SETTINGS_STORAGE_KEY = 'bharat-atlas-map-settings';
+
+// Matches Tailwind's `sm` breakpoint. Below it the customizer and the location
+// card each span the full width, so they cannot coexist without one hiding the
+// other; at sm and up they are side-by-side and both may stay open.
+const PANEL_COLLISION_MQ = '(min-width: 40rem)';
 
 type SavedMapSettings = {
   theme?: string;
@@ -258,6 +263,39 @@ export default function App() {
   );
   const [isCodeModalOpen, setIsCodeModalOpen] = useState<boolean>(false);
 
+  // Tracks the sm breakpoint so the two full-width panels can be made mutually
+  // exclusive on phones without duplicating the breakpoint in JS.
+  const [isCompactLayout, setIsCompactLayout] = useState<boolean>(
+    () => typeof window !== 'undefined' && window.matchMedia(PANEL_COLLISION_MQ).matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(PANEL_COLLISION_MQ);
+    const onChange = (e: MediaQueryListEvent) => setIsCompactLayout(e.matches);
+    setIsCompactLayout(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Opening one panel on a phone dismisses the other — otherwise the location
+  // card sits completely behind the customizer, since both are full width.
+  const openDetailsPanel = useCallback(() => {
+    if (isCompactLayout) setIsControlsOpen(false);
+    setIsDetailsOpen(true);
+  }, [isCompactLayout]);
+
+  const openControlsPanel = useCallback(() => {
+    if (isCompactLayout) setIsDetailsOpen(false);
+    setIsControlsOpen(true);
+  }, [isCompactLayout]);
+
+  // The exclusion above only runs when a panel is *opened*, so a reload that
+  // restores a previously selected city would still mount both panels and let
+  // the customizer cover the card. This also covers crossing the breakpoint.
+  useEffect(() => {
+    if (isCompactLayout && isDetailsOpen && activeMarker) setIsControlsOpen(false);
+  }, [isCompactLayout, isDetailsOpen, activeMarker]);
+
   // Remember the selected location across refreshes (deselect clears it)
   useEffect(() => {
     if (activeMarker) {
@@ -372,10 +410,10 @@ export default function App() {
     // Re-clicking the active pin reopens its panel. Removing the pin is an
     // explicit action (the card's Deselect button, the HUD, or the X key).
     setActiveMarker((current) => (current?.id === marker.id ? current : marker));
-    setIsDetailsOpen(true);
+    openDetailsPanel();
 
     globeRef.current?.flyTo(marker.lat, marker.lng, 1.8);
-  }, []);
+  }, [openDetailsPanel]);
 
   const handleHighlightStateChange = useCallback((stateName: string | null) => {
     setHighlightState(stateName);
@@ -387,18 +425,18 @@ export default function App() {
   const handleSearchSelectLocation = useCallback(
     (marker: GlobeMarker, stateName?: string) => {
       setActiveMarker(marker);
-      setIsDetailsOpen(true);
+      openDetailsPanel();
       if (stateName) {
         setHighlightState(stateName);
       }
       globeRef.current?.flyTo(marker.lat, marker.lng, 2.2);
     },
-    []
+    [openDetailsPanel]
   );
 
   const handleAddCustomLocation = (marker: GlobeMarker) => {
     setActiveMarker(marker);
-    setIsDetailsOpen(true);
+    openDetailsPanel();
     globeRef.current?.flyTo(marker.lat, marker.lng, 2.0);
   };
 
@@ -442,7 +480,11 @@ export default function App() {
       } else if (e.key === 'r' || e.key === 'R') {
         handleResetView();
       } else if (e.key === 'c' || e.key === 'C') {
-        setIsControlsOpen((prev) => !prev);
+        if (isControlsOpen) {
+          setIsControlsOpen(false);
+        } else {
+          openControlsPanel();
+        }
       } else if (e.key === 't' || e.key === 'T') {
         handleToggleDarkMode();
       }
@@ -450,7 +492,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSelectLocation, isEmbedMode, handleToggleDarkMode]);
+  }, [handleSelectLocation, isEmbedMode, handleToggleDarkMode, isControlsOpen, openControlsPanel]);
 
   // Sync selections to embed view via postMessage
   useEffect(() => {
@@ -490,7 +532,7 @@ export default function App() {
 
     return (
       <div
-        className="w-screen h-screen flex items-center justify-center overflow-hidden relative transition-colors duration-500"
+        className="w-full h-[100dvh] flex items-center justify-center overflow-hidden relative transition-colors duration-500"
         style={{
           backgroundColor: currentThemeConfig.background,
           overscrollBehavior: 'contain',
@@ -500,8 +542,8 @@ export default function App() {
           style={{
             width: formattedWidth,
             height: formattedHeight,
-            maxWidth: '100vw',
-            maxHeight: '100vh',
+            maxWidth: '100%',
+            maxHeight: '100%',
             position: 'relative',
           }}
           className="flex items-center justify-center overflow-hidden"
@@ -531,29 +573,32 @@ export default function App() {
           {/* Floating zoom controls */}
           {embedZoomEnabled && (
             <div
-              className={`absolute bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
-                isDark ? 'bg-zinc-950/80 border-zinc-800/80' : 'bg-white/85 border-zinc-200/80'
+              className={`hud-bottom absolute right-2 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl sm:right-6 ${
+                /* Same glass surface as the dashboard zoom HUD and the customizer. */
+                isDark
+                  ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
+                  : 'bg-white/85 border-neutral-200/80 text-neutral-700'
               }`}
             >
               <button
                 onClick={handleZoomIn}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+                className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                   isDark
-                    ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                    : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                    ? 'hover:bg-zinc-800 hover:text-white'
+                    : 'hover:bg-neutral-200 hover:text-neutral-950'
                 }`}
                 title="Zoom In"
                 aria-label="Zoom In"
               >
                 +
               </button>
-              <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+              <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
               <button
                 onClick={handleZoomOut}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+                className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                   isDark
-                    ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                    : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                    ? 'hover:bg-zinc-800 hover:text-white'
+                    : 'hover:bg-neutral-200 hover:text-neutral-950'
                 }`}
                 title="Zoom Out"
                 aria-label="Zoom Out"
@@ -591,7 +636,7 @@ export default function App() {
   // STANDARD INTERACTIVE APPLICATION DASHBOARD
   // =========================================================================
   return (
-    <div className="relative w-screen h-screen overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
+    <div       className="relative w-full h-[100dvh] overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
       {/* 1. Header Navigation Bar - light chrome, or the dialogs' dark glass in dark mode */}
       <Navbar
         activeMarker={activeMarker}
@@ -605,7 +650,13 @@ export default function App() {
         onDeselectLocation={() => handleSelectLocation(null)}
         onSearchSelectLocation={handleSearchSelectLocation}
         onOpenCode={() => setIsCodeModalOpen(true)}
-        onToggleControls={() => setIsControlsOpen((prev) => !prev)}
+        onToggleControls={() => {
+          if (isControlsOpen) {
+            setIsControlsOpen(false);
+          } else {
+            openControlsPanel();
+          }
+        }}
         isControlsOpen={isControlsOpen}
         onToggleEmbedMode={() => setIsEmbedMode(true)}
         onToggleDarkMode={handleToggleDarkMode}
@@ -643,10 +694,16 @@ export default function App() {
           className="w-full h-full"
         />
 
-        {/* 3. Floating Left Panel: Active Location Spotlight Card */}
+        {/* 3. Floating Left Panel: Active Location Spotlight Card.
+            Stacking tiers used by every floating overlay in the app:
+              z-10 status bar · z-20 bottom HUDs · z-30 customizer (sm+)
+              z-40 customizer (mobile) / city card (sm+)
+              z-45 city card (mobile) — must outrank the customizer, because at
+              640-744px the "desktop" layout still overlaps the 360px card with
+              the 384px panel. Stays under the navbar drawer (z-50). */}
         {isDetailsOpen && activeMarker && (
-          <div className="absolute top-6 left-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-left-4 duration-300">
-            <LocationDetailsCard
+          <div className="absolute inset-x-2 top-2 z-[45] pointer-events-auto transition-all animate-in fade-in slide-in-from-left-4 duration-300 sm:inset-x-auto sm:left-6 sm:top-6 sm:z-40">
+            <CityDetailsCard
               marker={activeMarker}
               onFlyTo={(lat, lng, zoom) => globeRef.current?.flyTo(lat, lng, zoom)}
               onClose={() => setIsDetailsOpen(false)}
@@ -672,9 +729,14 @@ export default function App() {
           </div>
         )}
 
-        {/* 4. Floating Right Panel: Globe Customizer & Controls HUD */}
+        {/* 4. Floating Right Panel: Globe Customizer & Controls HUD.
+            Below sm the panel is inset from BOTH edges: the card is w-full, so
+            anchoring it to right-6 alone used to push it (and its close button)
+            off the right edge on any viewport narrower than 408px. z-40 on
+            phones so it also sits above the bottom zoom/quick-action HUDs, which
+            share its width and were intercepting clicks on the layer toggles. */}
         {isControlsOpen && (
-          <div className="absolute top-6 right-6 z-30 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="absolute inset-x-2 top-2 z-40 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300 sm:inset-x-auto sm:top-6 sm:right-6 sm:z-30">
             <GlobeControls
               currentTheme={theme}
               onThemeChange={handleThemeChange}
@@ -712,11 +774,13 @@ export default function App() {
           </div>
         )}
 
-        {/* Floating Reopen Controls Button when HUD is collapsed */}
-        {!isControlsOpen && (
+        {/* Floating Reopen Controls Button — only when the customizer is closed,
+            and not while the city card owns the same top-right corner on a
+            phone (it was covering the card's close X). */}
+        {!isControlsOpen && !(isCompactLayout && isDetailsOpen && activeMarker) && (
           <button
-            onClick={() => setIsControlsOpen(true)}
-            className={`absolute top-4 right-6 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors ${
+            onClick={openControlsPanel}
+            className={`absolute top-2 right-2 z-30 px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-2xl flex items-center gap-2 cursor-pointer transition-colors sm:top-4 sm:right-6 ${
               isDark
                 ? 'bg-zinc-950/80 hover:bg-zinc-800 text-zinc-300 border-zinc-800/80'
                 : 'bg-white/95 hover:bg-neutral-100 text-neutral-900 border-neutral-300'
@@ -729,12 +793,12 @@ export default function App() {
         )}
 
         {/* 5. Floating Quick Actions Buttons */}
-        <div className="absolute bottom-10 left-6 z-30 flex items-center gap-2 flex-wrap max-w-[85vw]">
+        <div className="hud-bottom absolute left-2 z-20 flex items-center gap-2 flex-wrap max-w-[calc(100vw-4.5rem)] sm:left-6 sm:max-w-[85vw]">
           {/* Active location indicator / Deselect button */}
           {activeMarker ? (
             <button
               onClick={() => handleSelectLocation(null)}
-              className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-colors cursor-pointer inline-grid leading-none ${
+              className={`h-11 sm:h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-colors cursor-pointer inline-grid leading-none ${
                 isDark
                   ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
                   : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
@@ -753,7 +817,7 @@ export default function App() {
             </button>
           ) : (
             <div
-              className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md inline-grid select-none leading-none ${
+              className={`h-11 sm:h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md inline-grid select-none leading-none ${
                 isDark
                   ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-400'
                   : 'bg-white/85 border-zinc-200/80 text-zinc-600'
@@ -774,7 +838,7 @@ export default function App() {
           {/* Embed / Pure Mode Button */}
           <button
             onClick={() => setIsEmbedMode(true)}
-            className={`h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-all cursor-pointer inline-flex items-center gap-1.5 leading-none ${
+            className={`h-11 sm:h-7 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dashed backdrop-blur-md transition-all cursor-pointer inline-flex items-center gap-1.5 leading-none ${
               isDark
                 ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800 hover:text-white'
                 : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
@@ -787,14 +851,16 @@ export default function App() {
         </div>
 
         {/* 6. Floating Zoom & Orientation HUD */}
-        <div className={`absolute bottom-10 right-6 z-30 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
+        <div className={`hud-bottom absolute right-2 z-20 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl sm:right-6 ${
           isDark
             ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
-            : 'bg-white/90 border-neutral-200/80 text-neutral-700'
+            : 'bg-white/85 border-neutral-200/80 text-neutral-700'
         }`}>
+          {/* 36px on phones to keep the HUD compact; 44px is the ideal touch
+              target, so these stay slightly under it on small screens. */}
           <button
             onClick={handleZoomIn}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+            className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
               isDark
                 ? 'hover:bg-zinc-800 hover:text-white'
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
@@ -807,7 +873,7 @@ export default function App() {
           <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
           <button
             onClick={handleZoomOut}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+            className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
               isDark
                 ? 'hover:bg-zinc-800 hover:text-white'
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
@@ -820,7 +886,7 @@ export default function App() {
           <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
           <button
             onClick={handleResetView}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs ${
+            className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-xs ${
               isDark
                 ? 'hover:bg-zinc-800 hover:text-white'
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
@@ -833,15 +899,17 @@ export default function App() {
         </div>
 
         {/* 7. Bottom Status Bar & Shortcuts Guide */}
-        <div className={`absolute bottom-2 left-6 right-6 z-20 flex items-center justify-between text-[11px] font-mono pointer-events-none font-medium ${isDark ? 'text-zinc-500' : 'text-neutral-600'}`}>
-          <div className="flex items-center gap-3">
-            <span>SURVEY OF INDIA CARTOGRAPHY</span>
-            <span>·</span>
-            <span>{onlyIndia ? 'MODE: ONLY INDIA (ISOLATED)' : 'MODE: GLOBAL'}</span>
-            <span>·</span>
-            <span>PROJECTION: ORTHOGRAPHIC 3D</span>
-            <span>·</span>
-            <span>MAP: {currentThemeConfig.name.toUpperCase()}</span>
+        <div className={`status-bottom absolute left-2 right-2 z-10 flex items-center justify-between gap-3 text-[11px] font-mono pointer-events-none font-medium sm:left-6 sm:right-6 ${isDark ? 'text-zinc-500' : 'text-neutral-600'}`}>
+          {/* Trims rather than overflowing: the full row needs ~450px, which a
+              phone does not have. */}
+          <div className="flex min-w-0 items-center gap-3 overflow-hidden whitespace-nowrap">
+            <span className="shrink-0">SURVEY OF INDIA CARTOGRAPHY</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="truncate">{onlyIndia ? 'MODE: ONLY INDIA (ISOLATED)' : 'MODE: GLOBAL'}</span>
+            <span className="hidden md:inline">·</span>
+            <span className="hidden md:inline">PROJECTION: ORTHOGRAPHIC 3D</span>
+            <span className="hidden md:inline">·</span>
+            <span className="hidden md:inline">MAP: {currentThemeConfig.name.toUpperCase()}</span>
           </div>
           <div className="hidden lg:flex items-center gap-2">
             <span>[SPACE] Pause</span>

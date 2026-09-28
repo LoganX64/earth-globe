@@ -212,6 +212,16 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     const velocityRef = useRef<[number, number]>([0, 0]);
     const lastDragTimeRef = useRef<number>(0);
 
+    // Multi-touch (pinch) tracking. Pointer Events already cover touch, so a
+    // second concurrent pointer is all the signal we need — no touch listeners
+    // and no browser-specific gesture events.
+    const activePointersRef = useRef<Map<number, [number, number]>>(new Map());
+    const pinchStartRef = useRef<{ distance: number; zoom: number } | null>(null);
+    // Browsers still fire a click after a two-finger gesture. Without this the
+    // end of a pinch would select whatever marker or state happens to be under
+    // the fingers.
+    const pinchEndedAtRef = useRef<number>(0);
+
     // Animation / Fly-To interpolation state
     const animationRef = useRef<{
       startTime: number;
@@ -977,8 +987,36 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       return () => cancelAnimationFrame(animationFrameId);
     }, [dimensions]);
 
+    // Distance between the first two tracked pointers, or null when fewer than
+    // two are down.
+    const getPinchDistance = (): number | null => {
+      const points = Array.from(activePointersRef.current.values());
+      if (points.length < 2) return null;
+      const [a, b] = points;
+      return Math.hypot(b[0] - a[0], b[1] - a[1]);
+    };
+
     // Pointer Drag Handlers
     const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      activePointersRef.current.set(e.pointerId, [e.clientX, e.clientY]);
+
+      // A second finger means pinch, not drag. Record the gesture's starting
+      // distance and zoom so subsequent moves can scale relatively. When zoom
+      // is disabled the extra finger is simply ignored rather than being
+      // mistaken for a second drag.
+      if (activePointersRef.current.size >= 2) {
+        if (enableZoom) {
+          const distance = getPinchDistance();
+          if (distance && distance > 0) {
+            pinchStartRef.current = { distance, zoom: zoomRef.current };
+          }
+        }
+        // Stop the drag inertia fighting the pinch
+        isDraggingRef.current = false;
+        velocityRef.current = [0, 0];
+        return;
+      }
+
       if (!enableDrag) return;
       isDraggingRef.current = true;
       lastMousePosRef.current = [e.clientX, e.clientY];
@@ -993,6 +1031,24 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+
+      // Pinch path runs before anything else — during a pinch the first finger
+      // is also moving, and it must not be treated as a drag.
+      if (activePointersRef.current.has(e.pointerId)) {
+        activePointersRef.current.set(e.pointerId, [e.clientX, e.clientY]);
+      }
+      const pinchStart = pinchStartRef.current;
+      if (pinchStart && activePointersRef.current.size >= 2) {
+        const distance = getPinchDistance();
+        if (distance && distance > 0) {
+          const scale = distance / pinchStart.distance;
+          zoomRef.current = Math.min(
+            maxZoom,
+            Math.max(minZoom, pinchStart.zoom * scale)
+          );
+        }
+        return;
+      }
 
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -1103,6 +1159,25 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     };
 
     const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      activePointersRef.current.delete(e.pointerId);
+
+      // Below two pointers the pinch gesture is over. Re-seed the remaining
+      // finger as a fresh drag origin so lifting one finger mid-gesture does not
+      // snap the globe when the other keeps moving.
+      if (pinchStartRef.current) {
+        pinchStartRef.current = null;
+        pinchEndedAtRef.current = performance.now();
+        isDraggingRef.current = false;
+        const remaining = Array.from(activePointersRef.current.entries());
+        if (remaining.length === 1) {
+          lastMousePosRef.current = remaining[0][1];
+          velocityRef.current = [0, 0];
+          lastDragTimeRef.current = performance.now();
+          if (enableDrag) isDraggingRef.current = true;
+        }
+        return;
+      }
+
       if (!isDraggingRef.current) return;
       isDraggingRef.current = false;
       try {
@@ -1113,6 +1188,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     };
 
     const handleClick = () => {
+      // Swallow the click the browser synthesises at the end of a pinch
+      if (performance.now() - pinchEndedAtRef.current < 350) return;
       if (hoveredMarkerRef.current) {
         onMarkerClick?.(hoveredMarkerRef.current);
       } else if (hoveredStateRef.current) {

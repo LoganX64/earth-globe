@@ -282,7 +282,7 @@ function EmbedApp() {
 
   return (
     <div
-      className="w-screen h-screen flex items-center justify-center overflow-hidden relative transition-colors duration-500"
+      className="w-full h-[100dvh] flex items-center justify-center overflow-hidden relative transition-colors duration-500"
       style={{
         backgroundColor: currentThemeConfig.background,
         overscrollBehavior: 'contain',
@@ -292,8 +292,8 @@ function EmbedApp() {
         style={{
           width: formattedWidth,
           height: formattedHeight,
-          maxWidth: '100vw',
-          maxHeight: '100vh',
+          maxWidth: '100%',
+          maxHeight: '100%',
           position: 'relative',
         }}
         className="flex items-center justify-center overflow-hidden"
@@ -322,29 +322,32 @@ function EmbedApp() {
 
         {embedZoomButtonsEnabled && (
           <div
-            className={`absolute bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
-              isDark ? 'bg-zinc-950/80 border-zinc-800/80' : 'bg-white/85 border-zinc-200/80'
+            className={`hud-bottom absolute right-2 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl sm:right-6 ${
+              /* Same glass surface as the app's floating HUD and customizer. */
+              isDark
+                ? 'bg-zinc-950/80 border-zinc-800/80 text-zinc-300'
+                : 'bg-white/85 border-neutral-200/80 text-neutral-700'
             }`}
           >
             <button
               onClick={handleZoomIn}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                 isDark
-                  ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                  : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                  ? 'hover:bg-zinc-800 hover:text-white'
+                  : 'hover:bg-neutral-200 hover:text-neutral-950'
               }`}
               title="Zoom In"
               aria-label="Zoom In"
             >
               +
             </button>
-            <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+            <div className={`w-5 h-px ${isDark ? 'bg-zinc-800' : 'bg-neutral-200'}`} />
             <button
               onClick={handleZoomOut}
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
+              className={`w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer text-base font-bold ${
                 isDark
-                  ? 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                  : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
+                  ? 'hover:bg-zinc-800 hover:text-white'
+                  : 'hover:bg-neutral-200 hover:text-neutral-950'
               }`}
               title="Zoom Out"
               aria-label="Zoom Out"

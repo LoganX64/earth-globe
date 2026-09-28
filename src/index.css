@@ -45,6 +45,27 @@ html {
   color-scheme: light;
 }
 
+/* Floating panels are positioned with fixed insets (left-2, bottom-2, …), so on
+   notched devices they must be pushed clear of the notch and home indicator.
+   Requires viewport-fit=cover in the viewport meta, otherwise these are all 0. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Bottom-anchored overlays must clear the iOS home indicator, which extends
+   into the layout viewport once viewport-fit=cover is set. These reproduce the
+   Tailwind bottom-10 / bottom-2 insets plus the device inset. */
+.hud-bottom {
+  bottom: calc(var(--safe-bottom) + 2.5rem);
+}
+
+.status-bottom {
+  bottom: calc(var(--safe-bottom) + 0.5rem);
+}
+
 /* Buttons must keep a fixed size/shape on hover, active and focus.
    Written OUTSIDE @layer on purpose: unlayered rules beat Tailwind's layered
    utilities, so no `transition-all` on a button can animate width/height/

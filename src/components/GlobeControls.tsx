@@ -175,7 +175,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
 
   return (
     <div
-      className={`rounded-lg border transition-all max-w-sm w-full max-h-[85vh] flex flex-col overflow-hidden ${containerClass}`}
+      className={`rounded-lg border transition-all max-w-sm w-full max-h-[85dvh] flex flex-col overflow-hidden ${containerClass}`}
     >
       {/* Title & Quick Zoom (fixed header) */}
       <div className={`flex items-center justify-between shrink-0 px-4 pt-4 pb-3 border-b ${dividerClass} ${headerStripClass}`}>

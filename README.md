@@ -93,7 +93,7 @@ src/
 │   ├── Navbar.tsx              # Header, search, controls toggle
 │   ├── GlobeControls.tsx       # Customizer HUD (layers, rotation, states, pins)
 │   ├── LocationSearchBar.tsx   # Search input + Nominatim client
-│   ├── MumbaiDetailsCard.tsx   # Active location details card
+│   ├── CityDetailsCard.tsx     # Active location details card
 │   └── CodeExportModal.tsx     # Live embed preview + export helper
 ├── data/
 │   ├── defaultLocations.ts     # Cities, states, marker presets

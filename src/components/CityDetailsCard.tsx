@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 
-interface LocationDetailsCardProps {
+interface CityDetailsCardProps {
   marker: GlobeMarker;
   onFlyTo: (lat: number, lng: number, zoom?: number) => void;
   /** Hide the card but leave the pin on the globe */
@@ -23,7 +23,7 @@ interface LocationDetailsCardProps {
   isDark?: boolean;
 }
 
-export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
+export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
   marker,
   onFlyTo,
   onClose,
@@ -79,10 +79,12 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
 
   return (
     <div
-      className={`w-[22.5rem] max-w-[calc(100vw-3rem)] min-h-[27rem] rounded-lg border p-5 transition-all duration-300 ${bgClass}`}
+      /* Phones get a denser card (no min-height, tighter padding) so it fits
+         without a scrollbar; sm and up keep the roomier original density. */
+      className={`w-[22.5rem] max-w-full max-h-[min(70dvh,30rem)] sm:max-h-[32rem] overflow-y-auto overscroll-contain rounded-lg border p-3.5 sm:min-h-[27rem] sm:p-5 transition-all duration-300 ${bgClass}`}
     >
       {/* Header */}
-      <div className={`relative pb-3 border-b ${dividerClass}`}>
+      <div className={`relative pb-2 sm:pb-3 border-b ${dividerClass}`}>
         <div>
           <div className="hidden">
             <span
@@ -93,7 +95,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
             <span>Active Location Pin</span>
             <span aria-hidden="true">·</span>
           </div>
-          <h2 className="flex items-center gap-2 pr-20 text-xl font-bold text-inherit">
+          <h2 className="flex items-center gap-2 pr-20 text-lg sm:text-xl font-bold text-inherit">
             <span>{marker.name}</span>
             <span
               className="relative h-[13px] w-[13px] shrink-0"
@@ -146,15 +148,18 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
         </div>
       </div>
 
-      {/* Description if provided */}
+      {/* Description if provided — clamped on phones, where a long paragraph is
+          the main thing that would push the card past the viewport. */}
       {marker.description && (
-        <p className={`text-xs mt-3 leading-relaxed ${subTextClass}`}>
+        <p
+          className={`text-xs mt-2 sm:mt-3 leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-none ${subTextClass}`}
+        >
           {marker.description}
         </p>
       )}
 
       {/* Primary Coordinates & Live IST Clock */}
-      <div className="py-3.5 space-y-2.5">
+      <div className="py-2.5 sm:py-3.5 space-y-1.5 sm:space-y-2.5">
         <div className="flex items-center justify-between text-xs">
           <span className={`flex items-center gap-1.5 ${subTextClass}`}>
             <Compass className="w-3.5 h-3.5 text-sky-300" />
@@ -188,7 +193,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       </div>
 
       {/* Geographic & Regional Facts */}
-      <div className={`pt-3 border-t ${dividerClass} space-y-2 text-xs`}>
+      <div className={`pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2 text-xs`}>
         <div className="flex items-center justify-between">
           <span className={subTextClass}>State / Territory</span>
           <span className="font-medium text-right">
@@ -238,11 +243,11 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className={`mt-4 pt-3 border-t ${dividerClass} space-y-2`}>
+      <div className={`mt-3 sm:mt-4 pt-2 sm:pt-3 border-t ${dividerClass} space-y-1.5 sm:space-y-2`}>
         {marker.region && onToggleStateHighlight && (
           <button
             onClick={onToggleStateHighlight}
-            className={`w-full py-2 px-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               isStateHighlighted ? primaryButtonClass : secondaryButtonClass
             }`}
           >
@@ -255,17 +260,17 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           </button>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 1.6)}
-            className={`px-3 py-2 text-xs font-semibold rounded-md border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${primaryButtonClass}`}
+            className={`px-3 py-1.5 sm:py-2 text-xs font-semibold rounded-md border transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${primaryButtonClass}`}
           >
             <Navigation className="w-3.5 h-3.5" />
             <span>Center Pin</span>
           </button>
           <button
             onClick={() => onFlyTo(marker.lat, marker.lng, 2.6)}
-            className={`px-3 py-2 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${secondaryButtonClass}`}
+            className={`px-3 py-1.5 sm:py-2 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${secondaryButtonClass}`}
           >
             <Maximize2 className="w-3.5 h-3.5" />
             <span>Close Up</span>
@@ -276,7 +281,7 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
           <button
             onClick={onDeselect}
             title="Remove this pin from the globe"
-            className={`w-full py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${secondaryButtonClass}`}
+            className={`w-full py-1.5 sm:py-2 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${secondaryButtonClass}`}
           >
             <X className="w-3.5 h-3.5" />
             <span>Deselect Pin</span>
@@ -287,6 +292,4 @@ export const LocationDetailsCard: React.FC<LocationDetailsCardProps> = ({
   );
 };
 
-// Backward compatibility alias
-export const MumbaiDetailsCard = LocationDetailsCard;
-export default LocationDetailsCard;
+export default CityDetailsCard;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   X,
   Copy,
@@ -90,6 +90,10 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   const [embedSize, setEmbedSize] = useState<"500" | "400" | "600" | "100%">(
     "500",
   );
+  // Measured column width for the live preview, used to scale it down on narrow
+  // screens while keeping the true embed dimensions in the copied snippet.
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [previewColumnWidth, setPreviewColumnWidth] = useState<number>(0);
   const [embedOnlyIndia, setEmbedOnlyIndia] = useState<boolean>(onlyIndia);
   // Embed preview mode follows the MAP theme (chrome itself is always light)
   const [embedMode, setEmbedMode] = useState<"dark" | "light">(
@@ -148,6 +152,19 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     },
   ];
 
+  // Measure the preview column so the iframe can be scaled to fit. Runs while
+  // closed too (the ref is null then, so it no-ops) and re-attaches on open.
+  useEffect(() => {
+    if (!isOpen) return;
+    const el = previewRef.current;
+    if (!el) return;
+    const measure = () => setPreviewColumnWidth(el.clientWidth);
+    measure();
+    const obs = new ResizeObserver(measure);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isOpen, embedSize]);
+
   if (!isOpen) return null;
 
   const currentHost =
@@ -170,6 +187,22 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
   const embedWidth = embedSize === "100%" ? "100%" : `${embedSize}px`;
   const embedHeight = embedSize === "100%" ? "600px" : `${embedSize}px`;
+
+  // The preview is rendered at the real embed size, then scaled to fit the
+  // dialog column. A 500px preview is wider than a phone, and simply capping the
+  // box would crop the iframe rather than fit it.
+  const previewNaturalWidth = embedSize === "100%" ? 0 : Number(embedSize);
+  const previewNaturalHeight = embedSize === "100%" ? 600 : Number(embedSize);
+  const previewScale =
+    previewNaturalWidth > 0 && previewColumnWidth > 0
+      ? Math.min(1, previewColumnWidth / previewNaturalWidth)
+      : 1;
+  // "100%" previews fill the column directly, so they need no scaling.
+  const previewNaturalWidthCss =
+    embedSize === "100%" ? "100%" : `${previewNaturalWidth}px`;
+  const previewNaturalHeightCss =
+    embedSize === "100%" ? "600px" : `${previewNaturalHeight}px`;
+  const previewScaledHeight = `${previewNaturalHeight * previewScale}px`;
 
   const baseSrc = `${currentHost}/embed.html?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}&lightTheme=${lightTheme}&darkTheme=${darkTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
@@ -209,15 +242,22 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     : "bg-white border-neutral-200 text-neutral-900";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    /* items-start on phones so the dialog sits at the top of a short viewport
+       instead of being centred and clipped; sm restores the centred layout. */
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain p-3 bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
+      onClick={onClose}
+    >
       <div
-        className={`w-full max-w-3xl h-190 max-h-[88vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${bgClass}`}
+        className={`w-full max-w-3xl h-190 max-h-[88dvh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${bgClass}`}
+        /* Stop taps inside the dialog from reaching the backdrop handler. */
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between shrink-0 px-6 py-4 border-b border-inherit">
+        <div className="flex items-start justify-between gap-3 shrink-0 px-4 py-4 border-b border-inherit sm:items-center sm:px-6">
           <div className="flex items-center gap-2.5">
-            <Globe className="w-5 h-5 text-muted-foreground" />
-            <div>
+            <Globe className="w-5 h-5 shrink-0 text-muted-foreground" />
+            <div className="min-w-0">
               <h3 className="text-base font-bold">
                 Embed &amp; Component Integration
               </h3>
@@ -228,9 +268,11 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
               </p>
             </div>
           </div>
+          {/* 44px square below sm to meet the minimum touch target */}
           <button
             onClick={onClose}
-            className={`p-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center ${
+            aria-label="Close dialog"
+            className={`w-11 h-11 sm:w-auto sm:h-auto sm:p-1.5 rounded-lg border transition-colors cursor-pointer flex items-center justify-center shrink-0 ${
               isDark
                 ? "hover:bg-neutral-800 text-neutral-400 hover:text-white border-neutral-700"
                 : "hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 border-neutral-300"
@@ -242,7 +284,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
         {/* Content Body */}
         <div
-          className="flex-1 min-h-0 min-w-0 p-6 overflow-y-auto space-y-5 text-sm"
+          className="flex-1 min-h-0 min-w-0 p-3 sm:p-6 overflow-y-auto space-y-5 text-sm"
           style={{ scrollbarGutter: "stable" }}
         >
           {/* Quick Customizer Bar for Embed & Component */}
@@ -255,7 +297,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
               }`}
             >
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -293,7 +335,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -328,7 +370,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -355,7 +397,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -388,7 +430,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -421,7 +463,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -442,7 +484,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={
                       isDark
@@ -511,13 +553,13 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
           {/* Live in-dialog preview at the exact copied size */}
           {
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-medium px-0.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-medium px-0.5">
                 <span
-                  className={
+                  className={`min-w-0 ${
                     isDark
                       ? "text-neutral-300 font-semibold"
                       : "text-neutral-700 font-semibold"
-                  }
+                  }`}
                 >
                   Live Preview —{" "}
                   {embedMode === "light"
@@ -542,30 +584,53 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                   </a>
                 </div>
               </div>
+              {/* The preview keeps the real embed dimensions so what you see
+                  matches what you copy, but is scaled down when that is wider
+                  than the dialog column — otherwise a 500px preview is clipped
+                  on a phone. transform:scale keeps the whole iframe visible
+                  (shrinking the box would just crop it). */}
               <div
-                className={`rounded-xl overflow-hidden border transition-colors ${
-                  embedMode === "light"
-                    ? "border-neutral-300 bg-slate-100"
-                    : "border-neutral-800 bg-black"
-                }`}
-                style={{
-                  width: embedSize === "100%" ? "100%" : `${embedSize}px`,
-                  height: embedSize === "100%" ? "600px" : `${embedSize}px`,
-                }}
+                ref={previewRef}
+                className="w-full"
+                /* Reserves the scaled footprint so the scaled child does not
+                   collapse the row. */
+                style={{ height: previewScaledHeight }}
               >
-                <iframe
-                  src={embedSrc}
-                  title="Embed preview"
-                  className="w-full h-full border-0"
-                />
+                <div
+                  style={{
+                    width: previewNaturalWidthCss,
+                    height: previewNaturalHeightCss,
+                    transform:
+                      previewScale < 1 ? `scale(${previewScale})` : undefined,
+                    transformOrigin: "top left",
+                  }}
+                >
+                  <div
+                    className={`rounded-xl overflow-hidden border transition-colors ${
+                      embedMode === "light"
+                        ? "border-neutral-300 bg-slate-100"
+                        : "border-neutral-800 bg-black"
+                    }`}
+                    style={{
+                      width: previewNaturalWidthCss,
+                      height: previewNaturalHeightCss,
+                    }}
+                  >
+                    <iframe
+                      src={embedSrc}
+                      title="Embed preview"
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           }
 
           {/* iFrame Embed */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="min-w-0">
                 <h4
                   className={`font-semibold ${isDark ? "text-white" : "text-neutral-900"}`}
                 >
