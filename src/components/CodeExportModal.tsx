@@ -3,7 +3,6 @@ import {
   X,
   Copy,
   Check,
-  Code,
   Globe,
   ExternalLink,
   Sun,
@@ -39,7 +38,6 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   onlyIndia = true,
   isDark = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<"embed" | "react">("embed");
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [embedSize, setEmbedSize] = useState<"500" | "400" | "600" | "100%">(
     "500",
@@ -73,9 +71,12 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     return theme;
   })();
 
+  const embedWidth = embedSize === "100%" ? "100%" : `${embedSize}px`;
+  const embedHeight = embedSize === "100%" ? "600px" : `${embedSize}px`;
+
   const baseSrc = `${currentHost}/?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
-  }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}`;
+  }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
   // Shared by both tabs — mirrors the component's current config
   const embedSrc = `${baseSrc}${
@@ -95,57 +96,10 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   width="${embedSize === "100%" ? "100%" : `${embedSize}px`}"
   height="${embedSize === "100%" ? "600px" : `${embedSize}px`}"
   style="border: none; border-radius: 16px; overflow: hidden; background: ${embedMode === "light" ? "#f8fafc" : "#000000"};"
-  loading="lazy"
+  allow="fullscreen"
   title="India 3D Interactive Map Globe"
+  aria-label="Interactive 3D India Globe"
 ></iframe>`;
-
-  const markerCodeSnippet = activeMarker
-    ? `[\n          {\n            id: '${activeMarker.id}',\n            name: '${activeMarker.name}',\n            region: '${activeMarker.region || ""}',\n            country: 'India',\n            lat: ${activeMarker.lat.toFixed(4)},\n            lng: ${activeMarker.lng.toFixed(4)},\n            isPrimary: true,\n          }\n        ]`
-    : `[] // Clean map: no pins until selected`;
-
-  const reactSnippet = `import React, { ${embedZoom ? "useRef" : ""} } from 'react';
-import { EarthGlobe, EarthGlobeRef } from './components/EarthGlobe';
-
-// Drop-in React / Next.js Component for your portfolio or website
-// Supports dynamic host app switching between Light Mode & Dark Mode
-export function IndiaPortfolioGlobe({
-  width = ${embedSize === "100%" ? "'100%'" : embedSize},
-  height = ${embedSize === "100%" ? "'600px'" : embedSize},
-  mode = '${embedMode}', // Pass 'dark' or 'light' (or connect to next-themes / useColorScheme)
-}: {
-  width?: number | string;
-  height?: number | string;
-  mode?: 'dark' | 'light';
-}) {
-  const globeRef = useRef<EarthGlobeRef>(null);
-
-  return (
-    <div style={{ width, height, position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
-      <EarthGlobe
-        ref={globeRef}
-        mode={mode}                             // Automatically switches Light Map in Light Mode & Dark Map in Dark Mode
-        width="100%"
-        height="100%"
-        theme="${activeEmbedTheme}"
-        highlightCountry="356"                // Survey of India authentic boundaries
-        onlyIndia={${embedOnlyIndia}}                   // ${embedOnlyIndia ? "Shows ONLY India map (isolated clean globe)" : "Shows world with India featured"}
-        ${highlightState ? `highlightState="${highlightState}"` : `// highlightState="Kerala"`}
-        autoRotate={${embedRotate}}
-        autoRotateSpeed={${autoRotateSpeed.toFixed(1)}}
-        rotateDirection="west-to-east"
-        showStateBorders={true}
-        showGraticule={true}
-        showAtmosphere={true}
-        showStars={mode === 'dark'}
-        enableDrag={${embedDrag}}
-        enableZoom={${embedZoom}}
-        initialCenter={[${activeMarker ? activeMarker.lng.toFixed(4) : "78.9629"}, ${activeMarker ? activeMarker.lat.toFixed(4) : "20.5937"}]}
-        initialZoom={${activeMarker ? "1.4" : "1.1"}}
-        markers={${markerCodeSnippet}}
-      />
-    </div>
-  );
-}`;
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -186,40 +140,6 @@ export function IndiaPortfolioGlobe({
             }`}
           >
             <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Tab Controls */}
-        <div className="flex items-center gap-2 shrink-0 px-6 pt-3 border-b border-inherit">
-          <button
-            onClick={() => setActiveTab("embed")}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x border-dashed ${
-              activeTab === "embed"
-                ? isDark
-                  ? "bg-neutral-900 text-white border-neutral-700"
-                  : "bg-neutral-100 text-foreground border-neutral-300"
-                : isDark
-                  ? "text-neutral-400 hover:text-white border-transparent"
-                  : "text-neutral-600 hover:text-neutral-900 border-transparent"
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Website / Portfolio (iFrame)</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("react")}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors cursor-pointer flex-1 min-w-0 justify-center whitespace-nowrap flex items-center gap-1.5 border-t border-x border-dashed ${
-              activeTab === "react"
-                ? isDark
-                  ? "bg-neutral-900 text-white border-neutral-700"
-                  : "bg-neutral-100 text-foreground border-neutral-300"
-                : isDark
-                  ? "text-neutral-400 hover:text-white border-transparent"
-                  : "text-neutral-600 hover:text-neutral-900 border-transparent"
-            }`}
-          >
-            <Code className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">React / Next.js Component</span>
           </button>
         </div>
 
@@ -465,111 +385,56 @@ export function IndiaPortfolioGlobe({
             </div>
           }
 
-          {/* Tab 1: iFrame Embed */}
-          {activeTab === "embed" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4
-                    className={`font-semibold ${isDark ? "text-white" : "text-neutral-900"}`}
-                  >
-                    Embed in Any Website or Portfolio
-                  </h4>
-                  <p
-                    className={`text-xs ${isDark ? "text-neutral-400" : "text-neutral-500"}`}
-                  >
-                    Supports Light Mode &amp; Dark Mode out of the box via{" "}
-                    <code>?mode=light</code> or <code>?mode=dark</code> query
-                    param.
-                  </p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(iframeSnippet, "iframe")}
-                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-dashed cursor-pointer transition-colors shrink-0 ${
-                    isDark
-                      ? "text-neutral-950 bg-white hover:bg-neutral-200"
-                      : "text-white bg-neutral-900 hover:bg-neutral-800"
-                  }`}
+          {/* iFrame Embed */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4
+                  className={`font-semibold ${isDark ? "text-white" : "text-neutral-900"}`}
                 >
-                  <span
-                    className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "iframe" ? "" : "invisible"}`}
-                  >
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Copied!</span>
-                  </span>
-                  <span
-                    className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "iframe" ? "invisible" : ""}`}
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Embed Code</span>
-                  </span>
-                </button>
+                  Embed in Any Website or Portfolio
+                </h4>
+                <p
+                  className={`text-xs ${isDark ? "text-neutral-400" : "text-neutral-500"}`}
+                >
+                  Supports Light Mode &amp; Dark Mode out of the box via{" "}
+                  <code>?mode=light</code> or <code>?mode=dark</code> query
+                  param.
+                </p>
               </div>
-
-              <pre
-                className={`p-4 rounded-xl border text-xs font-mono overflow-x-auto leading-relaxed ${
+              <button
+                onClick={() => copyToClipboard(iframeSnippet, "iframe")}
+                className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-dashed cursor-pointer transition-colors shrink-0 ${
                   isDark
-                    ? "bg-neutral-900 border-neutral-800 text-neutral-200"
-                    : "bg-neutral-100 border-neutral-300 text-neutral-800"
+                    ? "text-neutral-950 bg-white hover:bg-neutral-200"
+                    : "text-white bg-neutral-900 hover:bg-neutral-800"
                 }`}
               >
-                {iframeSnippet}
-              </pre>
-            </div>
-          )}
-
-          {/* Tab 2: React Component */}
-          {activeTab === "react" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4
-                    className={`font-semibold ${isDark ? "text-white" : "text-neutral-900"}`}
-                  >
-                    React / Next.js Component
-                  </h4>
-                  <p
-                    className={`text-xs ${isDark ? "text-neutral-400" : "text-neutral-500"}`}
-                  >
-                    Use directly in your React, Next.js, or Vite codebase. Pass{" "}
-                    <code>mode="light"</code> or <code>mode="dark"</code> (or
-                    hook to <code>next-themes</code>).
-                  </p>
-                </div>
-                <button
-                  onClick={() => copyToClipboard(reactSnippet, "react")}
-                  className={`grid items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-dashed cursor-pointer transition-colors shrink-0 ${
-                    isDark
-                      ? "text-neutral-950 bg-white hover:bg-neutral-200"
-                      : "text-white bg-neutral-900 hover:bg-neutral-800"
-                  }`}
+                <span
+                  className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "iframe" ? "" : "invisible"}`}
                 >
-                  <span
-                    className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "react" ? "" : "invisible"}`}
-                  >
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Copied!</span>
-                  </span>
-                  <span
-                    className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "react" ? "invisible" : ""}`}
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Component Code</span>
-                  </span>
-                </button>
-              </div>
-
-              <pre
-                className={`p-4 rounded-xl border text-xs font-mono overflow-x-auto leading-relaxed ${
-                  isDark
-                    ? "bg-neutral-900 border-neutral-800 text-neutral-200"
-                    : "bg-neutral-100 border-neutral-300 text-neutral-800"
-                }`}
-              >
-                {reactSnippet}
-              </pre>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Copied!</span>
+                </span>
+                <span
+                  className={`col-start-1 row-start-1 flex items-center gap-1.5 whitespace-nowrap ${copiedSection === "iframe" ? "invisible" : ""}`}
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Embed Code</span>
+                </span>
+              </button>
             </div>
-          )}
+
+            <pre
+              className={`p-4 rounded-xl border text-xs font-mono overflow-x-auto leading-relaxed ${
+                isDark
+                  ? "bg-neutral-900 border-neutral-800 text-neutral-200"
+                  : "bg-neutral-100 border-neutral-300 text-neutral-800"
+              }`}
+            >
+              {iframeSnippet}
+            </pre>
+          </div>
         </div>
 
         {/* Footer */}
