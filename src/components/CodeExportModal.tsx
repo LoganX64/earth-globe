@@ -13,8 +13,6 @@ import {
   THEME_PRESETS,
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
-  DARK_THEME_PRESETS,
-  LIGHT_THEME_PRESETS,
 } from "./EarthGlobe/themePresets";
 
 interface CodeExportModalProps {
@@ -27,8 +25,6 @@ interface CodeExportModalProps {
   theme?: string;
   lightTheme?: string;
   darkTheme?: string;
-  onLightThemeChange?: (themeId: string) => void;
-  onDarkThemeChange?: (themeId: string) => void;
   onlyIndia?: boolean;
   isDark?: boolean;
 }
@@ -43,8 +39,6 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   theme = DEFAULT_LIGHT_THEME_ID,
   lightTheme = DEFAULT_LIGHT_THEME_ID,
   darkTheme = DEFAULT_DARK_THEME_ID,
-  onLightThemeChange,
-  onDarkThemeChange,
   onlyIndia = true,
   isDark = false,
 }) => {
@@ -238,64 +232,6 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                       Global (India Featured)
                     </span>
                   </button>
-                </div>
-              </div>
-
-              {/* Theme Selection */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={
-                        isDark
-                          ? "text-neutral-200 font-semibold"
-                          : "text-neutral-800 font-semibold"
-                      }
-                    >
-                      Light Theme:
-                    </span>
-                    <select
-                      value={lightTheme}
-                      onChange={(e) => onLightThemeChange?.(e.target.value)}
-                      className={`w-44 px-2 py-1 rounded-md border text-[11px] font-mono cursor-pointer ${
-                        isDark
-                          ? "bg-neutral-800 text-neutral-200 border-neutral-600"
-                          : "bg-white text-neutral-800 border-neutral-300"
-                      }`}
-                    >
-                      {LIGHT_THEME_PRESETS.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={
-                        isDark
-                          ? "text-neutral-200 font-semibold"
-                          : "text-neutral-800 font-semibold"
-                      }
-                    >
-                      Dark Theme:
-                    </span>
-                    <select
-                      value={darkTheme}
-                      onChange={(e) => onDarkThemeChange?.(e.target.value)}
-                      className={`w-44 px-2 py-1 rounded-md border text-[11px] font-mono cursor-pointer ${
-                        isDark
-                          ? "bg-neutral-800 text-neutral-200 border-neutral-600"
-                          : "bg-white text-neutral-800 border-neutral-300"
-                      }`}
-                    >
-                      {DARK_THEME_PRESETS.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
               </div>
 

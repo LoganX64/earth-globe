@@ -353,21 +353,6 @@ export default function App() {
     else setLightTheme(themeId);
   }, []);
 
-  // The embed pickers drive the same live state as the customizer — changing the
-  // bound theme for the polarity currently on screen re-skins the globe. Guards
-  // match the `in THEME_PRESETS` validation already used on load.
-  const handleLightThemeChange = useCallback((themeId: string) => {
-    if (!(themeId in THEME_PRESETS) || THEME_PRESETS[themeId].isDark) return;
-    setLightTheme(themeId);
-    setTheme((prevTheme) => (THEME_PRESETS[prevTheme]?.isDark ? prevTheme : themeId));
-  }, []);
-
-  const handleDarkThemeChange = useCallback((themeId: string) => {
-    if (!(themeId in THEME_PRESETS) || !THEME_PRESETS[themeId].isDark) return;
-    setDarkTheme(themeId);
-    setTheme((prevTheme) => (THEME_PRESETS[prevTheme]?.isDark ? themeId : prevTheme));
-  }, []);
-
   // Active markers passed to the globe
   const markersToRender: GlobeMarker[] = activeMarker
     ? showSecondaryMarkers
@@ -877,8 +862,6 @@ export default function App() {
         theme={theme}
         lightTheme={lightTheme}
         darkTheme={darkTheme}
-        onLightThemeChange={handleLightThemeChange}
-        onDarkThemeChange={handleDarkThemeChange}
         onlyIndia={onlyIndia}
         isDark={isDark}
       />
