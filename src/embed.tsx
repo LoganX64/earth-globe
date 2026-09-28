@@ -1,7 +1,12 @@
 import { StrictMode, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EarthGlobe, EarthGlobeRef } from './components/EarthGlobe';
-import { GlobeMarker } from './components/EarthGlobe/types';
+import {
+  GlobeMarker,
+  MIN_ZOOM_LEVEL,
+  MAX_ZOOM_LEVEL,
+  DEFAULT_EMBED_ZOOM,
+} from './components/EarthGlobe/types';
 import {
   THEME_PRESETS,
   DEFAULT_THEME_ID,
@@ -84,7 +89,21 @@ const initialWidth = urlParams.get('width') || urlParams.get('size') || '100%';
 const initialHeight = urlParams.get('height') || urlParams.get('size') || '100%';
 const initialSpeed = urlParams.get('speed') ? parseFloat(urlParams.get('speed')!) : 1.2;
 const embedDragEnabled = urlParams.get('drag') !== 'false';
+// `zoom` is the master off-switch for zooming; the two granular params let a host
+// keep one input path and drop the other, but never re-enable what zoom=false killed.
 const embedZoomEnabled = urlParams.get('zoom') !== 'false';
+const embedZoomButtonsEnabled =
+  embedZoomEnabled && urlParams.get('zoomButtons') !== 'false';
+const embedScrollZoomEnabled =
+  embedZoomEnabled && urlParams.get('scrollZoom') !== 'false';
+
+// Zoom bounds live in types.ts so the globe and the generator stay in step.
+const parsedZoomLevel = urlParams.get('zoomLevel')
+  ? parseFloat(urlParams.get('zoomLevel')!)
+  : NaN;
+const initialZoomLevel = isNaN(parsedZoomLevel)
+  ? DEFAULT_EMBED_ZOOM
+  : Math.min(MAX_ZOOM_LEVEL, Math.max(MIN_ZOOM_LEVEL, parsedZoomLevel));
 const initialAutoRotate = urlParams.get('rotate') !== 'false';
 const initialHighlightState = urlParams.get('state') || null;
 const initialShowStateBorders = urlParams.get('borders') !== 'false';
@@ -292,16 +311,16 @@ function EmbedApp() {
           autoRotate={autoRotate}
           autoRotateSpeed={autoRotateSpeed}
           enableDrag={embedDragEnabled}
-          enableZoom={embedZoomEnabled}
+          enableZoom={embedScrollZoomEnabled}
           showGraticule={showGraticule}
           showAtmosphere={showAtmosphere}
           showStars={showStars}
           initialCenter={activeMarker ? [activeMarker.lng, activeMarker.lat] : [78.9629, 20.5937]}
-          initialZoom={1.1}
+          initialZoom={initialZoomLevel}
           className="w-full h-full"
         />
 
-        {embedZoomEnabled && (
+        {embedZoomButtonsEnabled && (
           <div
             className={`absolute bottom-6 right-6 z-50 flex flex-col items-center gap-1 rounded-xl p-1 border backdrop-blur-md shadow-xl ${
               isDark ? 'bg-zinc-950/80 border-zinc-800/80' : 'bg-white/85 border-zinc-200/80'

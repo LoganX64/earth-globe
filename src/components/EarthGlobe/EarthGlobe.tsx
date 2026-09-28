@@ -30,7 +30,7 @@ import worldData from 'world-atlas/countries-110m.json';
 import indiaOfficialGeo from '../../data/india-official.json';
 import indiaOuterBoundary from '../../data/india-outer-boundary.json';
 import indiaInternalBorders from '../../data/india-internal-borders.json';
-import { EarthGlobeProps, GlobeMarker, GlobeThemeColors } from './types';
+import { EarthGlobeProps, GlobeMarker, GlobeThemeColors, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL } from './types';
 import { THEME_PRESETS, DEFAULT_THEME_ID, DEFAULT_DARK_THEME_ID, DEFAULT_LIGHT_THEME_ID } from './themePresets';
 
 export interface EarthGlobeRef {
@@ -111,8 +111,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       enableZoom = true,
       initialCenter = [78.9629, 20.5937], // Centered on India [lng, lat]
       initialZoom = 1.0,
-      minZoom = 0.65,
-      maxZoom = 3.8,
+      minZoom = MIN_ZOOM_LEVEL,
+      maxZoom = MAX_ZOOM_LEVEL,
       showGraticule = true,
       showAtmosphere = true,
       showStars = true,

@@ -8,12 +8,48 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { GlobeMarker } from "./EarthGlobe/types";
+import {
+  GlobeMarker,
+  MIN_ZOOM_LEVEL,
+  MAX_ZOOM_LEVEL,
+  DEFAULT_EMBED_ZOOM,
+} from "./EarthGlobe/types";
 import {
   THEME_PRESETS,
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
 } from "./EarthGlobe/themePresets";
+
+// A single on/off option: shows "✓ Label" while enabled and just "Label" once off,
+// both stacked in the same grid cell so the button never changes width.
+const ToggleChip: React.FC<{
+  label: string;
+  value: boolean;
+  onToggle: () => void;
+  isDark: boolean;
+}> = ({ label, value, onToggle, isDark }) => (
+  <button
+    onClick={onToggle}
+    className={`px-2.5 py-1 rounded-md border border-dashed text-[11px] cursor-pointer transition-colors grid ${
+      value
+        ? "bg-blue-600 text-white border-blue-500"
+        : isDark
+          ? "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600"
+          : "bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300"
+    }`}
+  >
+    <span
+      className={`col-start-1 row-start-1 whitespace-nowrap ${value ? "" : "invisible"}`}
+    >
+      ✓ {label}
+    </span>
+    <span
+      className={`col-start-1 row-start-1 whitespace-nowrap ${value ? "invisible" : ""}`}
+    >
+      {label}
+    </span>
+  </button>
+);
 
 interface CodeExportModalProps {
   isOpen: boolean;
@@ -63,6 +99,11 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   const [embedDrag, setEmbedDrag] = useState<boolean>(true);
   const [embedZoom, setEmbedZoom] = useState<boolean>(true);
   const [embedRotate, setEmbedRotate] = useState<boolean>(autoRotate);
+  // Zoom: the buttons and the wheel are separately switchable, and the level sets
+  // how close the globe starts
+  const [embedZoomButtons, setEmbedZoomButtons] = useState<boolean>(true);
+  const [embedScrollZoom, setEmbedScrollZoom] = useState<boolean>(true);
+  const [embedZoomLevel, setEmbedZoomLevel] = useState<number>(DEFAULT_EMBED_ZOOM);
   // Map layers — seeded from the globe currently on screen so the preview matches
   // the main app, then freely overridable per embed
   const [embedStars, setEmbedStars] = useState<boolean>(showStars);
@@ -132,7 +173,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
 
   const baseSrc = `${currentHost}/embed.html?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}&lightTheme=${lightTheme}&darkTheme=${darkTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
-  }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
+  }&drag=${embedDrag}&zoom=${embedZoom}&zoomButtons=${embedZoomButtons}&scrollZoom=${embedScrollZoom}&zoomLevel=${embedZoomLevel.toFixed(2)}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
   // Shared by both tabs — mirrors the component's current config
   const embedSrc = `${baseSrc}${
@@ -391,31 +432,78 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                     Layers:
                   </span>
                   {layerToggles.map((layer) => (
-                    <button
+                    <ToggleChip
                       key={layer.key}
-                      onClick={layer.toggle}
-                      className={`px-2.5 py-1 rounded-md border border-dashed text-[11px] cursor-pointer transition-colors grid ${
-                        layer.value
-                          ? "bg-blue-600 text-white border-blue-500"
-                          : isDark
-                            ? "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600"
-                            : "bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300"
-                      }`}
-                    >
-                      <span
-                        className={`col-start-1 row-start-1 whitespace-nowrap ${layer.value ? "" : "invisible"}`}
-                      >
-                        ✓ {layer.label}
-                      </span>
-                      <span
-                        className={`col-start-1 row-start-1 whitespace-nowrap ${layer.value ? "invisible" : ""}`}
-                      >
-                        {layer.label}
-                      </span>
-                    </button>
+                      label={layer.label}
+                      value={layer.value}
+                      onToggle={layer.toggle}
+                      isDark={isDark}
+                    />
                   ))}
                 </div>
 
+                <div className="flex items-center gap-2">
+                  <span
+                    className={
+                      isDark
+                        ? "text-neutral-200 font-semibold"
+                        : "text-neutral-800 font-semibold"
+                    }
+                  >
+                    Zoom:
+                  </span>
+                  <ToggleChip
+                    label="Buttons"
+                    value={embedZoomButtons}
+                    onToggle={() => setEmbedZoomButtons((prev) => !prev)}
+                    isDark={isDark}
+                  />
+                  <ToggleChip
+                    label="Scroll"
+                    value={embedScrollZoom}
+                    onToggle={() => setEmbedScrollZoom((prev) => !prev)}
+                    isDark={isDark}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 min-w-40">
+                  <span
+                    className={
+                      isDark
+                        ? "text-neutral-200 font-semibold"
+                        : "text-neutral-800 font-semibold"
+                    }
+                  >
+                    Closeness:
+                  </span>
+                  <div className="flex-1 min-w-24 flex flex-col gap-1">
+                    <div
+                      className={`flex justify-between text-[10px] ${
+                        isDark ? "text-neutral-300" : "text-neutral-600"
+                      }`}
+                    >
+                      <span>Zoom Level</span>
+                      <span className="font-mono font-semibold">
+                        {Math.round(embedZoomLevel * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={MIN_ZOOM_LEVEL}
+                      max={MAX_ZOOM_LEVEL}
+                      step="0.05"
+                      value={embedZoomLevel}
+                      onChange={(e) =>
+                        setEmbedZoomLevel(parseFloat(e.target.value))
+                      }
+                      className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer ${
+                        isDark
+                          ? "accent-sky-300 bg-white/20"
+                          : "accent-blue-600 bg-neutral-300"
+                      }`}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           }

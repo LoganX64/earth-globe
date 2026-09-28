@@ -102,3 +102,10 @@ export interface Coordinates {
   lat: number;
   lng: number;
 }
+
+/** Zoom bounds shared by the globe, the embed URL params and the generator slider */
+export const MIN_ZOOM_LEVEL = 0.65;
+export const MAX_ZOOM_LEVEL = 3.8;
+
+/** Zoom level an embed starts at when no `zoomLevel` param is supplied */
+export const DEFAULT_EMBED_ZOOM = 1.1;

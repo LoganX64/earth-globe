@@ -43,9 +43,18 @@ All configuration is done via URL query parameters. No JavaScript required.
 | Param | Values | Default | Description |
 |-------|--------|---------|-------------|
 | `drag` | `true` / `false` | `true` | Enable drag to rotate |
-| `zoom` | `true` / `false` | `true` | Enable zoom controls |
+| `zoom` | `true` / `false` | `true` | Master off-switch: `false` disables both the +/− buttons and scroll zoom |
+| `zoomButtons` | `true` / `false` | `true` | Show the floating +/− zoom buttons |
+| `scrollZoom` | `true` / `false` | `true` | Zoom on mouse scroll / trackpad |
+| `zoomLevel` | `0.65` – `3.8` | `1.1` | How close the globe starts. Values outside the range are clamped |
 | `rotate` | `true` / `false` | `true` | Enable auto-rotation |
 | `speed` | `0.1` – `5.0` | `1.2` | Rotation speed |
+
+To lock the globe at a fixed size, combine the three:
+
+```
+embed.html?zoomLevel=2.0&zoomButtons=false&scrollZoom=false
+```
 
 ### Layers
 
