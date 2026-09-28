@@ -123,6 +123,8 @@ export default function App() {
       : 1.2;
 
   const [theme, setTheme] = useState<string>(initialTheme);
+  const [lightTheme, setLightTheme] = useState<string>(DEFAULT_LIGHT_THEME_ID);
+  const [darkTheme, setDarkTheme] = useState<string>(DEFAULT_DARK_THEME_ID);
   const urlOnlyIndia = Boolean(urlParams?.has('onlyIndia') || urlParams?.has('indiaOnly'));
   const [onlyIndia, setOnlyIndia] = useState<boolean>(
     urlOnlyIndia
@@ -820,6 +822,10 @@ export default function App() {
         autoRotateSpeed={autoRotateSpeed}
         autoRotate={autoRotate}
         theme={theme}
+        lightTheme={lightTheme}
+        darkTheme={darkTheme}
+        onLightThemeChange={setLightTheme}
+        onDarkThemeChange={setDarkTheme}
         onlyIndia={onlyIndia}
         isDark={isDark}
       />

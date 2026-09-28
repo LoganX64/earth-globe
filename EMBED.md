@@ -31,7 +31,9 @@ All configuration is done via URL query parameters. No JavaScript required.
 | Param | Values | Default | Description |
 |-------|--------|---------|-------------|
 | `mode` | `light` / `dark` | `light` | Map color mode |
-| `theme` | Theme ID (see below) | `daylight-atlas` | Specific color theme |
+| `theme` | Theme ID (see below) | `daylight-atlas` | Specific color theme (initial) |
+| `lightTheme` | Light theme ID | `daylight-atlas` | Theme to use when mode is light |
+| `darkTheme` | Dark theme ID | `black-and-white` | Theme to use when mode is dark |
 | `onlyIndia` | `true` / `false` | `false` | Show only India (isolated) or world with India featured |
 | `width` | e.g. `500px`, `100%` | `100%` | Embed width |
 | `height` | e.g. `500px`, `600px` | `100%` | Embed height |

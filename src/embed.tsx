@@ -32,6 +32,19 @@ if (modeParam === 'light') {
   initialTheme = themeParam;
 }
 
+const lightThemeParam = urlParams.get('lightTheme');
+const darkThemeParam = urlParams.get('darkTheme');
+
+const initialLightTheme =
+  lightThemeParam && lightThemeParam in THEME_PRESETS && !THEME_PRESETS[lightThemeParam].isDark
+    ? lightThemeParam
+    : DEFAULT_LIGHT_THEME_ID;
+
+const initialDarkTheme =
+  darkThemeParam && darkThemeParam in THEME_PRESETS && THEME_PRESETS[darkThemeParam].isDark
+    ? darkThemeParam
+    : DEFAULT_DARK_THEME_ID;
+
 const initialOnlyIndia = urlParams.get('onlyIndia') === 'true' || urlParams.get('indiaOnly') === 'true';
 const initialWidth = urlParams.get('width') || urlParams.get('size') || '100%';
 const initialHeight = urlParams.get('height') || urlParams.get('size') || '100%';
