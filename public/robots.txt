@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The embed is a fragment meant for an iframe, not a standalone page
+Disallow: /embed
+
+Sitemap: https://earth-globe-nine.vercel.app/sitemap.xml

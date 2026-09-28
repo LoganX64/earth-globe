@@ -3,12 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Earth Globe - Mumbai &amp; India Highlight</title>
-    <meta name="description" content="Interactive reusable 3D Earth globe with a light-mode atlas theme, highlighting India with a location pin at Mumbai, Maharashtra. Switchable dark and light map themes — website UI stays light." />
-    <meta property="og:title" content="Earth Globe - Mumbai &amp; India Highlight" />
-    <meta property="og:description" content="Interactive reusable 3D Earth globe with a light-mode atlas theme, highlighting India with a location pin at Mumbai, Maharashtra." />
+    <title>BHARAT ATLAS - Interactive 3D India Globe</title>
+    <meta name="description" content="Interactive 3D globe of India built on official Survey of India cartography, with state highlight, location pins and a drop-in embeddable iframe." />
+    <meta property="og:title" content="BHARAT ATLAS - Interactive 3D India Globe" />
+    <meta property="og:description" content="Interactive 3D globe of India built on official Survey of India cartography, with state highlight, location pins and a drop-in embeddable iframe." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://earth-globe-nine.vercel.app/" />
+    <meta property="og:site_name" content="BHARAT ATLAS" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://earth-globe-nine.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://earth-globe-nine.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="BHARAT ATLAS - a 3D globe of India rendered on canvas with official state boundaries" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BHARAT ATLAS - Interactive 3D India Globe" />
+    <meta name="twitter:description" content="Interactive 3D globe of India built on official Survey of India cartography, with state highlight, location pins and a drop-in embeddable iframe." />
+    <meta name="twitter:image" content="https://earth-globe-nine.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="BHARAT ATLAS - a 3D globe of India rendered on canvas with official state boundaries" />
+    <link rel="canonical" href="https://earth-globe-nine.vercel.app/" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,6 +31,45 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      The globe is canvas-rendered, so crawlers and link-preview bots that do not
+      execute JavaScript would otherwise see an empty page. This static copy states
+      what the app is; it is visually hidden but remains in the accessibility tree.
+    -->
+    <main class="seo-content">
+      <h1>BHARAT ATLAS - Interactive 3D India Globe</h1>
+      <p>
+        An interactive 3D globe of India, rendered in the browser on an HTML canvas
+        using official Survey of India cartography. Explore every state boundary,
+        highlight Indian states, drop location pins, and embed the globe in any
+        website.
+      </p>
+      <h2>Features</h2>
+      <ul>
+        <li>Orthographic 3D globe with official state borders, J&amp;K, Ladakh and the outer boundary</li>
+        <li>Auto-rotation with adjustable speed and direction; drag to spin and scroll to zoom</li>
+        <li>Eleven cartography themes across light and dark modes</li>
+        <li>Hover or click a state to highlight it</li>
+        <li>Location pins for Indian cities plus worldwide search</li>
+        <li>Layer toggles for the graticule, atmosphere, starfield and state borders</li>
+        <li>Zero-chrome iframe embed for portfolios, Webflow, WordPress and any HTML site</li>
+      </ul>
+      <h2>Embedding the globe</h2>
+      <p>
+        Add the globe to any page with a single iframe, configured entirely through
+        query parameters:
+      </p>
+      <pre><code>&lt;iframe src="https://earth-globe-nine.vercel.app/embed.html?onlyIndia=true&amp;mode=dark" width="500" height="500" style="border: none; border-radius: 16px;"&gt;&lt;/iframe&gt;</code></pre>
+      <h2>Getting started</h2>
+      <p>
+        The globe loads with auto-rotation, drag and zoom enabled. Use the Globe
+        Customizer panel to switch themes, toggle map layers, place pins and pick a
+        state. Keyboard shortcuts: <code>SPACE</code> pause or resume rotation,
+        <code>X</code> clear the active pin, <code>ESC</code> close the details
+        panel, <code>C</code> toggle the customizer, <code>T</code> switch
+        light/dark map themes and <code>R</code> reset the view.
+      </p>
+    </main>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
