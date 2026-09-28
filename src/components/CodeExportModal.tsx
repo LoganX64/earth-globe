@@ -74,7 +74,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   const embedWidth = embedSize === "100%" ? "100%" : `${embedSize}px`;
   const embedHeight = embedSize === "100%" ? "600px" : `${embedSize}px`;
 
-  const baseSrc = `${currentHost}/?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
+  const baseSrc = `${currentHost}/embed.html?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
   }&drag=${embedDrag}&zoom=${embedZoom}&rotate=${embedRotate}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
@@ -356,11 +356,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-bold underline underline-offset-2 shrink-0"
                   >
-                    <span>
-                      {activeTab === "embed"
-                        ? "Test Embed URL"
-                        : "Test Preview URL"}
-                    </span>
+                    <span>Test Embed URL</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
