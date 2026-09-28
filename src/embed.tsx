@@ -311,6 +311,7 @@ function EmbedApp() {
                   : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
               }`}
               title="Zoom In"
+              aria-label="Zoom In"
             >
               +
             </button>
@@ -323,6 +324,7 @@ function EmbedApp() {
                   : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
               }`}
               title="Zoom Out"
+              aria-label="Zoom Out"
             >
               −
             </button>

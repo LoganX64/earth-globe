@@ -17,6 +17,23 @@ export default defineConfig(() => {
           main: path.resolve(import.meta.dirname, 'index.html'),
           embed: path.resolve(import.meta.dirname, 'embed.html'),
         },
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'react-vendor';
+            }
+            if (
+              id.includes('node_modules/d3-geo') ||
+              id.includes('node_modules/topojson-client') ||
+              id.includes('world-atlas')
+            ) {
+              return 'geo-engine';
+            }
+            if (id.includes('india-') && id.endsWith('.json')) {
+              return 'india-cartography';
+            }
+          },
+        },
       },
     },
     server: {

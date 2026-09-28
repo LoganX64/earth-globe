@@ -6,7 +6,7 @@
  * 100% Client-side React + Vite SPA (Zero backend needed, Vercel Free Tier ready).
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   EarthGlobe,
   EarthGlobeRef,
@@ -351,14 +351,15 @@ export default function App() {
     else setLightTheme(themeId);
   }, []);
 
-  // Active markers passed to the globe
-  const markersToRender: GlobeMarker[] = activeMarker
-    ? showSecondaryMarkers
-      ? [activeMarker, ...POPULAR_INDIAN_LOCATIONS.filter((p) => p.id !== activeMarker.id)]
-      : [activeMarker]
-    : showSecondaryMarkers
-    ? POPULAR_INDIAN_LOCATIONS
-    : [];
+  // Active markers passed to the globe (memoized to prevent render loop restarts)
+  const markersToRender: GlobeMarker[] = useMemo(() => {
+    if (activeMarker) {
+      return showSecondaryMarkers
+        ? [activeMarker, ...POPULAR_INDIAN_LOCATIONS.filter((p) => p.id !== activeMarker.id)]
+        : [activeMarker];
+    }
+    return showSecondaryMarkers ? POPULAR_INDIAN_LOCATIONS : [];
+  }, [activeMarker, showSecondaryMarkers]);
 
   // Handle location selection - toggles off if already selected, or selects new marker
   const handleSelectLocation = useCallback((marker: GlobeMarker | null) => {
@@ -541,6 +542,7 @@ export default function App() {
                     : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
                 }`}
                 title="Zoom In"
+                aria-label="Zoom In"
               >
                 +
               </button>
@@ -553,6 +555,7 @@ export default function App() {
                     : 'text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950'
                 }`}
                 title="Zoom Out"
+                aria-label="Zoom Out"
               >
                 −
               </button>
@@ -569,6 +572,7 @@ export default function App() {
                   : 'bg-white/85 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950'
               }`}
               title="Exit Pure View (or press X / Esc)"
+              aria-label="Exit Pure View"
             >
               <X className="w-3.5 h-3.5" />
               <span>Exit Pure View</span>
@@ -794,6 +798,7 @@ export default function App() {
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
             }`}
             title="Zoom In"
+            aria-label="Zoom In"
           >
             +
           </button>
@@ -806,6 +811,7 @@ export default function App() {
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
             }`}
             title="Zoom Out"
+            aria-label="Zoom Out"
           >
             −
           </button>
@@ -818,6 +824,7 @@ export default function App() {
                 : 'hover:bg-neutral-200 hover:text-neutral-950'
             }`}
             title="Reset to India Center"
+            aria-label="Reset to India Center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>

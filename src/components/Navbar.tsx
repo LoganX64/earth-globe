@@ -89,6 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : "rounded-lg border border-dashed bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-300"
             }`}
             title="Toggle Globe Customizer and Cartography HUD"
+            aria-label="Toggle Globe Customizer and Cartography HUD"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Menu &amp; Controls</span>
@@ -161,6 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : "rounded-lg border border-dashed border-neutral-300 bg-white text-neutral-700 hover:text-neutral-950"
             }`}
             title="Open quick menu"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
               <X className="w-4 h-4" />
@@ -192,6 +194,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : "rounded-lg border border-dashed bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-neutral-300"
               }`}
               title={
+                mapThemeIsDark
+                  ? "Switch Map to Light Theme"
+                  : "Switch Map to Dark Theme"
+              }
+              aria-label={
                 mapThemeIsDark
                   ? "Switch Map to Light Theme"
                   : "Switch Map to Dark Theme"

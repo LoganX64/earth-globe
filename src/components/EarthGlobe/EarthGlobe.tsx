@@ -14,6 +14,7 @@ import React, {
   useState,
   useImperativeHandle,
   forwardRef,
+  useMemo,
 } from 'react';
 import {
   geoOrthographic,
@@ -140,17 +141,58 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     })();
 
     // Color theme resolution
-    const activeTheme: GlobeThemeColors = {
-      ...(THEME_PRESETS[resolvedThemeId] || THEME_PRESETS[DEFAULT_THEME_ID]),
-      ...customColors,
-    };
+    const activeTheme: GlobeThemeColors = useMemo(
+      () => ({
+        ...(THEME_PRESETS[resolvedThemeId] || THEME_PRESETS[DEFAULT_THEME_ID]),
+        ...customColors,
+      }),
+      [resolvedThemeId, customColors]
+    );
 
     // Normalize highlighted state(s) array - empty if null or empty string
-    const highlightedStatesList = Array.isArray(highlightState)
-      ? highlightState.map((s) => s?.toLowerCase().trim()).filter(Boolean)
-      : highlightState && typeof highlightState === 'string' && highlightState.trim()
-      ? [highlightState.toLowerCase().trim()]
-      : [];
+    const highlightedStatesList = useMemo(
+      () =>
+        Array.isArray(highlightState)
+          ? highlightState.map((s) => s?.toLowerCase().trim()).filter(Boolean)
+          : highlightState && typeof highlightState === 'string' && highlightState.trim()
+          ? [highlightState.toLowerCase().trim()]
+          : [],
+      [highlightState]
+    );
+
+    // Dynamic render configuration ref: allows the 60fps canvas loop to read
+    // latest props every frame without cancelling and restarting the RAF loop.
+    const renderPropsRef = useRef({
+      activeTheme,
+      autoRotateSpeed,
+      rotateDirection,
+      showGraticule,
+      showAtmosphere,
+      showStars,
+      showStateBorders,
+      highlightedStatesList,
+      highlightStateColor,
+      onlyIndia,
+      markers,
+      selectedMarkerId,
+      highlightCountry,
+    });
+
+    renderPropsRef.current = {
+      activeTheme,
+      autoRotateSpeed,
+      rotateDirection,
+      showGraticule,
+      showAtmosphere,
+      showStars,
+      showStateBorders,
+      highlightedStatesList,
+      highlightStateColor,
+      onlyIndia,
+      markers,
+      selectedMarkerId,
+      highlightCountry,
+    };
 
     // Globe transformation state: rotation is [longitude, latitude, roll]
     const rotationRef = useRef<[number, number, number]>([
@@ -304,6 +346,22 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       const render = (now: number) => {
         const deltaTime = (now - lastTimestamp) / 1000;
         lastTimestamp = now;
+
+        const {
+          activeTheme,
+          autoRotateSpeed,
+          rotateDirection,
+          showGraticule,
+          showAtmosphere,
+          showStars,
+          showStateBorders,
+          highlightedStatesList,
+          highlightStateColor,
+          onlyIndia,
+          markers,
+          selectedMarkerId,
+          highlightCountry,
+        } = renderPropsRef.current;
 
         // Handle fly-to animation
         if (animationRef.current) {
@@ -917,22 +975,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
 
       animationFrameId = requestAnimationFrame(render);
       return () => cancelAnimationFrame(animationFrameId);
-    }, [
-      dimensions,
-      activeTheme,
-      autoRotateSpeed,
-      rotateDirection,
-      showGraticule,
-      showAtmosphere,
-      showStars,
-      showStateBorders,
-      highlightState,
-      highlightStateColor,
-      onlyIndia,
-      markers,
-      selectedMarkerId,
-      highlightCountry,
-    ]);
+    }, [dimensions]);
 
     // Pointer Drag Handlers
     const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -995,8 +1038,9 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         const centerCoord: [number, number] = [-currentRot[0], -currentRot[1]];
 
         let foundMarker: GlobeMarker | null = null;
+        const currentMarkers = renderPropsRef.current.markers;
 
-        for (const marker of markers) {
+        for (const marker of currentMarkers) {
           const dist = geoDistance(centerCoord, [marker.lng, marker.lat]);
           if (dist >= Math.PI / 2) continue;
 
