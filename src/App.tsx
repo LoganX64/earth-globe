@@ -414,6 +414,35 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSelectLocation, isEmbedMode, handleToggleDarkMode]);
 
+  // Sync selections to embed view via postMessage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const message = activeMarker
+      ? {
+          type: 'earth-globe',
+          command: 'setMarker',
+          payload: { marker: activeMarker },
+        }
+      : { type: 'earth-globe', command: 'clearMarker' };
+
+    window.postMessage(message, '*');
+  }, [activeMarker]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const message = highlightState
+      ? {
+          type: 'earth-globe',
+          command: 'setHighlightState',
+          payload: { stateName: highlightState },
+        }
+      : { type: 'earth-globe', command: 'clearHighlightState' };
+
+    window.postMessage(message, '*');
+  }, [highlightState]);
+
   // =========================================================================
   // PURE EMBED / COMPONENT MODE: ONLY THE GLOBE AND MAP WITH SIZE CUSTOMIZATION
   // =========================================================================
