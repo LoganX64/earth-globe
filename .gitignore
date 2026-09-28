@@ -1,8 +1,51 @@
+# Dependencies
 node_modules/
-build/
+.pnp
+.pnp.js
+
+# Production / Build Output
 dist/
-coverage/
-.DS_Store
+dist-ssr/
+build/
+
+# Vercel
+.vercel/
+
+# Environment files & secrets
+.env
+.env.*
+.env*.local
+!.env.example
+
+# Logs
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & IDE directories
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Caches & Test
+coverage/
+*.tsbuildinfo
+.eslintcache
+.vite/
+
+# Project internal
 plan-tracker.md
