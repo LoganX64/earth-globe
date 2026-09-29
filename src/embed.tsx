@@ -277,7 +277,9 @@ function EmbedApp() {
           break;
         case "toggleAutoRotate":
           globeRef.current?.toggleAutoRotate();
-          setAutoRotate(globeRef.current?.getRotation ? true : true);
+          // Mirror the globe's post-toggle flag into React state, otherwise the
+          // sync effect in EarthGlobe overwrites it on the next render.
+          setAutoRotate(globeRef.current?.getIsAutoRotating() ?? true);
           break;
         case "setZoom":
           if (payload?.zoom != null) {

@@ -38,6 +38,7 @@ export interface EarthGlobeRef {
   focusState: (stateName: string, zoomMultiplier?: number) => void;
   resetView: () => void;
   toggleAutoRotate: () => void;
+  getIsAutoRotating: () => boolean;
   getZoom: () => number;
   setZoom: (zoom: number) => void;
   getRotation: () => [number, number];
@@ -333,6 +334,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       toggleAutoRotate: () => {
         isAutoRotatingRef.current = !isAutoRotatingRef.current;
       },
+      getIsAutoRotating: () => isAutoRotatingRef.current,
       getZoom: () => zoomRef.current,
       setZoom: (z: number) => {
         zoomRef.current = Math.min(maxZoom, Math.max(minZoom, z));

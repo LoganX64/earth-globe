@@ -8,7 +8,7 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 
 - **Orthographic 3D globe** rendered per-frame on canvas — official state borders, J&K, Ladakh and the outer boundary
 - **Auto-rotation** with adjustable speed, direction and presets (drag to spin, scroll to zoom)
-- **11 cartography themes** — 6 light, 5 dark, with a live light/dark switch
+- **12 cartography themes** — 6 light, 6 dark, with a live light/dark switch
 - **State highlight** — hover or click a state on the globe, or pick from the customizer
 - **Location pins & search** — built-in Indian cities plus worldwide geocoding via OpenStreetMap Nominatim, with an offline fallback list
 - **Layer toggles** — graticule, atmosphere, starfield, state borders, isolated India map
@@ -17,9 +17,10 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 
 ## Tech stack
 
-React 19 · Vite · TypeScript · Tailwind CSS v4 · d3-geo · canvas 2D
+React 19 · Vite · TypeScript · Tailwind CSS v4 · d3-geo + topojson · canvas 2D
 
 No backend, no database, no API keys. Everything ships as static files.
+Settings persist to `localStorage`; URL params always win over saved values.
 
 ## Run locally
 
@@ -42,7 +43,10 @@ pnpm run preview   # serve the production build
 
 **None.** The app requires no API keys or env configuration — cloning and `pnpm install` is all you need.
 
-The only network call is keyless geocoding against the public OSM Nominatim service (`src/services/geocoding.ts`), with a built-in offline fallback list of Indian cities.
+Two outbound network calls:
+
+- **Keyless geocoding** against the public OSM Nominatim service (`src/services/geocoding.ts`), with a built-in offline fallback list of Indian cities.
+- **Vercel Analytics** (`@vercel/analytics`), injected in both `App.tsx` and `embed.tsx`. It is a no-op when the site is not deployed on Vercel, and can be removed by deleting the `inject()` call.
 
 ## Embedding
 
@@ -55,26 +59,28 @@ The only network call is keyless geocoding against the public OSM Nominatim serv
 
 ## URL parameters
 
-Available on both the main app and `embed.html`.
+Supported on both the main app and `embed.html`, unless marked *embed only*.
 
 | Param | Effect |
 |---|---|
-| `?embed=true` | Pure globe view, no UI chrome |
-| `?onlyIndia=true` | Render only the Indian territory |
-| `?marker=mumbai` | Pre-select a location pin (`mumbai`, `thrissur`, `ulhasnagar`, or any id from `src/data/defaultLocations.ts`) |
-| `?lat=` / `?lng=` | Place a pin at explicit coordinates |
+| `?embed=true` | Pure globe view, no UI chrome. `?pure=true` and `?mode=embed` are aliases |
+| `?onlyIndia=true` | Render only the Indian territory. `?indiaOnly=true` is an alias |
+| `?marker=<id>` | Pre-select a location pin. Any `id` from `src/data/defaultLocations.ts` works, e.g. `mumbai-maharashtra`, `thrissur-kerala`, `srinagar-jk`, `tokyo` |
+| `?lat=` / `?lng=` | Place a pin at explicit coordinates (must be given as a pair) |
+| `?name=` / `?region=` | Label and region for a custom `lat`/`lng` pin |
 | `?state=Kerala` | Pre-highlight a state |
-| `?theme=<id>` | Pre-select one of the 11 themes |
-| `?mode=light` / `?mode=dark` | Force a light or dark map |
-| `?speed=2` | Auto-rotate speed multiplier (`0.1`–`5.0`) |
+| `?theme=<id>` | Pre-select one of the 12 themes |
+| `?mode=light` / `?mode=dark` | Force a light or dark map. Constrains `theme` to the matching group |
+| `?lightTheme=<id>` / `?darkTheme=<id>` | Theme to use when the mode flips to light or dark |
+| `?speed=2` | Auto-rotate speed multiplier. Not clamped — `0` stops rotation, and the slider's own range is `0.0`–`4.0` |
 | `?rotate=false` | Start with rotation paused |
 | `?drag=false` | Disable drag to rotate |
 | `?borders=false` / `?grid=false` / `?atmosphere=false` / `?stars=false` | Toggle layer visibility |
-| `?zoomLevel=2` | How close the globe starts (`0.65`–`3.8`, default `1.1`) |
-| `?zoomButtons=false` | Hide the floating +/− zoom buttons |
-| `?scrollZoom=false` | Disable zooming on mouse scroll / trackpad |
-| `?zoom=false` | Disable zooming entirely (both buttons and scroll) |
-| `?width=` / `?height=` | Embed dimensions, e.g. `500px` or `100%` |
+| `?width=` / `?height=` | Embed dimensions, e.g. `500px` or `100%`. `?size=500px` sets both at once |
+| `?zoomLevel=2` | *embed only* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped). The main app starts at a fixed `1.2` |
+| `?zoom=false` | *embed only* — disable zooming entirely (both buttons and scroll) |
+| `?zoomButtons=false` | *embed only* — hide the floating +/− zoom buttons |
+| `?scrollZoom=false` | *embed only* — disable zooming on mouse scroll / trackpad |
 
 To lock the globe at a fixed size, combine the zoom parameters:
 
