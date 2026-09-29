@@ -1,15 +1,15 @@
 /**
- * Background override parsing and validation.
+ * Backdrop override parsing and validation.
  *
- * The globe's own background colour is a per-theme field, but a host may want
- * to drop the theme's tinted backdrop for a neutral one, or replace it with a
- * colour of their choosing. Both are expressed by a single `background` query
- * parameter with three values:
+ * A theme carries its own background colour, but a host may want a neutral
+ * backdrop or a colour of their own. Three parameters cover it, and the colour
+ * is kept per polarity so light and dark themes never inherit each other's:
  *
- *   (absent)   use the active theme's background
- *   false      neutral backdrop: pure white for light themes, pure black for
- *              dark themes
- *   #rrggbb    a custom colour
+ *   background=false        drop the theme's background for a neutral one —
+ *                           pure white under a light theme, pure black under a
+ *                           dark one
+ *   lightBackground=#rrggbb  colour used whenever a LIGHT theme is active
+ *   darkBackground=#rrggbb   colour used whenever a DARK theme is active
  *
  * Because the "off" case is a solid colour rather than transparency, the canvas
  * never needs an alpha channel and the page around the globe is left alone.
@@ -19,14 +19,8 @@
  * and the code generator so the three surfaces can never disagree.
  */
 
-export interface BackgroundSetting {
-  /** False means "use a neutral backdrop instead of the theme's own". */
-  show: boolean;
-  /** Normalised 6-digit hex, or null to fall back to the theme's own colour. */
-  color: string | null;
-}
-
-const TRANSPARENT_VALUES = new Set(['false', 'none', 'transparent']);
+/** Parameters that turn the background off, whatever their spelling. */
+const OFF_VALUES = new Set(['false', 'none', 'transparent']);
 
 /**
  * The neutral backdrop used when the theme's own background is switched off.
@@ -38,8 +32,8 @@ export const neutralBackground = (isDark: boolean): string =>
 
 /**
  * Normalise `#rgb`, `rgb` or `#rrggbb` to lowercase 6-digit hex.
- * Returns null for anything else, including the keyword `transparent`, which is
- * handled as a "use the neutral backdrop" signal rather than a colour.
+ * Returns null for anything else, including the `off` keywords, which are
+ * handled as a show/hide signal rather than a colour.
  */
 export const normalizeBackgroundColor = (raw: unknown): string | null => {
   if (typeof raw !== 'string') return null;
@@ -61,23 +55,29 @@ export const normalizeBackgroundColor = (raw: unknown): string | null => {
   return null;
 };
 
-/** Parse the `background` query parameter into a show/colour pair. */
-export const parseBackgroundParam = (
-  raw: string | null | undefined,
-): BackgroundSetting => {
-  if (raw == null) return { show: true, color: null };
-
-  const value = raw.trim().toLowerCase();
-  if (value === '' || value === 'true') return { show: true, color: null };
-  if (TRANSPARENT_VALUES.has(value)) return { show: false, color: null };
-
-  const color = normalizeBackgroundColor(raw);
-  return color ? { show: true, color } : { show: true, color: null };
-};
-
-/** True when the parameter was supplied at all (and not merely blank). */
-export const hasBackgroundParam = (raw: string | null | undefined): boolean =>
+/** True when a parameter was supplied at all (and not merely blank). */
+export const hasParam = (raw: string | null | undefined): boolean =>
   raw != null && raw.trim() !== '';
+
+/**
+ * The `background` parameter controls visibility only. Anything other than one
+ * of the off keywords leaves the theme's own background in place — a hex here
+ * is not a colour, so use `lightBackground` / `darkBackground` for that.
+ */
+export const parseShowBackground = (
+  raw: string | null | undefined,
+): boolean => !OFF_VALUES.has((raw ?? '').trim().toLowerCase());
+
+/**
+ * Resolve one polarity's colour, URL parameter first and saved settings second.
+ * A supplied-but-invalid parameter falls through to the saved value rather than
+ * silently clearing it.
+ */
+export const resolveBackgroundColor = (
+  urlValue: string | null | undefined,
+  savedValue: unknown,
+): string | null =>
+  normalizeBackgroundColor(urlValue) ?? normalizeBackgroundColor(savedValue);
 
 /**
  * Colour to paint the area AROUND the globe, as distinct from the canvas.
@@ -93,10 +93,9 @@ export const hasBackgroundParam = (raw: string | null | undefined): boolean =>
  * colour in place".
  */
 export const resolveFrameBackground = (
-  setting: BackgroundSetting,
+  show: boolean,
   isDark: boolean,
-): string | undefined =>
-  setting.show ? undefined : neutralBackground(isDark);
+): string | undefined => (show ? undefined : neutralBackground(isDark));
 
 /**
  * Value for an <input type="color">, which only accepts 6-digit hex. Falls

@@ -65,8 +65,9 @@ interface CodeExportModalProps {
   isDark?: boolean;
   showStars?: boolean;
   showBackground?: boolean;
-  /** null means the embed follows its own theme's background colour */
-  backgroundColor?: string | null;
+  /** Per-polarity custom backdrop. Only the one matching the embed's theme is emitted. */
+  lightBackground?: string | null;
+  darkBackground?: string | null;
   showGraticule?: boolean;
   showAtmosphere?: boolean;
   showStateBorders?: boolean;
@@ -86,7 +87,8 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   isDark = false,
   showStars = true,
   showBackground = true,
-  backgroundColor = null,
+  lightBackground = null,
+  darkBackground = null,
   showGraticule = true,
   showAtmosphere = true,
   showStateBorders = true,
@@ -213,13 +215,18 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
   }&drag=${embedDrag}&zoom=${embedZoom}&zoomButtons=${embedZoomButtons}&scrollZoom=${embedScrollZoom}&zoomLevel=${embedZoomLevel.toFixed(2)}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
-  // `background` is one param with three meanings, so it is only emitted when
-  // it differs from the default of "follow the theme".
+  // `background` is the visibility switch. Colours are per polarity, and this
+  // embed pins one mode, so only the matching slot is worth emitting — the
+  // other would never apply unless a host later drives it with setTheme.
   const backgroundParam = !showBackground
     ? "&background=false"
-    : backgroundColor
-      ? `&background=${encodeURIComponent(backgroundColor)}`
-      : "";
+    : embedMode === "light"
+      ? lightBackground
+        ? `&lightBackground=${encodeURIComponent(lightBackground)}`
+        : ""
+      : darkBackground
+        ? `&darkBackground=${encodeURIComponent(darkBackground)}`
+        : "";
 
   // What the HOST page paints behind the iframe element. The neutral backdrop
   // has to reach the host's snippet too, otherwise the globe sits in a

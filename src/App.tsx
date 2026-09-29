@@ -23,9 +23,9 @@ import {
   POPULAR_INDIAN_LOCATIONS,
 } from "./data/defaultLocations";
 import {
-  hasBackgroundParam,
-  normalizeBackgroundColor,
-  parseBackgroundParam,
+  hasParam,
+  parseShowBackground,
+  resolveBackgroundColor,
   resolveFrameBackground,
 } from "./components/EarthGlobe/background";
 import { CityDetailsCard } from "./components/CityDetailsCard";
@@ -51,7 +51,8 @@ type SavedMapSettings = {
   showAtmosphere?: boolean;
   showStars?: boolean;
   showBackground?: boolean;
-  backgroundColor?: string;
+  lightBackground?: string;
+  darkBackground?: string;
   customizerOpen?: boolean;
 };
 
@@ -245,26 +246,31 @@ export default function App() {
     resolveBoolSetting("stars", savedSettings.showStars, true),
   );
 
-  // `?background` is one parameter with three meanings: absent follows the
-  // theme, `false` hides it, a hex value replaces it. A supplied parameter
-  // deliberately outranks saved settings for BOTH halves, so `?background=false`
-  // cannot be defeated by a previously saved custom colour.
+  // `?background` is the visibility switch only: false/none/transparent swap
+  // the theme's background for a neutral one. Colours live in their own
+  // per-polarity parameters so light and dark themes never inherit each other's
+  // value, mirroring how lightTheme/darkTheme are kept apart.
   const backgroundParam = urlParams?.get("background");
-  const backgroundFromUrl = parseBackgroundParam(backgroundParam);
-  const backgroundParamGiven = hasBackgroundParam(backgroundParam);
+  const backgroundParamGiven = hasParam(backgroundParam);
 
   const [showBackground, setShowBackground] = useState<boolean>(
     backgroundParamGiven
-      ? backgroundFromUrl.show
+      ? parseShowBackground(backgroundParam)
       : typeof savedSettings.showBackground === "boolean"
         ? savedSettings.showBackground
         : true,
   );
-  const [backgroundColor, setBackgroundColor] = useState<string | null>(
-    backgroundFromUrl.color ??
-      (backgroundParamGiven
-        ? null
-        : normalizeBackgroundColor(savedSettings.backgroundColor)),
+  const [lightBackground, setLightBackground] = useState<string | null>(() =>
+    resolveBackgroundColor(
+      urlParams?.get("lightBackground"),
+      savedSettings.lightBackground,
+    ),
+  );
+  const [darkBackground, setDarkBackground] = useState<string | null>(() =>
+    resolveBackgroundColor(
+      urlParams?.get("darkBackground"),
+      savedSettings.darkBackground,
+    ),
   );
   const [showSecondaryMarkers, setShowSecondaryMarkers] =
     useState<boolean>(false);
@@ -424,7 +430,8 @@ export default function App() {
           showAtmosphere,
           showStars,
           showBackground,
-          backgroundColor,
+          lightBackground,
+          darkBackground,
           customizerOpen: isControlsOpen,
         }),
       );
@@ -445,26 +452,29 @@ export default function App() {
     showAtmosphere,
     showStars,
     showBackground,
-    backgroundColor,
+    lightBackground,
+    darkBackground,
     isControlsOpen,
   ]);
 
   const currentThemeConfig =
     THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
 
-  // Only ever "transparent" — a custom colour is painted on the canvas alone.
-  // Leaving this undefined keeps every theme-aware background class in charge.
+  // Only ever the neutral colour — a custom colour is painted on the canvas
+  // alone. Leaving this undefined keeps every theme-aware background class in
+  // charge.
   const frameBackground = resolveFrameBackground(
-    {
-      show: showBackground,
-      color: backgroundColor,
-    },
+    showBackground,
     currentThemeConfig.isDark,
   );
 
   // Map theme darkness — drives ONLY the globe and pure-view overlays.
   // The site chrome itself is always light mode.
   const isDark = currentThemeConfig.isDark;
+
+  // The custom colour belongs to whichever polarity is on screen, so a colour
+  // set while a dark theme is active is never used by a light one.
+  const activeBackgroundColor = isDark ? darkBackground : lightBackground;
 
   // Theme switch changes ONLY the map theme; website UI never leaves light mode.
   // Flips between the two palettes bound in the Globe Customizer, falling back to
@@ -683,7 +693,7 @@ export default function App() {
             showAtmosphere={showAtmosphere}
             showStars={showStars}
             showBackground={showBackground}
-            backgroundColor={backgroundColor}
+            backgroundColor={activeBackgroundColor}
             initialCenter={
               activeMarker
                 ? [activeMarker.lng, activeMarker.lat]
@@ -814,7 +824,7 @@ export default function App() {
           showAtmosphere={showAtmosphere}
           showStars={showStars}
           showBackground={showBackground}
-          backgroundColor={backgroundColor}
+          backgroundColor={activeBackgroundColor}
           initialCenter={
             activeMarker
               ? [activeMarker.lng, activeMarker.lat]
@@ -901,10 +911,15 @@ export default function App() {
               onToggleAtmosphere={() => setShowAtmosphere((prev) => !prev)}
               showStars={showStars}
               showBackground={showBackground}
-              backgroundColor={backgroundColor}
+              backgroundColor={activeBackgroundColor}
               onToggleStars={() => setShowStars((prev) => !prev)}
               onToggleShowBackground={() => setShowBackground((prev) => !prev)}
-              onBackgroundColorChange={setBackgroundColor}
+              // The picker edits whichever polarity is on screen, so a colour
+              // chosen under a dark theme is never reused by a light one.
+              onBackgroundColorChange={(color) => {
+                if (isDark) setDarkBackground(color);
+                else setLightBackground(color);
+              }}
               onlyIndia={onlyIndia}
               onToggleOnlyIndia={() => setOnlyIndia((prev) => !prev)}
               onZoomIn={handleZoomIn}
@@ -1102,7 +1117,8 @@ export default function App() {
         isDark={isDark}
         showStars={showStars}
         showBackground={showBackground}
-        backgroundColor={backgroundColor}
+        lightBackground={lightBackground}
+        darkBackground={darkBackground}
         showGraticule={showGraticule}
         showAtmosphere={showAtmosphere}
         showStateBorders={showStateBorders}

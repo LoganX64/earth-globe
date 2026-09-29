@@ -802,16 +802,21 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
               </span>
             </button>
 
-            {/* Custom background colour. Kept mounted while the background is
-                hidden so the choice survives toggling. */}
+            {/* Custom backdrop colour, kept per polarity: what you pick under a
+                dark theme is never reused by a light one. */}
             <div
               className={`col-span-2 px-2.5 py-2 rounded-lg border flex items-center justify-between gap-2 ${
                 showBackground ? buttonInactive : 'opacity-50'
               }`}
             >
-              <span className="text-[11px] font-medium shrink-0">
-                {backgroundColor ? 'Custom colour' : 'Theme colour'}
-              </span>
+              <div className="min-w-0">
+                <div className="text-[11px] font-medium truncate">
+                  {backgroundColor ? 'Custom colour' : 'Theme colour'}
+                </div>
+                <div className="text-[9px] opacity-60 font-mono">
+                  {mapThemeIsDark ? 'DARK THEMES ONLY' : 'LIGHT THEMES ONLY'}
+                </div>
+              </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <input
                   type="color"
@@ -823,14 +828,14 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                   disabled={!showBackground}
                   onChange={(e) => onBackgroundColorChange(e.target.value)}
                   className="w-7 h-7 rounded-md border border-black/20 bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
-                  title="Custom background colour (globe canvas only)"
-                  aria-label="Custom background colour"
+                  title={`Custom background colour for ${mapThemeIsDark ? 'dark' : 'light'} themes`}
+                  aria-label={`Custom background colour for ${mapThemeIsDark ? 'dark' : 'light'} themes`}
                 />
                 {backgroundColor && (
                   <button
                     onClick={() => onBackgroundColorChange(null)}
                     className={`text-[10px] px-1.5 py-1 rounded font-semibold transition-colors cursor-pointer ${actionLinkClass}`}
-                    title="Use the active theme's own background colour"
+                    title={`Use the theme's own background for ${mapThemeIsDark ? 'dark' : 'light'} themes`}
                   >
                     Reset
                   </button>

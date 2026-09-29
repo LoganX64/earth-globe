@@ -64,19 +64,36 @@ embed.html?zoomLevel=2.0&zoomButtons=false&scrollZoom=false
 | `grid` | `true` / `false` | `true` | Show lat/lng graticule |
 | `atmosphere` | `true` / `false` | `true` | Show atmosphere glow |
 | `stars` | `true` / `false` | `true` | Show starfield |
-| `background` | absent / `false` / hex | theme's own | One param, three meanings — see below |
+| `background` | absent / `false` | theme's own | Swap the theme's background for a neutral one |
+| `lightBackground` | hex | — | Custom backdrop colour used only by light themes |
+| `darkBackground` | hex | — | Custom backdrop colour used only by dark themes |
 
 #### `background`
 
 | Value | Result |
 |---|---|
-| absent, or `true` | The active theme's own background |
+| absent, or anything other than an off keyword | The active theme's own background |
 | `false`, `none` or `transparent` | A neutral backdrop: pure white for light themes, pure black for dark themes |
-| `#rrggbb` or `#rgb` (e.g. `%23ffffff`, or the `ffffff` shorthand) | A custom colour |
+
+The neutral backdrop also replaces the page colour around the globe, so a small
+embed shows no letterbox of the theme's own background.
+
+#### `lightBackground` / `darkBackground`
+
+Custom backdrop colours, **kept separate per polarity** so a dark theme never
+inherits a light theme's colour and vice versa. Each accepts `#rrggbb` or
+`#rgb` — e.g. `%230a0a0a`, or the `0a0a0a` shorthand. Leave one out to let
+themes of that polarity keep their own background.
+
+```html
+<iframe src="https://your-domain.com/embed.html?theme=black-and-white&darkBackground=%230a0a0a&lightBackground=%23ffffff">
+```
+
+Supplying both is what lets a single embed stay correct if you later drive it
+with `setTheme` into the other polarity.
 
 Notes:
 
-- The neutral backdrop also replaces the page colour around the globe, so a small embed shows no letterbox of the theme's own background.
 - A **custom colour applies to the globe's canvas only** — the page and the area around the globe keep the theme's own colour, so picking a colour never repaints the surrounding UI.
 - `#` must be URL-encoded as `%23` in a query string. Colours are validated: anything unrecognised falls back to the theme's own background rather than being applied.
 - The backdrop is always an opaque solid colour — the globe's canvas has no alpha channel, so the page behind an embed never shows through. Set the `<iframe>` element's own `background` to match (the code generator does this for you) so the frame doesn't flash a different colour before the globe first paints.
@@ -235,9 +252,10 @@ send('setShowStars', { show: false });
 // (pure white under a light theme, pure black under a dark theme)
 send('setShowBackground', { show: false });
 
-// Custom backdrop colour, applied to the globe's canvas only.
-// null reverts to the theme's own background.
-send('setBackgroundColor', { color: '#ffffff' });
+// Custom backdrop colours, kept separate per polarity. null reverts that
+// polarity to the theme's own background.
+send('setDarkBackground', { color: '#0a0a0a' });
+send('setLightBackground', { color: '#ffffff' });
 
 // Toggle auto-rotate
 send('setAutoRotate', { enabled: false });

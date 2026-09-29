@@ -15,7 +15,7 @@ import {
 } from "./components/EarthGlobe/themePresets";
 import {
   normalizeBackgroundColor,
-  parseBackgroundParam,
+  parseShowBackground,
   resolveFrameBackground,
 } from "./components/EarthGlobe/background";
 import { inject } from "@vercel/analytics";
@@ -132,8 +132,14 @@ const initialShowStateBorders = urlParams.get("borders") !== "false";
 const initialShowGraticule = urlParams.get("grid") !== "false";
 const initialShowAtmosphere = urlParams.get("atmosphere") !== "false";
 const initialShowStars = urlParams.get("stars") !== "false";
-const initialBackgroundSetting = parseBackgroundParam(
-  urlParams.get("background"),
+const initialShowBackground = parseShowBackground(urlParams.get("background"));
+// Colours are per polarity so a dark theme and a light theme can carry their
+// own, and neither inherits the other.
+const initialLightBackground = normalizeBackgroundColor(
+  urlParams.get("lightBackground"),
+);
+const initialDarkBackground = normalizeBackgroundColor(
+  urlParams.get("darkBackground"),
 );
 
 const getInitialMarker = (): GlobeMarker | null => {
@@ -194,11 +200,13 @@ function EmbedApp() {
     initialShowAtmosphere,
   );
   const [showStars, setShowStars] = useState<boolean>(initialShowStars);
-  const [showBackground, setShowBackground] = useState<boolean>(
-    initialBackgroundSetting.show,
+  const [showBackground, setShowBackground] =
+    useState<boolean>(initialShowBackground);
+  const [lightBackground, setLightBackground] = useState<string | null>(
+    initialLightBackground,
   );
-  const [backgroundColor, setBackgroundColor] = useState<string | null>(
-    initialBackgroundSetting.color,
+  const [darkBackground, setDarkBackground] = useState<string | null>(
+    initialDarkBackground,
   );
   const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(
     getInitialMarker,
@@ -318,8 +326,11 @@ function EmbedApp() {
         case "setShowBackground":
           setShowBackground(payload?.show ?? true);
           break;
-        case "setBackgroundColor":
-          setBackgroundColor(normalizeBackgroundColor(payload?.color));
+        case "setLightBackground":
+          setLightBackground(normalizeBackgroundColor(payload?.color));
+          break;
+        case "setDarkBackground":
+          setDarkBackground(normalizeBackgroundColor(payload?.color));
           break;
         case "setAutoRotate":
           setAutoRotate(payload?.enabled ?? true);
@@ -349,10 +360,8 @@ function EmbedApp() {
       className="w-full h-dvh flex items-center justify-center overflow-hidden relative transition-colors duration-500 overscroll-contain"
       style={{
         backgroundColor:
-          resolveFrameBackground(
-            { show: showBackground, color: backgroundColor },
-            isDark,
-          ) ?? currentThemeConfig.background,
+          resolveFrameBackground(showBackground, isDark) ??
+          currentThemeConfig.background,
       }}
     >
       <div
@@ -377,7 +386,7 @@ function EmbedApp() {
           showAtmosphere={showAtmosphere}
           showStars={showStars}
           showBackground={showBackground}
-          backgroundColor={backgroundColor}
+          backgroundColor={isDark ? darkBackground : lightBackground}
           initialCenter={
             activeMarker
               ? [activeMarker.lng, activeMarker.lat]
