@@ -44,6 +44,7 @@ type SavedMapSettings = {
   showGraticule?: boolean;
   showAtmosphere?: boolean;
   showStars?: boolean;
+  customizerOpen?: boolean;
 };
 
 const readSavedMapSettings = (): SavedMapSettings => {
@@ -313,7 +314,12 @@ export default function App() {
   const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(
     getInitialMarker,
   );
-  const [isControlsOpen, setIsControlsOpen] = useState<boolean>(true);
+  // Closed by default; a returning visitor gets their last choice back.
+  const [isControlsOpen, setIsControlsOpen] = useState<boolean>(
+    typeof savedSettings.customizerOpen === "boolean"
+      ? savedSettings.customizerOpen
+      : false,
+  );
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(
     Boolean(initialMarkerParam) || activeMarker !== null,
   );
@@ -387,6 +393,7 @@ export default function App() {
           showGraticule,
           showAtmosphere,
           showStars,
+          customizerOpen: isControlsOpen,
         }),
       );
     } catch {
@@ -405,6 +412,7 @@ export default function App() {
     showGraticule,
     showAtmosphere,
     showStars,
+    isControlsOpen,
   ]);
 
   const currentThemeConfig =
