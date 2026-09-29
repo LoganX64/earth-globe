@@ -15,6 +15,7 @@ import {
   Compass,
   ArrowRightLeft,
   Layers,
+  Square,
   X,
 } from 'lucide-react';
 import {
@@ -23,7 +24,9 @@ import {
   LIGHT_THEME_PRESETS,
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
+  DEFAULT_THEME_ID,
 } from './EarthGlobe/themePresets';
+import { toColorInputValue } from './EarthGlobe/background';
 import { GlobeMarker } from './EarthGlobe/types';
 import { ALL_INDIAN_STATES, POPULAR_INDIAN_LOCATIONS } from '../data/defaultLocations';
 import { LocationSearchBar } from './LocationSearchBar';
@@ -51,6 +54,11 @@ interface GlobeControlsProps {
   showAtmosphere: boolean;
   onToggleAtmosphere: () => void;
   showStars: boolean;
+  showBackground: boolean;
+  onToggleShowBackground: () => void;
+  /** null means "use the active theme's own background colour" */
+  backgroundColor: string | null;
+  onBackgroundColorChange: (color: string | null) => void;
   onToggleStars: () => void;
   onlyIndia?: boolean;
   onToggleOnlyIndia?: () => void;
@@ -86,6 +94,10 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
   showAtmosphere,
   onToggleAtmosphere,
   showStars,
+  showBackground,
+  onToggleShowBackground,
+  backgroundColor,
+  onBackgroundColorChange,
   onToggleStars,
   onlyIndia = false,
   onToggleOnlyIndia,
@@ -758,6 +770,73 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
                 {showStars ? 'ON' : 'OFF'}
               </span>
             </button>
+
+            {/* Background — swap the theme's tinted backdrop for a neutral one.
+                A custom colour is applied to the globe's canvas only, never to
+                this panel or the page around it. */}
+            <button
+              onClick={onToggleShowBackground}
+              className={`col-span-2 px-2.5 py-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                showBackground ? buttonActive : buttonInactive
+              }`}
+              title="Use a plain white (light themes) or black (dark themes) backdrop instead of the theme's own"
+            >
+              <div className="flex items-center gap-1.5">
+                <Square className="w-3.5 h-3.5" />
+                <span className="font-medium text-[11px]">Background</span>
+              </div>
+              <span
+                className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                  showBackground
+                    ? isDark
+                      ? 'bg-slate-950/45 text-slate-950'
+                      : 'bg-blue-800 text-white'
+                    : badgeOffClass
+                }`}
+              >
+                {showBackground
+                  ? 'THEME'
+                  : isDark
+                    ? 'BLACK'
+                    : 'WHITE'}
+              </span>
+            </button>
+
+            {/* Custom background colour. Kept mounted while the background is
+                hidden so the choice survives toggling. */}
+            <div
+              className={`col-span-2 px-2.5 py-2 rounded-lg border flex items-center justify-between gap-2 ${
+                showBackground ? buttonInactive : 'opacity-50'
+              }`}
+            >
+              <span className="text-[11px] font-medium shrink-0">
+                {backgroundColor ? 'Custom colour' : 'Theme colour'}
+              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <input
+                  type="color"
+                  value={toColorInputValue(
+                    backgroundColor,
+                    THEME_PRESETS[currentTheme]?.background ??
+                      THEME_PRESETS[DEFAULT_THEME_ID].background,
+                  )}
+                  disabled={!showBackground}
+                  onChange={(e) => onBackgroundColorChange(e.target.value)}
+                  className="w-7 h-7 rounded-md border border-black/20 bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
+                  title="Custom background colour (globe canvas only)"
+                  aria-label="Custom background colour"
+                />
+                {backgroundColor && (
+                  <button
+                    onClick={() => onBackgroundColorChange(null)}
+                    className={`text-[10px] px-1.5 py-1 rounded font-semibold transition-colors cursor-pointer ${actionLinkClass}`}
+                    title="Use the active theme's own background colour"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
 
             {/* Only India Map Toggle */}
             {onToggleOnlyIndia && (

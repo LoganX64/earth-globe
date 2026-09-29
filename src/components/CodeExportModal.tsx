@@ -64,6 +64,9 @@ interface CodeExportModalProps {
   onlyIndia?: boolean;
   isDark?: boolean;
   showStars?: boolean;
+  showBackground?: boolean;
+  /** null means the embed follows its own theme's background colour */
+  backgroundColor?: string | null;
   showGraticule?: boolean;
   showAtmosphere?: boolean;
   showStateBorders?: boolean;
@@ -82,6 +85,8 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   onlyIndia = true,
   isDark = false,
   showStars = true,
+  showBackground = true,
+  backgroundColor = null,
   showGraticule = true,
   showAtmosphere = true,
   showStateBorders = true,
@@ -208,8 +213,28 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
   }&drag=${embedDrag}&zoom=${embedZoom}&zoomButtons=${embedZoomButtons}&scrollZoom=${embedScrollZoom}&zoomLevel=${embedZoomLevel.toFixed(2)}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
 
+  // `background` is one param with three meanings, so it is only emitted when
+  // it differs from the default of "follow the theme".
+  const backgroundParam = !showBackground
+    ? "&background=false"
+    : backgroundColor
+      ? `&background=${encodeURIComponent(backgroundColor)}`
+      : "";
+
+  // What the HOST page paints behind the iframe element. The neutral backdrop
+  // has to reach the host's snippet too, otherwise the globe sits in a
+  // letterbox of the theme's own colour. A custom colour deliberately does NOT
+  // — inside the embed it is painted on the globe's canvas only.
+  const iframeBackground = !showBackground
+    ? embedMode === "light"
+      ? "#ffffff"
+      : "#000000"
+    : embedMode === "light"
+      ? "#f8fafc"
+      : "#000000";
+
   // Shared by both tabs — mirrors the component's current config
-  const embedSrc = `${baseSrc}${
+  const embedSrc = `${baseSrc}${backgroundParam}${
     activeMarker
       ? `&marker=${encodeURIComponent(activeMarker.id)}&name=${encodeURIComponent(activeMarker.name)}&lat=${activeMarker.lat.toFixed(4)}&lng=${activeMarker.lng.toFixed(4)}${
           activeMarker.region

@@ -64,6 +64,22 @@ embed.html?zoomLevel=2.0&zoomButtons=false&scrollZoom=false
 | `grid` | `true` / `false` | `true` | Show lat/lng graticule |
 | `atmosphere` | `true` / `false` | `true` | Show atmosphere glow |
 | `stars` | `true` / `false` | `true` | Show starfield |
+| `background` | absent / `false` / hex | theme's own | One param, three meanings — see below |
+
+#### `background`
+
+| Value | Result |
+|---|---|
+| absent, or `true` | The active theme's own background |
+| `false`, `none` or `transparent` | A neutral backdrop: pure white for light themes, pure black for dark themes |
+| `#rrggbb` or `#rgb` (e.g. `%23ffffff`, or the `ffffff` shorthand) | A custom colour |
+
+Notes:
+
+- The neutral backdrop also replaces the page colour around the globe, so a small embed shows no letterbox of the theme's own background.
+- A **custom colour applies to the globe's canvas only** — the page and the area around the globe keep the theme's own colour, so picking a colour never repaints the surrounding UI.
+- `#` must be URL-encoded as `%23` in a query string. Colours are validated: anything unrecognised falls back to the theme's own background rather than being applied.
+- The backdrop is always an opaque solid colour — the globe's canvas has no alpha channel, so the page behind an embed never shows through. Set the `<iframe>` element's own `background` to match (the code generator does this for you) so the frame doesn't flash a different colour before the globe first paints.
 
 ### Markers & Highlights
 
@@ -214,6 +230,14 @@ send('setShowStateBorders', { show: false });
 send('setShowGraticule', { show: false });
 send('setShowAtmosphere', { show: false });
 send('setShowStars', { show: false });
+
+// Drop the theme's tinted background for a neutral one
+// (pure white under a light theme, pure black under a dark theme)
+send('setShowBackground', { show: false });
+
+// Custom backdrop colour, applied to the globe's canvas only.
+// null reverts to the theme's own background.
+send('setBackgroundColor', { color: '#ffffff' });
 
 // Toggle auto-rotate
 send('setAutoRotate', { enabled: false });

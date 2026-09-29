@@ -12,6 +12,7 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 - **State highlight** — hover or click a state on the globe, or pick from the customizer
 - **Location pins & search** — built-in Indian cities plus worldwide geocoding via OpenStreetMap Nominatim, with an offline fallback list
 - **Layer toggles** — graticule, atmosphere, starfield, state borders, isolated India map
+- **Backdrop control** — keep a theme's background, swap it for a neutral white/black, or set a custom colour
 - **Embeddable** — zero-chrome iframe with configurable size, mode, layers and zoom behaviour
 - **Keyboard shortcuts** — `SPACE` pause/rotate · `X` clear pin · `ESC` close panel · `C` customizer · `T` light/dark · `R` reset view
 
@@ -76,6 +77,7 @@ Supported on both the main app and `embed.html`, unless marked *embed only*.
 | `?rotate=false` | Start with rotation paused |
 | `?drag=false` | Disable drag to rotate |
 | `?borders=false` / `?grid=false` / `?atmosphere=false` / `?stars=false` | Toggle layer visibility |
+| `?background=` | Backdrop behind the globe. Absent or `true` uses the theme's own colour, `false` swaps it for a neutral one (pure white under a light theme, pure black under a dark theme), or pass a hex value such as `%23ffffff` to set a custom colour — which applies to the globe's canvas only, never the page around it |
 | `?width=` / `?height=` | Embed dimensions, e.g. `500px` or `100%`. `?size=500px` sets both at once |
 | `?zoomLevel=2` | *embed only* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped). The main app starts at a fixed `1.2` |
 | `?zoom=false` | *embed only* — disable zooming entirely (both buttons and scroll) |

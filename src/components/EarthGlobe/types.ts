@@ -80,6 +80,10 @@ export interface EarthGlobeProps {
   showAtmosphere?: boolean;
   /** Display deep space star field (default: true) */
   showStars?: boolean;
+  /** Paint the theme's background behind the globe (default: true). When false the globe floats on a transparent canvas */
+  showBackground?: boolean;
+  /** Overrides the theme's background colour, applied to the canvas only (default: null). Ignored when showBackground is false */
+  backgroundColor?: string | null;
   /** When true, renders ONLY the India map on the globe sphere, omitting all other world landmasses */
   onlyIndia?: boolean;
   /** Highlight a specific Indian state or array of states on request (default: null, no predefined highlight) */

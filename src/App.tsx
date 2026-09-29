@@ -22,6 +22,12 @@ import {
   ULHASNAGAR_MARKER,
   POPULAR_INDIAN_LOCATIONS,
 } from "./data/defaultLocations";
+import {
+  hasBackgroundParam,
+  normalizeBackgroundColor,
+  parseBackgroundParam,
+  resolveFrameBackground,
+} from "./components/EarthGlobe/background";
 import { CityDetailsCard } from "./components/CityDetailsCard";
 import { GlobeControls } from "./components/GlobeControls";
 import { Navbar } from "./components/Navbar";
@@ -44,6 +50,8 @@ type SavedMapSettings = {
   showGraticule?: boolean;
   showAtmosphere?: boolean;
   showStars?: boolean;
+  showBackground?: boolean;
+  backgroundColor?: string;
   customizerOpen?: boolean;
 };
 
@@ -236,6 +244,28 @@ export default function App() {
   const [showStars, setShowStars] = useState<boolean>(
     resolveBoolSetting("stars", savedSettings.showStars, true),
   );
+
+  // `?background` is one parameter with three meanings: absent follows the
+  // theme, `false` hides it, a hex value replaces it. A supplied parameter
+  // deliberately outranks saved settings for BOTH halves, so `?background=false`
+  // cannot be defeated by a previously saved custom colour.
+  const backgroundParam = urlParams?.get("background");
+  const backgroundFromUrl = parseBackgroundParam(backgroundParam);
+  const backgroundParamGiven = hasBackgroundParam(backgroundParam);
+
+  const [showBackground, setShowBackground] = useState<boolean>(
+    backgroundParamGiven
+      ? backgroundFromUrl.show
+      : typeof savedSettings.showBackground === "boolean"
+        ? savedSettings.showBackground
+        : true,
+  );
+  const [backgroundColor, setBackgroundColor] = useState<string | null>(
+    backgroundFromUrl.color ??
+      (backgroundParamGiven
+        ? null
+        : normalizeBackgroundColor(savedSettings.backgroundColor)),
+  );
   const [showSecondaryMarkers, setShowSecondaryMarkers] =
     useState<boolean>(false);
 
@@ -393,6 +423,8 @@ export default function App() {
           showGraticule,
           showAtmosphere,
           showStars,
+          showBackground,
+          backgroundColor,
           customizerOpen: isControlsOpen,
         }),
       );
@@ -412,11 +444,23 @@ export default function App() {
     showGraticule,
     showAtmosphere,
     showStars,
+    showBackground,
+    backgroundColor,
     isControlsOpen,
   ]);
 
   const currentThemeConfig =
     THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
+
+  // Only ever "transparent" — a custom colour is painted on the canvas alone.
+  // Leaving this undefined keeps every theme-aware background class in charge.
+  const frameBackground = resolveFrameBackground(
+    {
+      show: showBackground,
+      color: backgroundColor,
+    },
+    currentThemeConfig.isDark,
+  );
 
   // Map theme darkness — drives ONLY the globe and pure-view overlays.
   // The site chrome itself is always light mode.
@@ -613,7 +657,9 @@ export default function App() {
     return (
       <div
         className="w-full h-dvh flex items-center justify-center overflow-hidden relative transition-colors duration-500 overscroll-contain"
-        style={{ backgroundColor: currentThemeConfig.background }}
+        style={{
+          backgroundColor: frameBackground ?? currentThemeConfig.background,
+        }}
       >
         <div
           style={{ width: formattedWidth, height: formattedHeight }}
@@ -636,6 +682,8 @@ export default function App() {
             showGraticule={showGraticule}
             showAtmosphere={showAtmosphere}
             showStars={showStars}
+            showBackground={showBackground}
+            backgroundColor={backgroundColor}
             initialCenter={
               activeMarker
                 ? [activeMarker.lng, activeMarker.lat]
@@ -713,7 +761,12 @@ export default function App() {
   // STANDARD INTERACTIVE APPLICATION DASHBOARD
   // =========================================================================
   return (
-    <div className="relative w-full h-dvh overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground">
+    <div
+      className="relative w-full h-dvh overflow-hidden flex flex-col transition-colors duration-500 font-sans bg-background text-foreground"
+      style={
+        frameBackground ? { backgroundColor: frameBackground } : undefined
+      }
+    >
       {/* 1. Header Navigation Bar - light chrome, or the dialogs' dark glass in dark mode */}
       <Navbar
         activeMarker={activeMarker}
@@ -760,6 +813,8 @@ export default function App() {
           showGraticule={showGraticule}
           showAtmosphere={showAtmosphere}
           showStars={showStars}
+          showBackground={showBackground}
+          backgroundColor={backgroundColor}
           initialCenter={
             activeMarker
               ? [activeMarker.lng, activeMarker.lat]
@@ -845,7 +900,11 @@ export default function App() {
               showAtmosphere={showAtmosphere}
               onToggleAtmosphere={() => setShowAtmosphere((prev) => !prev)}
               showStars={showStars}
+              showBackground={showBackground}
+              backgroundColor={backgroundColor}
               onToggleStars={() => setShowStars((prev) => !prev)}
+              onToggleShowBackground={() => setShowBackground((prev) => !prev)}
+              onBackgroundColorChange={setBackgroundColor}
               onlyIndia={onlyIndia}
               onToggleOnlyIndia={() => setOnlyIndia((prev) => !prev)}
               onZoomIn={handleZoomIn}
@@ -1042,6 +1101,8 @@ export default function App() {
         onlyIndia={onlyIndia}
         isDark={isDark}
         showStars={showStars}
+        showBackground={showBackground}
+        backgroundColor={backgroundColor}
         showGraticule={showGraticule}
         showAtmosphere={showAtmosphere}
         showStateBorders={showStateBorders}

@@ -31,6 +31,7 @@ import indiaOfficialGeo from '../../data/india-official.json';
 import indiaOuterBoundary from '../../data/india-outer-boundary.json';
 import indiaInternalBorders from '../../data/india-internal-borders.json';
 import { EarthGlobeProps, GlobeMarker, GlobeThemeColors, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL } from './types';
+import { neutralBackground } from './background';
 import { THEME_PRESETS, DEFAULT_THEME_ID, DEFAULT_DARK_THEME_ID, DEFAULT_LIGHT_THEME_ID } from './themePresets';
 
 export interface EarthGlobeRef {
@@ -117,6 +118,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       showGraticule = true,
       showAtmosphere = true,
       showStars = true,
+      showBackground = true,
+      backgroundColor = null,
       onlyIndia = false,
       className = '',
     },
@@ -170,6 +173,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       showGraticule,
       showAtmosphere,
       showStars,
+      showBackground,
+      backgroundColor,
       showStateBorders,
       highlightedStatesList,
       highlightStateColor,
@@ -186,6 +191,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       showGraticule,
       showAtmosphere,
       showStars,
+      showBackground,
+      backgroundColor,
       showStateBorders,
       highlightedStatesList,
       highlightStateColor,
@@ -366,6 +373,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           showGraticule,
           showAtmosphere,
           showStars,
+          showBackground,
+          backgroundColor,
           showStateBorders,
           highlightedStatesList,
           highlightStateColor,
@@ -439,8 +448,17 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         ctx.save();
         ctx.scale(dpr, dpr);
 
-        // Clear canvas with space background
-        ctx.fillStyle = activeTheme.background;
+        // Clear canvas with the space background. Switching the theme's own
+        // background off substitutes a neutral white/black backdrop rather than
+        // transparency, so the canvas keeps its opaque context and every frame
+        // is fully painted — no clearRect, and no letterbox showing through.
+        //
+        // backgroundColor is applied HERE and nowhere else on purpose: painting
+        // the wrapper as well recoloured the whole page and made the globe read
+        // as recoloured with it.
+        ctx.fillStyle = showBackground
+          ? backgroundColor || activeTheme.background
+          : neutralBackground(activeTheme.isDark);
         ctx.fillRect(0, 0, width, height);
 
         // Render cosmic starfield
@@ -452,6 +470,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const alphaMod =
               star.alpha *
               (0.65 + 0.35 * Math.sin(now * star.twinkleSpeed + star.x * 25));
+            // Polarity still predicts the backdrop even when the theme's own
+            // background is off, since that falls back to white or black.
             ctx.fillStyle = activeTheme.isDark
               ? `rgba(255, 255, 255, ${alphaMod})`
               : `rgba(24, 24, 27, ${alphaMod * 0.35})`;

@@ -13,6 +13,11 @@ import {
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
 } from "./components/EarthGlobe/themePresets";
+import {
+  normalizeBackgroundColor,
+  parseBackgroundParam,
+  resolveFrameBackground,
+} from "./components/EarthGlobe/background";
 import { inject } from "@vercel/analytics";
 import "./index.css";
 
@@ -127,6 +132,9 @@ const initialShowStateBorders = urlParams.get("borders") !== "false";
 const initialShowGraticule = urlParams.get("grid") !== "false";
 const initialShowAtmosphere = urlParams.get("atmosphere") !== "false";
 const initialShowStars = urlParams.get("stars") !== "false";
+const initialBackgroundSetting = parseBackgroundParam(
+  urlParams.get("background"),
+);
 
 const getInitialMarker = (): GlobeMarker | null => {
   const markerParam = urlParams.get("marker");
@@ -186,6 +194,12 @@ function EmbedApp() {
     initialShowAtmosphere,
   );
   const [showStars, setShowStars] = useState<boolean>(initialShowStars);
+  const [showBackground, setShowBackground] = useState<boolean>(
+    initialBackgroundSetting.show,
+  );
+  const [backgroundColor, setBackgroundColor] = useState<string | null>(
+    initialBackgroundSetting.color,
+  );
   const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(
     getInitialMarker,
   );
@@ -301,6 +315,12 @@ function EmbedApp() {
         case "setShowStars":
           setShowStars(payload?.show ?? true);
           break;
+        case "setShowBackground":
+          setShowBackground(payload?.show ?? true);
+          break;
+        case "setBackgroundColor":
+          setBackgroundColor(normalizeBackgroundColor(payload?.color));
+          break;
         case "setAutoRotate":
           setAutoRotate(payload?.enabled ?? true);
           break;
@@ -327,7 +347,13 @@ function EmbedApp() {
   return (
     <div
       className="w-full h-dvh flex items-center justify-center overflow-hidden relative transition-colors duration-500 overscroll-contain"
-      style={{ backgroundColor: currentThemeConfig.background }}
+      style={{
+        backgroundColor:
+          resolveFrameBackground(
+            { show: showBackground, color: backgroundColor },
+            isDark,
+          ) ?? currentThemeConfig.background,
+      }}
     >
       <div
         style={{ width: formattedWidth, height: formattedHeight }}
@@ -350,6 +376,8 @@ function EmbedApp() {
           showGraticule={showGraticule}
           showAtmosphere={showAtmosphere}
           showStars={showStars}
+          showBackground={showBackground}
+          backgroundColor={backgroundColor}
           initialCenter={
             activeMarker
               ? [activeMarker.lng, activeMarker.lat]
