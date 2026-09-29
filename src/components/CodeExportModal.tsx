@@ -250,7 +250,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   src="${embedSrc}"
   width="${embedSize === "100%" ? "100%" : `${embedSize}px`}"
   height="${embedSize === "100%" ? "600px" : `${embedSize}px`}"
-  style="border: none; border-radius: 16px; overflow: hidden; background: ${embedMode === "light" ? "#f8fafc" : "#000000"};"
+  style="border: none; border-radius: 16px; overflow: hidden; background: ${iframeBackground};"
   allow="fullscreen"
   title="India 3D Interactive Map Globe"
   aria-label="Interactive 3D India Globe"
@@ -644,6 +644,10 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                       src={embedSrc}
                       title="Embed preview"
                       className="w-full h-full border-0"
+                      // Match the generated snippet so the preview shows the
+                      // host's real backdrop rather than the modal's surface
+                      // while the embed first paints.
+                      style={{ backgroundColor: iframeBackground }}
                     />
                   </div>
                 </div>
