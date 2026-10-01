@@ -4,6 +4,8 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 
 **Live site:** [earth-globe-nine.vercel.app](https://earth-globe-nine.vercel.app)
 
+![Interactive 3D India globe](https://raw.githubusercontent.com/LoganX64/earth-globe/main/public/og-image.png)
+
 ## Features
 
 - **Orthographic 3D globe** rendered per-frame on canvas — official state borders, J&K, Ladakh and the outer boundary
@@ -47,7 +49,7 @@ pnpm run preview   # serve the production build
 Two outbound network calls:
 
 - **Keyless geocoding** against the public OSM Nominatim service (`src/services/geocoding.ts`), with a built-in offline fallback list of Indian cities.
-- **Vercel Analytics** (`@vercel/analytics`), injected in both `App.tsx` and `embed.tsx`. It is a no-op when the site is not deployed on Vercel, and can be removed by deleting the `inject()` call.
+- **Vercel Analytics** (`@vercel/analytics`), injected in both `main.tsx` and `embed.tsx`. It is a no-op when the site is not deployed on Vercel, and can be removed by deleting the `inject()` call.
 
 ## Embedding
 
@@ -66,7 +68,7 @@ Supported on both the main app and `embed.html`, unless marked *embed only*.
 |---|---|
 | `?embed=true` | Pure globe view, no UI chrome. `?pure=true` and `?mode=embed` are aliases |
 | `?onlyIndia=true` | Render only the Indian territory. `?indiaOnly=true` is an alias |
-| `?marker=<id>` | Pre-select a location pin. Any `id` from `src/data/defaultLocations.ts` works, e.g. `mumbai-maharashtra`, `thrissur-kerala`, `srinagar-jk`, `tokyo` |
+| `?marker=<id>` | Pre-select a location pin. Any `id` from `POPULAR_INDIAN_LOCATIONS` in `src/data/defaultLocations.ts` works on the main app, e.g. `mumbai-maharashtra`, `thrissur-kerala`, `srinagar-jk`. On `embed.html` there is no id lookup — any value drops a pin at India's centroid (20.5937, 78.9629) labelled with that value |
 | `?lat=` / `?lng=` | Place a pin at explicit coordinates (must be given as a pair) |
 | `?name=` / `?region=` | Label and region for a custom `lat`/`lng` pin |
 | `?state=Kerala` | Pre-highlight a state |
@@ -95,6 +97,7 @@ embed.html?zoomLevel=2.0&zoomButtons=false&scrollZoom=false
 
 ```
 src/
+├── main.tsx                    # Main entrypoint (analytics inject, React root)
 ├── App.tsx                     # App shell, state routing, keyboard shortcuts
 ├── embed.tsx                   # Chrome-free iframe entrypoint (postMessage API)
 ├── components/
@@ -111,6 +114,40 @@ src/
     └── geocoding.ts            # Nominatim search + local fallback
 ```
 
-## Deploy
+## Self-hosting
 
-Any static host works (Vercel, Netlify, GitHub Pages). For Vercel, `vercel.json` is already configured with the SPA rewrite rule.
+The build is fully static — no backend, no database, no API keys. Run
+`pnpm run build` and serve `dist/` from any static host.
+
+### Allow the globe to be embedded
+
+The globe is meant to sit inside other sites as an iframe, which browsers block
+by default. The host must send:
+
+```
+Content-Security-Policy: frame-ancestors *;
+```
+
+Without that header the browser refuses to frame the page: you get an empty
+iframe and nothing in your own console pointing at the cause. Once you have
+your own domains, narrow it:
+
+```
+Content-Security-Policy: frame-ancestors https://your-site.com;
+```
+
+`X-Frame-Options` is not an alternative — it has no permissive value that
+works. See [EMBED.md](EMBED.md#security-headers).
+
+### Rewrites
+
+`vercel.json` configures two:
+
+| Source | Destination | Why |
+|---|---|---|
+| `/embed` | `/embed.html` | Short, stable embed URL. Must match **before** the catch-all, or `/embed` silently serves the full app instead of the chrome-free globe |
+| `/(.*)` | `/index.html` | Serves the app for unknown paths |
+
+The catch-all is not there for routing — the app has no client-side router.
+On Netlify translate it to `_redirects`; on GitHub Pages drop it, or copy
+`index.html` to `404.html`.
