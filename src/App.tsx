@@ -288,7 +288,7 @@ export default function App() {
                   ? [activeMarker.lng, activeMarker.lat]
                   : [78.9629, 20.5937]
               }
-              initialZoom={1.2}
+initialZoom={1.0}
               className="w-full h-full"
             />
           </ErrorBoundary>
@@ -421,7 +421,7 @@ export default function App() {
                 ? [activeMarker.lng, activeMarker.lat]
                 : [78.9629, 20.5937]
             }
-            initialZoom={1.2}
+            initialZoom={1.0}
             onMarkerClick={(marker) => {
               handleSelectLocation(marker);
             }}

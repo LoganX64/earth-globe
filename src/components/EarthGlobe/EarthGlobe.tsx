@@ -114,6 +114,14 @@ const generateStars = (count: number): Star[] => {
 
 const STATIC_STARS = generateStars(280);
 
+/**
+ * Sphere radius as a fraction of the shorter viewport edge, per unit of zoom.
+ * The atmosphere halo is painted out to 1.2× the radius, so this is sized to
+ * keep the whole globe AND its glow on screen at zoom 1 — at 0.42 the halo ran
+ * past the edges and the default view read as zoomed in and cropped.
+ */
+const BASE_RADIUS_FACTOR = 0.38;
+
 export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
   (
     {
@@ -563,7 +571,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         }
 
         // Calculate projection — reconfigured, not rebuilt
-        const radius = Math.min(width, height) * 0.42 * zoomRef.current;
+        const radius = Math.min(width, height) * BASE_RADIUS_FACTOR * zoomRef.current;
         const cx = width / 2;
         const cy = height / 2;
 
@@ -1134,7 +1142,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       if (!canvas || isDraggingRef.current) return;
 
       const radius =
-        Math.min(dimensions.w, dimensions.h) * 0.42 * zoomRef.current;
+        Math.min(dimensions.w, dimensions.h) * BASE_RADIUS_FACTOR * zoomRef.current;
       const cx = dimensions.w / 2;
       const cy = dimensions.h / 2;
 
