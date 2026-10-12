@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { GlobeMarker } from "./EarthGlobe/types";
 import {
   Navigation,
@@ -42,6 +42,17 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
 }) => {
   const [istTime, setIstTime] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+  // Held so the "Copied!" reset can be cancelled on unmount; a timer that fires
+  // after the card closes calls setState on a dead component.
+  const copiedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedResetRef.current !== null) {
+        clearTimeout(copiedResetRef.current);
+      }
+    };
+  }, []);
 
   // Live IST (Indian Standard Time) Clock
   useEffect(() => {
@@ -63,11 +74,27 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
   }, []);
 
   const copyCoords = () => {
-    navigator.clipboard.writeText(
-      `${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}`,
-    );
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const text = `${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}`;
+    // `navigator.clipboard` rejects outside a secure context, and an
+    // unhandled rejection there would still have left "Copied!" on screen for
+    // two seconds claiming something that never happened. Only claim success
+    // once the write has actually resolved.
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        if (copiedResetRef.current !== null) {
+          clearTimeout(copiedResetRef.current);
+        }
+        copiedResetRef.current = setTimeout(() => {
+          setCopied(false);
+          copiedResetRef.current = null;
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Clipboard write failed:", err);
+        setCopied(false);
+      });
   };
 
   const bgClass = isDark

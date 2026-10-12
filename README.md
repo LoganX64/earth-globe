@@ -62,7 +62,9 @@ Two outbound network calls:
 
 ## URL parameters
 
-Supported on both the main app and `embed.html`, unless marked *embed only*.
+Supported on both the main app and `embed.html`, unless marked *embed surface*.
+*Embed surface* means `embed.html` **and** the main app's `?embed=true` mode —
+those three zoom parameters and `respectReducedMotion` are honoured in both.
 
 | Param | Effect |
 |---|---|
@@ -82,10 +84,11 @@ Supported on both the main app and `embed.html`, unless marked *embed only*.
 | `?background=false` | Swap the theme's backdrop for a neutral one — pure white under a light theme, pure black under a dark theme |
 | `?lightBackground=` / `?darkBackground=` | Custom backdrop colour per polarity, e.g. `%230a0a0a`. A dark theme never picks up the light theme's value. Applied to the globe's canvas only, never the page around it |
 | `?width=` / `?height=` | Embed dimensions, e.g. `500px` or `100%`. `?size=500px` sets both at once |
-| `?zoomLevel=2` | *embed only* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped). The main app starts at a fixed `1.2` |
-| `?zoom=false` | *embed only* — disable zooming entirely (both buttons and scroll) |
-| `?zoomButtons=false` | *embed only* — hide the floating +/− zoom buttons |
-| `?scrollZoom=false` | *embed only* — disable zooming on mouse scroll / trackpad |
+| `?zoomLevel=2` | *embed surface* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped) |
+| `?zoom=false` | *embed surface* — disable zooming entirely (both buttons and scroll) |
+| `?zoomButtons=false` | *embed surface* — hide the floating +/− zoom buttons |
+| `?scrollZoom=false` | *embed surface* — disable zooming on mouse scroll / trackpad |
+| `?respectReducedMotion=true` | *embed surface, opt-in* — start still when the visitor's device asks for reduced motion. Off by default, so omitting it changes nothing |
 
 To lock the globe at a fixed size, combine the zoom parameters:
 

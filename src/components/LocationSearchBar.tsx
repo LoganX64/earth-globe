@@ -11,7 +11,46 @@ interface LocationSearchBarProps {
   isDark?: boolean;
   className?: string;
   variant?: "default" | "glass";
+  /**
+   * Whether this instance should run searches. The navbar mounts two — one for
+   * the desktop bar, one inside the mobile drawer — and `display:none` does not
+   * unmount, so both would otherwise hold their own AbortController and run
+   * their own debounce. Only one is ever active.
+   */
+  isActive?: boolean;
 }
+
+/**
+ * Tracks a media query.
+ *
+ * Used to decide which of the navbar's two search bars is the live one.
+ * `md` is where the desktop bar becomes visible, so below it the drawer copy
+ * owns the search.
+ */
+const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia(query).matches
+      : false,
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    const list = window.matchMedia(query);
+    // Re-read on mount: the viewport can differ from the lazy initializer if
+    // this component mounts after the first paint.
+    setMatches(list.matches);
+    const onChange = (e: MediaQueryListEvent) => setMatches(e.matches);
+    list.addEventListener("change", onChange);
+    return () => list.removeEventListener("change", onChange);
+  }, [query]);
+
+  return matches;
+};
+
+export { useMediaQuery };
 
 const QUICK_SUGGESTIONS = [
   "Ulhasnagar, MH",
@@ -30,6 +69,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
   isDark = false,
   className = "",
   variant = "default",
+  isActive = true,
 }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -66,6 +106,11 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
 
   // Debounced search
   useEffect(() => {
+    // An inactive instance must not even schedule a request. The debounce
+    // alone is not enough of a guard: the hidden copy of this component is a
+    // real mounted component with a real AbortController.
+    if (!isActive) return;
+
     if (!query.trim() || query.trim().length < 2) {
       setResults([]);
       setIsLoading(false);
@@ -95,7 +140,7 @@ export const LocationSearchBar: React.FC<LocationSearchBarProps> = ({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, isActive]);
 
   const handlePick = (item: GeocodeResult) => {
     onSelectLocation(item.marker, item.state);

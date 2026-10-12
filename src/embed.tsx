@@ -4,6 +4,7 @@ import { EarthGlobe, EarthGlobeRef } from "./components/EarthGlobe";
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
+  DEFAULT_ROTATION_SPEED,
   type GlobeMarker,
 } from "./components/EarthGlobe/types";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -132,7 +133,7 @@ function EmbedApp() {
   );
   const [autoRotate, setAutoRotate] = useState<boolean>(initialAutoRotate);
   const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(
-    isNaN(initialSpeed) ? 1.2 : initialSpeed,
+    isNaN(initialSpeed) ? DEFAULT_ROTATION_SPEED : initialSpeed,
   );
   const [showStateBorders, setShowStateBorders] = useState<boolean>(
     initialShowStateBorders,
@@ -174,13 +175,15 @@ function EmbedApp() {
     globeRef.current?.setZoom(z * 0.8);
   };
 
+  // Both entrypoints pin `<html class="scheme-light">`, so a dark embed renders
+  // dark canvas inside a light frame: native scrollbars, form controls and the
+  // caret come out light. Toggling the real `dark` class and the `color-scheme`
+  // property follows the resolved theme, so those widgets match. The class list
+  // is set rather than toggled because nothing else owns `dark`.
   useEffect(() => {
-    const handleResize = () => {
-      window.dispatchEvent(new Event("resize"));
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+  }, [isDark]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -289,7 +292,7 @@ function EmbedApp() {
           // Documented as 0.0–4.0 and explicitly not clamped, so only
           // non-numeric input falls back to the default.
           const speed = toFiniteNumber(payload?.speed);
-          setAutoRotateSpeed(speed ?? 1.2);
+          setAutoRotateSpeed(speed ?? DEFAULT_ROTATION_SPEED);
           break;
         }
       }

@@ -14,7 +14,6 @@ import {
   DEFAULT_THEME_ID,
 } from "./components/EarthGlobe";
 import type { GlobeMarker } from "./components/EarthGlobe/types";
-import { POPULAR_INDIAN_LOCATIONS } from "./data/defaultLocations";
 import { resolveFrameBackground } from "./components/EarthGlobe/background";
 import { CityDetailsCard } from "./components/CityDetailsCard";
 import { GlobeControls } from "./components/GlobeControls";
@@ -100,8 +99,6 @@ export default function App() {
   const embedZoomEnabled = config.zoomEnabled;
   const initialEmbed = config.isEmbedMode;
 
-  const [showSecondaryMarkers] = useState<boolean>(false);
-
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(
     Boolean(config.urls.markerId || config.urls.hasLatLng) || activeMarker !== null
   );
@@ -156,17 +153,10 @@ export default function App() {
     : "Survey of India + Natural Earth";
 
   // Active markers passed to the globe (memoized to prevent render loop restarts)
-  const markersToRender: GlobeMarker[] = useMemo(() => {
-    if (activeMarker) {
-      return showSecondaryMarkers
-        ? [
-            activeMarker,
-            ...POPULAR_INDIAN_LOCATIONS.filter((p) => p.id !== activeMarker.id),
-          ]
-        : [activeMarker];
-    }
-    return showSecondaryMarkers ? POPULAR_INDIAN_LOCATIONS : [];
-  }, [activeMarker, showSecondaryMarkers]);
+  const markersToRender: GlobeMarker[] = useMemo(
+    () => (activeMarker ? [activeMarker] : []),
+    [activeMarker]
+  );
 
   // Handle location selection - selecting the active pin again just reopens its card
   const handleSelectLocation = useCallback(

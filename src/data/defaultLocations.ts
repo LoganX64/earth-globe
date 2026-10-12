@@ -1,4 +1,4 @@
-import { GlobeMarker } from '../components/EarthGlobe/types';
+﻿import { GlobeMarker } from '../components/EarthGlobe/types';
 
 export const MUMBAI_MARKER: GlobeMarker = {
   id: 'mumbai-maharashtra',
@@ -14,7 +14,7 @@ export const MUMBAI_MARKER: GlobeMarker = {
     country: 'India',
     elevation: '14 m (46 ft)',
     timezone: 'IST (UTC+05:30)',
-    coordinatesFormatted: "19°04'33\" N, 72°52'39\" E",
+    coordinatesFormatted: "19Â°04'33\" N, 72Â°52'39\" E",
     populationMetro: '21.3 Million',
     majorLandmarks: 'Gateway of India, Marine Drive, CSMT, Bandra-Worli Sea Link',
     role: 'Financial Capital of India & Maharashtra Capital',
@@ -35,7 +35,7 @@ export const THRISSUR_MARKER: GlobeMarker = {
     country: 'India',
     elevation: '2.83 m (9 ft)',
     timezone: 'IST (UTC+05:30)',
-    coordinatesFormatted: "10°31'39\" N, 76°12'52\" E",
+    coordinatesFormatted: "10Â°31'39\" N, 76Â°12'52\" E",
     populationMetro: '1.85 Million',
     majorLandmarks: 'Vadakkumnathan Temple, Shakthan Thampuran Palace, Thrissur Round',
     role: 'Cultural Capital of Kerala',
@@ -56,7 +56,7 @@ export const ULHASNAGAR_MARKER: GlobeMarker = {
     country: 'India',
     elevation: '19 m (62 ft)',
     timezone: 'IST (UTC+05:30)',
-    coordinatesFormatted: "19°13'25\" N, 73°10'02\" E",
+    coordinatesFormatted: "19Â°13'25\" N, 73Â°10'02\" E",
     populationMetro: '506,000+',
     majorLandmarks: 'Birla Mandir, Ambreshwar Shiva Temple, Ulhas River, Japani Bazaar',
     role: 'Major Commercial & Industrial City in Thane District, Maharashtra',
@@ -79,7 +79,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Kerala',
       role: 'Commercial Hub of Kerala & Historic Spice Port',
-      coordinatesFormatted: "09°55'52\" N, 76°16'02\" E",
+      coordinatesFormatted: "09Â°55'52\" N, 76Â°16'02\" E",
       majorLandmarks: 'Fort Kochi, Chinese Fishing Nets, Mattancherry Palace',
     },
   },
@@ -95,7 +95,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Kerala',
       role: 'State Capital of Kerala',
-      coordinatesFormatted: "08°31'27\" N, 76°56'12\" E",
+      coordinatesFormatted: "08Â°31'27\" N, 76Â°56'12\" E",
       majorLandmarks: 'Padmanabhaswamy Temple, Kovalam Beach, Technopark',
     },
   },
@@ -107,11 +107,11 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     lat: 12.9716,
     lng: 77.5946,
     isPrimary: false,
-    description: 'Silicon Valley of India, capital of Karnataka, and nation’s leading IT exporter.',
+    description: 'Silicon Valley of India, capital of Karnataka, and nationâ€™s leading IT exporter.',
     data: {
       state: 'Karnataka',
       role: 'Silicon Valley of India',
-      coordinatesFormatted: "12°58'17\" N, 77°35'40\" E",
+      coordinatesFormatted: "12Â°58'17\" N, 77Â°35'40\" E",
       majorLandmarks: 'Vidhana Soudha, Lalbagh Botanical Garden, Cubbon Park',
     },
   },
@@ -127,7 +127,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Jammu and Kashmir',
       role: 'Summer Capital of J&K',
-      coordinatesFormatted: "34°05'01\" N, 74°47'50\" E",
+      coordinatesFormatted: "34Â°05'01\" N, 74Â°47'50\" E",
       majorLandmarks: 'Dal Lake, Shankaracharya Temple, Shalimar Bagh',
     },
   },
@@ -143,7 +143,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Ladakh',
       role: 'Capital of Ladakh UT',
-      coordinatesFormatted: "34°09'09\" N, 77°34'38\" E",
+      coordinatesFormatted: "34Â°09'09\" N, 77Â°34'38\" E",
       majorLandmarks: 'Leh Palace, Shanti Stupa, Khardung La',
     },
   },
@@ -159,7 +159,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Delhi',
       role: 'National Capital of India',
-      coordinatesFormatted: "28°36'50\" N, 77°12'32\" E",
+      coordinatesFormatted: "28Â°36'50\" N, 77Â°12'32\" E",
       majorLandmarks: 'India Gate, Rashtrapati Bhavan, Red Fort',
     },
   },
@@ -175,7 +175,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Tamil Nadu',
       role: 'Capital of Tamil Nadu',
-      coordinatesFormatted: "13°04'58\" N, 80°16'15\" E",
+      coordinatesFormatted: "13Â°04'58\" N, 80Â°16'15\" E",
       majorLandmarks: 'Marina Beach, Kapaleeshwarar Temple, Fort St. George',
     },
   },
@@ -191,7 +191,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'Rajasthan',
       role: 'Capital of Rajasthan',
-      coordinatesFormatted: "26°54'45\" N, 75°47'14\" E",
+      coordinatesFormatted: "26Â°54'45\" N, 75Â°47'14\" E",
       majorLandmarks: 'Hawa Mahal, Amber Fort, City Palace',
     },
   },
@@ -207,7 +207,7 @@ export const POPULAR_INDIAN_LOCATIONS: GlobeMarker[] = [
     data: {
       state: 'West Bengal',
       role: 'Capital of West Bengal',
-      coordinatesFormatted: "22°34'21\" N, 88°21'50\" E",
+      coordinatesFormatted: "22Â°34'21\" N, 88Â°21'50\" E",
       majorLandmarks: 'Howrah Bridge, Victoria Memorial, Dakshineswar Kali Temple',
     },
   },
@@ -253,48 +253,3 @@ export const ALL_INDIAN_STATES = [
   'West Bengal',
 ] as const;
 
-export const GLOBAL_REFERENCE_MARKERS: GlobeMarker[] = [
-  ...POPULAR_INDIAN_LOCATIONS,
-  {
-    id: 'tokyo',
-    name: 'Tokyo',
-    region: 'Kanto',
-    country: 'Japan',
-    lat: 35.6762,
-    lng: 139.6503,
-    isPrimary: false,
-    description: 'Capital of Japan',
-    data: {
-      role: 'Global Metropole',
-      coordinatesFormatted: "35°40'34\" N, 139°39'01\" E",
-    },
-  },
-  {
-    id: 'london',
-    name: 'London',
-    region: 'England',
-    country: 'United Kingdom',
-    lat: 51.5074,
-    lng: -0.1278,
-    isPrimary: false,
-    description: 'Capital of the United Kingdom',
-    data: {
-      role: 'Prime Meridian Reference',
-      coordinatesFormatted: "51°30'26\" N, 00°07'39\" W",
-    },
-  },
-  {
-    id: 'new-york',
-    name: 'New York City',
-    region: 'New York',
-    country: 'United States',
-    lat: 40.7128,
-    lng: -74.0060,
-    isPrimary: false,
-    description: 'Global Financial Hub',
-    data: {
-      role: 'Global Trade Hub',
-      coordinatesFormatted: "40°42'46\" N, 74°00'21\" W",
-    },
-  },
-];

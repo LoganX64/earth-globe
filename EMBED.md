@@ -347,6 +347,20 @@ only sign is the `commandRejected` event above.
 
 ---
 
+## Known differences from the dashboard
+
+- **Canvas labels fall back to the system sans-serif.** The globe draws pin
+  callouts, state hover badges and marker text with a hard-coded
+  `"Plus Jakarta Sans"`, which `index.html` loads from Google Fonts.
+  `embed.html` deliberately does not, so embeds render those labels in the
+  fallback face. This is intentional: adding the font would give every embed a
+  third-party request it does not currently make, and widen the CSP
+  `style-src`/`font-src` allowlist, to style text that is 8–10px tall. Set a
+  matching `background` on your `<iframe>` to avoid a colour flash before first
+  paint.
+
+---
+
 ## Security Headers
 
 The hosting server must allow the globe to be embedded in iframes. Configure one of:

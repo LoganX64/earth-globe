@@ -109,6 +109,15 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   // Measured column width for the live preview, used to scale it down on narrow
   // screens while keeping the true embed dimensions in the copied snippet.
   const previewRef = useRef<HTMLDivElement>(null);
+  // Cleared on unmount so the "Copied!" reset cannot fire into a closed modal.
+  const copiedResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (copiedResetRef.current !== null) {
+        clearTimeout(copiedResetRef.current);
+      }
+    };
+  }, []);
   const [previewColumnWidth, setPreviewColumnWidth] = useState<number>(0);
   const [embedOnlyIndia, setEmbedOnlyIndia] = useState<boolean>(onlyIndia);
   // Embed preview mode follows the MAP theme (chrome itself is always light)
@@ -252,9 +261,25 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   );
 
   const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedSection(id);
-    setTimeout(() => setCopiedSection(null), 2000);
+    // Only claim a copy happened once the write resolves. `navigator.clipboard`
+    // rejects in a non-secure context, and the old unconditional version still
+    // showed "Copied!" for two seconds over a failed write.
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedSection(id);
+        if (copiedResetRef.current !== null) {
+          clearTimeout(copiedResetRef.current);
+        }
+        copiedResetRef.current = setTimeout(() => {
+          setCopiedSection(null);
+          copiedResetRef.current = null;
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error("Clipboard write failed:", err);
+        setCopiedSection(null);
+      });
   };
 
   const bgClass = isDark

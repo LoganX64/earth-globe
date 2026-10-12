@@ -11,7 +11,17 @@ export interface GlobeMarker {
   lng: number;
   description?: string;
   isPrimary?: boolean;
+  /**
+   * @deprecated Never read by the renderer — marker colours come entirely from
+   * the active theme. Part of the public `setMarker` payload documented in
+   * EMBED.md, so removing it would break hosts still sending it. Ignored
+   * silently, which is why it can be deprecated rather than deleted.
+   */
   color?: string;
+  /**
+   * @deprecated Never read by the renderer — primary markers always pulse.
+   * Kept for the same compatibility reason as `color`: hosts may send it.
+   */
   pulse?: boolean;
   data?: Record<string, string | number>;
 }
@@ -117,3 +127,24 @@ export const MAX_ZOOM_LEVEL = 3.8;
 
 /** Zoom level an embed starts at when no `zoomLevel` param is supplied */
 export const DEFAULT_EMBED_ZOOM = 1.1;
+
+/**
+ * Rotation speed used when nothing specifies one.
+ *
+ * Shared because the URL emitter omits `speed` on the assumption that the
+ * reader defaults to the same value (`buildEmbedUrl.ts`). Two independent
+ * literals could drift and silently produce a URL that means something other
+ * than what the user was looking at.
+ */
+export const DEFAULT_ROTATION_SPEED = 1.2;
+
+/**
+ * Zoom the parsed config reports for the main app, which has no embed zoom
+ * controls.
+ *
+ * Note this is NOT what the dashboard actually opens at: `App.tsx` passes
+ * `initialZoom={1.0}` and never reads `config.initialZoom`. Kept as a named
+ * value so the distinction is visible instead of being two bare `1.2`s.
+ * Reconciling that is I-15, and it is a behaviour change, not a rename.
+ */
+export const DEFAULT_APP_ZOOM = 1.2;

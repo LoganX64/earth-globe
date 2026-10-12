@@ -35,7 +35,9 @@ import {
   resolveBackgroundColor,
 } from '../components/EarthGlobe/background';
 import {
-  MIN_ZOOM_LEVEL,
+MIN_ZOOM_LEVEL,
+  DEFAULT_APP_ZOOM,
+  DEFAULT_ROTATION_SPEED,
   MAX_ZOOM_LEVEL,
   DEFAULT_EMBED_ZOOM,
 } from '../components/EarthGlobe/types';
@@ -263,11 +265,11 @@ export const parseGlobeConfig = (
   const savedSpeed = saved?.autoRotateSpeed;
   const autoRotateSpeed = speedParam
     ? Number.isNaN(parsedSpeed)
-      ? 1.2
+      ? DEFAULT_ROTATION_SPEED
       : parsedSpeed
     : typeof savedSpeed === 'number' && Number.isFinite(savedSpeed)
       ? savedSpeed
-      : 1.2;
+      : DEFAULT_ROTATION_SPEED;
 
   const rotateDirection: RotateDirection =
     saved?.rotateDirection === 'east-to-west' ||
@@ -329,7 +331,7 @@ export const parseGlobeConfig = (
     ? Number.isNaN(parsedZoomLevel)
       ? DEFAULT_EMBED_ZOOM
       : Math.min(MAX_ZOOM_LEVEL, Math.max(MIN_ZOOM_LEVEL, parsedZoomLevel))
-    : 1.2;
+    : DEFAULT_APP_ZOOM;
 
   // ---- size ------------------------------------------------------------
   const size = params.get('size');

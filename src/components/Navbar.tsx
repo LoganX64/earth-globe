@@ -10,7 +10,7 @@ import {
   Moon,
 } from "lucide-react";
 import { GlobeMarker } from "./EarthGlobe/types";
-import { LocationSearchBar } from "./LocationSearchBar";
+import { LocationSearchBar, useMediaQuery } from "./LocationSearchBar";
 
 interface NavbarProps {
   activeMarker: GlobeMarker | null;
@@ -40,6 +40,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   mapThemeIsDark = false,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // The desktop search bar is hidden below `md` with CSS, which does not
+  // unmount it. Without this, both copies stay mounted and each runs its own
+  // debounced search — a double-request trap for any future prop-driven query.
+  const isDesktopViewport = useMediaQuery("(min-width: 768px)");
 
   // Dark mode: identical glass tokens to the location/customizer dialogs.
   // The dialog bg (bg-slate-950/78) only reads as the dialogs' near-black
@@ -181,6 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               variant={isDark ? "glass" : "default"}
               placeholder="Search Indian city or state..."
               className="w-48 lg:w-64"
+              isActive={isDesktopViewport}
             />
           </div>
 
@@ -236,6 +242,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               variant={isDark ? "glass" : "default"}
               placeholder="Search place in India..."
               className="w-full"
+              isActive={!isDesktopViewport && isMobileMenuOpen}
             />
           </div>
 

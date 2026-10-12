@@ -16,6 +16,7 @@
 
 import type { GlobeMarker } from '../components/EarthGlobe/types';
 import { THEME_PRESETS } from '../components/EarthGlobe/themePresets';
+import { DEFAULT_ROTATION_SPEED } from '../components/EarthGlobe/types';
 
 export interface EmbedUrlOptions {
   /** Origin the embed is served from, e.g. `https://example.com`. */
@@ -128,8 +129,10 @@ export const buildEmbedUrl = (o: EmbedUrlOptions): string => {
     : '';
 
   // `speed` is omitted when it matches the default, to keep the copied URL
-  // short. That is safe because the reader defaults to the same value.
-  const speedParam = o.autoRotateSpeed !== 1.2
+  // short. That is safe only because the reader defaults to the same value —
+  // which is why both sides name DEFAULT_ROTATION_SPEED rather than repeating
+  // a literal that could drift.
+  const speedParam = o.autoRotateSpeed !== DEFAULT_ROTATION_SPEED
     ? `&speed=${o.autoRotateSpeed.toFixed(1)}`
     : '';
 

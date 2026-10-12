@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { searchLocation } from './geocoding';
+import { searchLocation, resetNominatimBudget } from './geocoding';
 
 const stubFetch = (impl: (url: string) => Promise<Response>) => {
   vi.stubGlobal('fetch', vi.fn(impl));
@@ -18,6 +18,10 @@ const osmItem = (over: Partial<Record<string, unknown>> = {}) => ({
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  // The ≤1 req/s budget and the 429 cooldown are module-level by design, so
+  // they outlive a single test. Without this reset a test that simulates a
+  // rate-limit response would silence every search after it.
+  resetNominatimBudget();
 });
 
 describe('searchLocation', () => {
@@ -80,6 +84,22 @@ describe('searchLocation', () => {
     const results = await searchLocation('Kochi');
 
     expect(results.some((r) => r.name === 'Kochi')).toBe(true);
+  });
+
+  // A 429 is the documented "slow down" response. Recording it means later
+  // searches stop calling OSM entirely rather than retrying into the limit.
+  it('stops calling Nominatim for a cooldown after a 429', async () => {
+    const spy = vi.fn(async () => new Response('nope', { status: 429 }));
+    vi.stubGlobal('fetch', spy);
+
+    await searchLocation('Kochi');
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // Inside the cooldown window: no second request, but the curated table is
+    // still returned so the search box keeps working.
+    const results = await searchLocation('Thrissur');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(results.some((r) => r.name === 'Thrissur')).toBe(true);
   });
 
   it('falls back to local matches when the body is not an array', async () => {

@@ -199,6 +199,14 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       [highlightState]
     );
 
+    // Membership is tested once per feature, per frame. An array scan is O(n)
+    // against a Set's O(1); at 37 states it is unmeasurable, but the loop is
+    // the hot path and the Set is free.
+    const highlightedStatesSet = useMemo(
+      () => new Set(highlightedStatesList),
+      [highlightedStatesList]
+    );
+
     // Dynamic render configuration ref: allows the 60fps canvas loop to read
     // latest props every frame without cancelling and restarting the RAF loop.
     const renderPropsRef = useRef({
@@ -443,9 +451,44 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         return cachedTimeWidth;
       };
 
+      // Frame budget: 60fps. Anything slower is worth knowing about, especially on
+      // the low-end devices an embed is most likely to run on.
+      const LONG_FRAME_SECONDS = 1 / 60;
+      let lastLongFrameWarnAt = 0;
+
+      // Canvas gradients depend only on geometry and theme, never on rotation, so
+      // all three were being rebuilt identically every frame. One entry per
+      // gradient kind, invalidated by geometry (resize, zoom) or theme identity.
+      // Building a gradient is cheap, so this is a tidy-up rather than a fix —
+      // the I-25 long-frame logger above is what settles whether the frame cost
+      // lives here or in the country-geometry pass.
+      let cachedGlow: { key: string; grad: CanvasGradient } | null = null;
+      let cachedOcean: { key: string; grad: CanvasGradient } | null = null;
+      let cachedShadow: { key: string; grad: CanvasGradient } | null = null;
+
+      const geometryKey = (cx: number, cy: number, radius: number) =>
+        `${cx}|${cy}|${radius}`;
+
       const render = (now: number) => {
         const deltaTime = (now - lastTimestamp) / 1000;
         lastTimestamp = now;
+
+        // I-25: report frames that blew the 60fps budget. Throttled to one
+        // warning a second so a genuinely slow device produces a readable log
+        // rather than thousands of lines. This exists to answer empirically
+        // whether the per-frame gradient work (I-12) or the 176-country
+        // geometry pass is the real cost — see the note on the cache below.
+        if (deltaTime > LONG_FRAME_SECONDS) {
+          const sinceLastWarn = now - lastLongFrameWarnAt;
+          if (sinceLastWarn >= 1000) {
+            lastLongFrameWarnAt = now;
+            console.warn(
+              `EarthGlobe: long frame (${(deltaTime * 1000).toFixed(1)}ms, budget ${(
+                LONG_FRAME_SECONDS * 1000
+              ).toFixed(1)}ms)`
+            );
+          }
+        }
 
         const {
           activeTheme,
@@ -582,29 +625,34 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
 
         // 1. Atmosphere Outer Glow
         if (showAtmosphere) {
-          const glowGrad = ctx.createRadialGradient(
-            cx,
-            cy,
-            radius * 0.98,
-            cx,
-            cy,
-            radius * 1.20
-          );
-          glowGrad.addColorStop(
-            0,
-            activeTheme.atmosphereOuter ||
-              (activeTheme.isDark
-                ? 'rgba(255, 255, 255, 0.40)'
-                : 'rgba(56, 189, 248, 0.25)')
-          );
-          glowGrad.addColorStop(
-            0.4,
-            activeTheme.atmosphereInner ||
-              (activeTheme.isDark
-                ? 'rgba(255, 255, 255, 0.14)'
-                : 'rgba(56, 189, 248, 0.08)')
-          );
-          glowGrad.addColorStop(1, 'transparent');
+          const glowKey = `glow|${geometryKey(cx, cy, radius)}|${activeTheme.id}`;
+          if (!cachedGlow || cachedGlow.key !== glowKey) {
+            const g = ctx.createRadialGradient(
+              cx,
+              cy,
+              radius * 0.98,
+              cx,
+              cy,
+              radius * 1.20
+            );
+            g.addColorStop(
+              0,
+              activeTheme.atmosphereOuter ||
+                (activeTheme.isDark
+                  ? 'rgba(255, 255, 255, 0.40)'
+                  : 'rgba(56, 189, 248, 0.25)')
+            );
+            g.addColorStop(
+              0.4,
+              activeTheme.atmosphereInner ||
+                (activeTheme.isDark
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : 'rgba(56, 189, 248, 0.08)')
+            );
+            g.addColorStop(1, 'transparent');
+            cachedGlow = { key: glowKey, grad: g };
+          }
+          const glowGrad = cachedGlow.grad;
 
           ctx.fillStyle = glowGrad;
           ctx.beginPath();
@@ -619,19 +667,24 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         ctx.clip();
 
         // 3D spherical depth shading for ocean
-        const oceanGrad = ctx.createRadialGradient(
-          cx - radius * 0.28,
-          cy - radius * 0.28,
-          radius * 0.08,
-          cx,
-          cy,
-          radius
-        );
-        oceanGrad.addColorStop(0, activeTheme.ocean);
-        oceanGrad.addColorStop(
-          1,
-          activeTheme.oceanBorder || (activeTheme.isDark ? '#000000' : '#a1a1aa')
-        );
+        const oceanKey = `ocean|${geometryKey(cx, cy, radius)}|${activeTheme.id}`;
+        if (!cachedOcean || cachedOcean.key !== oceanKey) {
+          const g = ctx.createRadialGradient(
+            cx - radius * 0.28,
+            cy - radius * 0.28,
+            radius * 0.08,
+            cx,
+            cy,
+            radius
+          );
+          g.addColorStop(0, activeTheme.ocean);
+          g.addColorStop(
+            1,
+            activeTheme.oceanBorder || (activeTheme.isDark ? '#000000' : '#a1a1aa')
+          );
+          cachedOcean = { key: oceanKey, grad: g };
+        }
+        const oceanGrad = cachedOcean.grad;
 
         ctx.fillStyle = oceanGrad;
         ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
@@ -730,7 +783,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
 
           for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
             const stName = (stateFeature.properties?.st_nm || '').toLowerCase().trim();
-            const isHighlighted = highlightedStatesList.includes(stName);
+            const isHighlighted = highlightedStatesSet.has(stName);
 
             if (isHighlighted) {
               const hFill =
@@ -777,7 +830,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
 
         // 5e. Hovered State Preview (gentle translucent outline when pointer is over a state)
         const hoveredSt = hoveredStateRef.current?.toLowerCase().trim();
-        if (hoveredSt && !highlightedStatesList.includes(hoveredSt)) {
+        if (hoveredSt && !highlightedStatesSet.has(hoveredSt)) {
           const hoveredFeature = INDIA_FEATURE_BY_NAME.get(hoveredSt);
           if (hoveredFeature) {
             ctx.save();
@@ -797,27 +850,28 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         ctx.restore();
 
         // 6. Volumetric Sphere Shading (Terminator / Edge Shadow)
-        const shadowGrad = ctx.createRadialGradient(
-          cx - radius * 0.1,
-          cy - radius * 0.1,
-          radius * 0.75,
-          cx,
-          cy,
-          radius
-        );
-        shadowGrad.addColorStop(0, 'transparent');
-        shadowGrad.addColorStop(
-          0.85,
-          activeTheme.isDark
-            ? 'rgba(0, 0, 0, 0.4)'
-            : 'rgba(0, 0, 0, 0.08)'
-        );
-        shadowGrad.addColorStop(
-          1,
-          activeTheme.isDark
-            ? 'rgba(0, 0, 0, 0.82)'
-            : 'rgba(0, 0, 0, 0.22)'
-        );
+        const shadowKey = `shadow|${geometryKey(cx, cy, radius)}|${activeTheme.id}`;
+        if (!cachedShadow || cachedShadow.key !== shadowKey) {
+          const g = ctx.createRadialGradient(
+            cx - radius * 0.1,
+            cy - radius * 0.1,
+            radius * 0.75,
+            cx,
+            cy,
+            radius
+          );
+          g.addColorStop(0, 'transparent');
+          g.addColorStop(
+            0.85,
+            activeTheme.isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.08)'
+          );
+          g.addColorStop(
+            1,
+            activeTheme.isDark ? 'rgba(0, 0, 0, 0.82)' : 'rgba(0, 0, 0, 0.22)'
+          );
+          cachedShadow = { key: shadowKey, grad: g };
+        }
+        const shadowGrad = cachedShadow.grad;
 
         ctx.fillStyle = shadowGrad;
         ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);

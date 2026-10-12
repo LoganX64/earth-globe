@@ -168,6 +168,57 @@ const KNOWN_INDIAN_PLACES: Array<{
 ];
 
 /**
+ * Politeness state for the shared Nominatim instance.
+ *
+ * The public OSM endpoint is explicitly a low-traffic service asking for
+ * ≤1 req/s and a real identifying User-Agent — which a browser cannot set. The
+ * only throttle here is otherwise the 280ms input debounce, which still lets a
+ * determined user exceed that. At scale this is the app's one real dependency
+ * constraint, so the budget is enforced in this module rather than left to the
+ * caller.
+ *
+ * Module-level rather than per-call because the limit applies to the *client*,
+ * not the request: two search bars in one tab share it.
+ */
+const MIN_REQUEST_INTERVAL_MS = 1000;
+const RATE_LIMIT_COOLDOWN_MS = 30_000;
+
+let lastRequestAt = 0;
+let cooldownUntil = 0;
+
+/**
+ * Clears the request budget and any active cooldown.
+ *
+ * Exists because that state is module-level by design, which means one test
+ * that simulates a 429 would otherwise silence every test after it. Kept out
+ * of the call path deliberately — nothing in the app should call this.
+ */
+export function resetNominatimBudget(): void {
+  lastRequestAt = 0;
+  cooldownUntil = 0;
+}
+
+/** Sleep that rejects as soon as the caller's signal aborts. */
+const sleepAbortable = (ms: number, signal?: AbortSignal): Promise<void> => {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(signal.reason ?? new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'));
+    };
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+};
+
+/**
  * Searches for any location worldwide or in India by query (e.g. "Ulhasnagar, MH, India", "Thrissur", etc.)
  * Uses OpenStreetMap Nominatim with local instant fallback.
  */
@@ -217,8 +268,20 @@ export async function searchLocation(
     }
   }
 
-  // 2. Fetch live geocoding results from Nominatim
+  // 2. Fetch live geocoding results from Nominatim, within the politeness
+  // budget. Every failure path returns the local matches rather than throwing:
+  // a rate-limited or unreachable OSM must degrade to the curated table, not
+  // break search.
   try {
+    const now = Date.now();
+    if (now < cooldownUntil) return localMatches;
+
+    const wait = MIN_REQUEST_INTERVAL_MS - (now - lastRequestAt);
+    // Abortable so a keystroke arriving during the wait does not leave the
+    // aborted request to fire later anyway.
+    await sleepAbortable(wait, signal);
+    lastRequestAt = Date.now();
+
     const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(
       trimmed
     )}&limit=6`;
@@ -231,6 +294,11 @@ export async function searchLocation(
     });
 
     if (!res.ok) {
+      // 429 is the documented "slow down" response. Record it so subsequent
+      // searches stop calling entirely instead of retrying into the limit.
+      if (res.status === 429) {
+        cooldownUntil = Date.now() + RATE_LIMIT_COOLDOWN_MS;
+      }
       return localMatches;
     }
 
