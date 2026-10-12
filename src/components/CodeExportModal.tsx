@@ -64,6 +64,8 @@ interface CodeExportModalProps {
   highlightState?: string;
   autoRotateSpeed?: number;
   autoRotate?: boolean;
+  /** Whether this session honours reduced motion. Opt-in; default false. */
+  respectReducedMotion?: boolean;
   theme?: string;
   lightTheme?: string;
   darkTheme?: string;
@@ -86,6 +88,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   highlightState,
   autoRotateSpeed = 1.2,
   autoRotate = true,
+  respectReducedMotion = false,
   theme = DEFAULT_LIGHT_THEME_ID,
   lightTheme = DEFAULT_LIGHT_THEME_ID,
   darkTheme = DEFAULT_DARK_THEME_ID,
@@ -116,6 +119,10 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
   const [embedDrag, setEmbedDrag] = useState<boolean>(true);
   const [embedZoom, setEmbedZoom] = useState<boolean>(true);
   const [embedRotate, setEmbedRotate] = useState<boolean>(autoRotate);
+  // Off unless this browser or the dashboard is already set to honour it — see
+  // `GlobeConfig.respectReducedMotion`.
+  const [embedRespectReducedMotion, setEmbedRespectReducedMotion] =
+    useState<boolean>(respectReducedMotion ?? false);
   // Zoom: the buttons and the wheel are separately switchable, and the level sets
   // how close the globe starts
   const [embedZoomButtons, setEmbedZoomButtons] = useState<boolean>(true);
@@ -232,6 +239,7 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     darkBackground,
     marker: activeMarker,
     highlightState,
+    respectReducedMotion: embedRespectReducedMotion,
   });
 
   const iframeBackground = iframeBackgroundFor(embedMode, showBackground);
@@ -438,6 +446,24 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
                     >
                       Frozen
                     </span>
+                  </button>
+                  {/* Opt-in, off by default: flipping the reader's default would
+                      silently freeze globes for hosts who never asked for it. */}
+                  <button
+                    onClick={() => setEmbedRespectReducedMotion((prev) => !prev)}
+                    aria-pressed={embedRespectReducedMotion}
+                    title="Start the embed still when the visitor's device requests reduced motion"
+                    className={`px-2.5 py-1 rounded-md border border-dashed text-[11px] cursor-pointer transition-colors ${
+                      embedRespectReducedMotion
+                        ? "bg-blue-600 text-white border-blue-500"
+                        : isDark
+                          ? "bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border-neutral-600"
+                          : "bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300"
+                    }`}
+                  >
+                    {embedRespectReducedMotion
+                      ? "✓ Honours reduced motion"
+                      : "Reduced motion: ignored"}
                   </button>
                 </div>
 

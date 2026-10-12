@@ -67,6 +67,16 @@ export interface GlobeConfig {
   onlyIndia: boolean;
   autoRotate: boolean;
   autoRotateSpeed: number;
+  /**
+   * Whether the visitor's OS-level reduced-motion preference is allowed to
+   * suppress auto-rotation. Opt-in via `?respectReducedMotion=true`.
+   *
+   * Deliberately off by default: making it the default would silently freeze
+   * the globe for every host whose URL omits `rotate`, which is what the
+   * documented Quick Start snippet produces. Changing this default is a
+   * breaking change for live embeds and needs a major version.
+   */
+  respectReducedMotion: boolean;
   rotateDirection: RotateDirection;
   showStateBorders: boolean;
   showGraticule: boolean;
@@ -174,6 +184,23 @@ export const resolveBoolSetting = (
 ): boolean => {
   if (params.has(key)) return !isOff(params.get(key));
   return typeof savedValue === 'boolean' ? savedValue : fallback;
+};
+
+/**
+ * Whether this visitor's OS asks for reduced motion.
+ *
+ * Read lazily and defensively: `matchMedia` is missing in some non-browser
+ * environments (and in the node test runner), and an absent media query must
+ * mean "no preference expressed" rather than throwing during config parsing.
+ */
+const prefersReducedMotion = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.matchMedia !== 'function') return false;
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
 };
 
 export const parseGlobeConfig = (
@@ -320,12 +347,32 @@ export const parseGlobeConfig = (
     !Number.isNaN(parsedLat) &&
     !Number.isNaN(parsedLng);
 
+  // Opt-in: absent means off, and an explicit `=false` also reads as off, so a
+  // host can pin the old behaviour in a URL they have already published.
+  const respectReducedMotion = resolveBoolSetting(
+    params,
+    'respectReducedMotion',
+    undefined,
+    false
+  );
+
+  const rotateSetting = resolveBoolSetting(params, 'rotate', saved?.autoRotate, true);
+  // An explicit `rotate` param always wins. Only the *default* is deferred to
+  // the visitor's OS preference, and only for hosts who asked for that.
+  const autoRotate =
+    params.has('rotate')
+      ? rotateSetting
+      : respectReducedMotion && prefersReducedMotion()
+        ? false
+        : rotateSetting;
+
   return {
     theme,
     lightTheme,
     darkTheme,
     onlyIndia,
-    autoRotate: resolveBoolSetting(params, 'rotate', saved?.autoRotate, true),
+    autoRotate,
+    respectReducedMotion,
     autoRotateSpeed,
     rotateDirection,
     showStateBorders,

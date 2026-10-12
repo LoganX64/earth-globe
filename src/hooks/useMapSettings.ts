@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import {
   parseGlobeConfig,
@@ -50,16 +50,43 @@ const readSavedHighlight = (): string | null => {
 
 const readSavedMarker = (): GlobeMarker | null => {
   try {
-    const raw = localStorage.getItem(LAST_LOCATION_STORAGE_KEY);
-    if (!raw) return null;
-    const saved: unknown = JSON.parse(raw);
-    if (!isValidSavedMarker(saved)) return null;
-    return { isPrimary: true, country: 'India', ...saved } as GlobeMarker;
+    return parseSavedMarker(localStorage.getItem(LAST_LOCATION_STORAGE_KEY));
   } catch {
-    // Corrupted storage key — fall through to no selection
+    // Storage unavailable — fall through to no selection
   }
   return null;
 };
+
+/** Same validation as the mount path, for a value handed over by another tab. */
+const parseSavedMarker = (raw: string | null): GlobeMarker | null => {
+  if (!raw) return null;
+  const saved: unknown = JSON.parse(raw);
+  if (!isValidSavedMarker(saved)) return null;
+  return { isPrimary: true, country: 'India', ...saved } as GlobeMarker;
+};
+
+/**
+ * The persisted settings fields, in one list so the writer can diff against
+ * what it last stored. Every value is a primitive, so `!==` is an exact
+ * comparison and no field needs a deep-equal helper.
+ */
+const SETTINGS_KEYS = [
+  'theme',
+  'lightTheme',
+  'darkTheme',
+  'onlyIndia',
+  'autoRotate',
+  'autoRotateSpeed',
+  'rotateDirection',
+  'showStateBorders',
+  'showGraticule',
+  'showAtmosphere',
+  'showStars',
+  'showBackground',
+  'lightBackground',
+  'darkBackground',
+  'customizerOpen',
+] as const;
 
 export interface MapSettings {
   /** Resolved once at mount. Callers read `isEmbedMode` from state, not here. */
@@ -156,6 +183,21 @@ export const useMapSettings = (search: string): MapSettings => {
   );
   const [isEmbedMode, setIsEmbedMode] = useState<boolean>(config.isEmbedMode);
 
+  // What we believe is currently on disk for this key. Every write is a
+  // read-modify-write diffed against this, so a sibling tab's change to a
+  // *different* field survives ours instead of being clobbered by a full-blob
+  // overwrite. Seeded from storage so the first write after mount does not
+  // treat every field as freshly changed.
+  const lastKnownSettingsRef = useRef<SavedMapSettings | null>(null);
+  if (lastKnownSettingsRef.current === null) {
+    lastKnownSettingsRef.current = readSavedMapSettings();
+  }
+
+  // A marker pinned in the URL outranks whatever another tab last selected, so
+  // cross-tab adoption stays out of its way — the same precedence
+  // `resolveAppMarker` applies at mount.
+  const urlPinsMarker = config.urls.hasLatLng || Boolean(config.urls.markerId);
+
   // ---- persistence -----------------------------------------------------
 
   // Remember the selected location across refreshes (deselect clears it).
@@ -188,32 +230,49 @@ export const useMapSettings = (search: string): MapSettings => {
     }
   }, [highlightState]);
 
-  // One write for the whole blob rather than sixteen, which also means a
+// One write for the whole blob rather than sixteen, which also means a
   // rapid slider drag collapses into a single serialisation.
   // An embed session must never overwrite the visitor's saved settings.
   useEffect(() => {
     if (isEmbedMode) return;
+    const current = {
+      theme,
+      lightTheme,
+      darkTheme,
+      onlyIndia,
+      autoRotate,
+      autoRotateSpeed,
+      rotateDirection,
+      showStateBorders,
+      showGraticule,
+      showAtmosphere,
+      showStars,
+      showBackground,
+      lightBackground,
+      darkBackground,
+      customizerOpen: isControlsOpen,
+    } as Record<string, unknown>;
+
     try {
-      localStorage.setItem(
-        MAP_SETTINGS_STORAGE_KEY,
-        JSON.stringify({
-          theme,
-          lightTheme,
-          darkTheme,
-          onlyIndia,
-          autoRotate,
-          autoRotateSpeed,
-          rotateDirection,
-          showStateBorders,
-          showGraticule,
-          showAtmosphere,
-          showStars,
-          showBackground,
-          lightBackground,
-          darkBackground,
-          customizerOpen: isControlsOpen,
-        })
-      );
+      const previous = (lastKnownSettingsRef.current ?? {}) as Record<string, unknown>;
+      // Start from whatever is on disk, not from our own state: a sibling tab
+      // may have written a field we have not touched. Merging over the stored
+      // blob is what makes the result the union of every tab's fields, which in
+      // turn makes whole-blob adoption below correct rather than destructive.
+      const merged: Record<string, unknown> = { ...readSavedMapSettings() };
+      let changedAny = false;
+      for (const key of SETTINGS_KEYS) {
+        const value = current[key];
+        if (value !== undefined && value !== previous[key]) {
+          merged[key] = value;
+          changedAny = true;
+        }
+      }
+      // Nothing changed, so write nothing. This also stops the mount-time write
+      // from firing a spurious `storage` event in every other open tab.
+      if (!changedAny) return;
+      localStorage.setItem(MAP_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+      lastKnownSettingsRef.current = merged as SavedMapSettings;
     } catch {
       // Storage unavailable — ignore
     }
@@ -287,19 +346,50 @@ export const useMapSettings = (search: string): MapSettings => {
       if (next.darkBackground !== undefined) {
         setDarkBackground(normalizeBackgroundColor(next.darkBackground));
       }
-      if (typeof next.customizerOpen === 'boolean') {
+if (typeof next.customizerOpen === 'boolean') {
         setIsControlsOpen(next.customizerOpen);
+      }
+      // Adopted values are now what we believe is on disk, so the next write
+      // diffs against them instead of treating them as local changes.
+      lastKnownSettingsRef.current = next;
+    };
+
+    // The highlight and selected-location keys were persisted but never
+    // watched, so two tabs could visibly disagree about what was highlighted.
+    // They go through the same validators the mount path uses.
+    const adoptHighlight = (raw: string | null) => {
+      const next = (raw ?? '').trim();
+      setHighlightState(next || null);
+    };
+
+    const adoptMarker = (raw: string | null) => {
+      if (urlPinsMarker) return;
+      try {
+        setActiveMarker(parseSavedMarker(raw));
+      } catch {
+        // Corrupted value from another tab — ignore rather than clear
       }
     };
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== MAP_SETTINGS_STORAGE_KEY) return;
-      adopt(e.newValue);
+      if (e.key === MAP_SETTINGS_STORAGE_KEY) {
+        adopt(e.newValue);
+        return;
+      }
+      if (e.key === HIGHLIGHT_STATE_STORAGE_KEY) {
+        adoptHighlight(e.newValue);
+        return;
+      }
+      if (e.key === LAST_LOCATION_STORAGE_KEY) {
+        adoptMarker(e.newValue);
+      }
     };
 
-    window.addEventListener('storage', onStorage);
+window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, []);
+    // urlPinsMarker is derived from `config`, which is resolved once and never
+    // changes; listed for honest dependency rather than because it varies.
+  }, [urlPinsMarker]);
 
   // ---- theme binding ---------------------------------------------------
 

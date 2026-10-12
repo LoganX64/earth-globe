@@ -44,6 +44,13 @@ export interface EmbedUrlOptions {
   darkBackground: string | null;
   marker?: GlobeMarker | null;
   highlightState?: string | null;
+  /**
+   * Opt-in reduced-motion handling. Optional so existing callers keep
+   * compiling, and omitted from the URL entirely unless enabled — generated
+   * snippets are already pasted into the wild, so the default output must stay
+   * byte-identical to what earlier versions produced.
+   */
+  respectReducedMotion?: boolean;
 }
 
 /**
@@ -126,6 +133,12 @@ export const buildEmbedUrl = (o: EmbedUrlOptions): string => {
     ? `&speed=${o.autoRotateSpeed.toFixed(1)}`
     : '';
 
+  // Last, and only when enabled: appending keeps every previously generated URL
+  // byte-identical, and the reader already defaults this to off.
+  const reducedMotionParam = o.respectReducedMotion
+    ? '&respectReducedMotion=true'
+    : '';
+
   return (
     `${o.host}/embed.html?embed=true` +
     `&mode=${o.embedMode}` +
@@ -148,7 +161,8 @@ export const buildEmbedUrl = (o: EmbedUrlOptions): string => {
     `&height=${encodeURIComponent(height)}` +
     backgroundParam +
     markerParam +
-    stateParam
+    stateParam +
+    reducedMotionParam
   );
 };
 

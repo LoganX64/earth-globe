@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   parseGlobeConfig,
   resolveThemeId,
@@ -440,5 +440,70 @@ describe('parseGlobeConfig — saved rotate direction', () => {
   it('ignores an unrecognised saved value', () => {
     const saved = { rotateDirection: 'sideways' } as unknown as SavedMapSettings;
     expect(parse('', { saved }).rotateDirection).toBe('west-to-east');
+  });
+});
+// `respectReducedMotion` is opt-in precisely so it cannot change the behaviour
+// of an embed that predates it. These tests pin that: a host who never passes
+// the param must get a rotating globe even on a device that asks for reduced
+// motion, because that is the documented default.
+describe('parseGlobeConfig - respectReducedMotion (opt-in)', () => {
+  const withReducedMotion = (matches: boolean) => {
+    vi.stubGlobal('window', {
+      matchMedia: (query: string) => ({
+        matches,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }),
+    });
+  };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('is off when the parameter is absent', () => {
+    expect(parse('').respectReducedMotion).toBe(false);
+  });
+
+  it('leaves auto-rotation untouched when off, even with the OS preference set', () => {
+    withReducedMotion(true);
+    const c = parse('');
+    expect(c.respectReducedMotion).toBe(false);
+    expect(c.autoRotate).toBe(true);
+  });
+
+  it('reads an explicit =false as off', () => {
+    withReducedMotion(true);
+    const c = parse('respectReducedMotion=false');
+    expect(c.respectReducedMotion).toBe(false);
+    expect(c.autoRotate).toBe(true);
+  });
+
+  it('suppresses the rotation default when opted in and the OS asks', () => {
+    withReducedMotion(true);
+    const c = parse('respectReducedMotion=true');
+    expect(c.respectReducedMotion).toBe(true);
+    expect(c.autoRotate).toBe(false);
+  });
+
+  it('still rotates when opted in but no preference is expressed', () => {
+    withReducedMotion(false);
+    expect(parse('respectReducedMotion=true').autoRotate).toBe(true);
+  });
+
+  it('lets an explicit rotate=true win over the opt-in', () => {
+    withReducedMotion(true);
+    expect(parse('respectReducedMotion=true&rotate=true').autoRotate).toBe(true);
+  });
+
+  it('lets an explicit rotate=false win over the opt-in', () => {
+    withReducedMotion(false);
+    expect(parse('respectReducedMotion=true&rotate=false').autoRotate).toBe(false);
+  });
+
+  it('treats a missing matchMedia as no preference rather than throwing', () => {
+    vi.stubGlobal('window', {});
+    expect(parse('respectReducedMotion=true').autoRotate).toBe(true);
   });
 });

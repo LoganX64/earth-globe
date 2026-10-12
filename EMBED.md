@@ -48,7 +48,18 @@ All configuration is done via URL query parameters. No JavaScript required.
 | `scrollZoom` | `true` / `false` | `true` | Zoom on mouse scroll / trackpad |
 | `zoomLevel` | `0.65` – `3.8` | `1.1` | How close the globe starts. Values outside the range are clamped |
 | `rotate` | `true` / `false` | `true` | Enable auto-rotation |
+| `respectReducedMotion` | `true` / `false` | `false` | **Opt-in.** Start *not* auto-rotating when the visitor's device requests reduced motion. Off by default, so omitting it changes nothing |
 | `speed` | `0.0` – `4.0` | `1.2` | Rotation speed. Not clamped — `0` stops rotation, `rotate=false` disables it entirely |
+
+> **On `rotate` and accessibility.** Continuous rotation is the kind of motion
+> `prefers-reduced-motion` exists for, but honouring it *by default* would
+> silently freeze the globe for every embed that omits `rotate` — which the
+> Quick Start snippet above does. So the visitor's OS preference is respected
+> only when a host asks for it with `respectReducedMotion=true`. An explicit
+> `rotate=true` or `rotate=false` always wins over the preference.
+>
+> If you want the accessible default, add `&respectReducedMotion=true` to your
+> URL. The code generator has a toggle for it next to the rotation control.
 
 To lock the globe at a fixed size, combine the three:
 

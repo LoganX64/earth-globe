@@ -397,7 +397,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) return;
 
-      let animationFrameId: number;
+      let animationFrameId: number | null = null;
       let lastTimestamp = performance.now();
       const graticuleGenerator = geoGraticule().step([15, 15]);
       const graticuleLines = graticuleGenerator();
@@ -1095,6 +1095,15 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       // here shows up in nobody's devtools except ours.
       let frameFailureReported = false;
 
+      // Single exit point for the frame chain. Clearing the id to null is what
+      // makes "is a frame pending?" answerable, which is what the visibility
+      // handler and the unmount cleanup both need to decide.
+      const stopRenderLoop = () => {
+        if (animationFrameId === null) return;
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      };
+
       const paintRenderFailure = (err: unknown) => {
         if (frameFailureReported) return;
         frameFailureReported = true;
@@ -1126,13 +1135,33 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         } catch (err) {
           // Nothing reschedules after a throw, so the loop is already stopped;
           // this makes that explicit and covers the early-return path above.
-          cancelAnimationFrame(animationFrameId);
+          stopRenderLoop();
           paintRenderFailure(err);
         }
       };
 
+      // A backgrounded tab still asks for frames: the browser throttles them but
+      // never to zero, and this is the heaviest thing on the page. Pausing is
+      // invisible to a host — a backgrounded iframe is not being looked at, and
+      // the globe resumes in exactly the state it paused in.
+      const onVisibilityChange = () => {
+        if (document.hidden) {
+          stopRenderLoop();
+        } else if (animationFrameId === null && !frameFailureReported) {
+          // Resetting the clock is the point of this branch. Without it the
+          // first frame back reports a deltaTime measured in minutes, which
+          // underflows pow(0.93, deltaTime * 60) and throws the rotation.
+          lastTimestamp = performance.now();
+          animationFrameId = requestAnimationFrame(safeRender);
+        }
+      };
+
+      document.addEventListener('visibilitychange', onVisibilityChange);
       animationFrameId = requestAnimationFrame(safeRender);
-      return () => cancelAnimationFrame(animationFrameId);
+      return () => {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        stopRenderLoop();
+      };
     }, [dimensions]);
 
     // Distance between the first two tracked pointers, or null when fewer than

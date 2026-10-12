@@ -491,7 +491,7 @@ initialZoom={1.0}
                 onThemeChange={handleThemeChange}
                 lightTheme={lightTheme}
                 darkTheme={darkTheme}
-                autoRotate={autoRotate}
+autoRotate={autoRotate}
                 onToggleAutoRotate={() => setAutoRotate((prev) => !prev)}
                 autoRotateSpeed={autoRotateSpeed}
                 onSpeedChange={setAutoRotateSpeed}
@@ -711,6 +711,7 @@ initialZoom={1.0}
           highlightState={highlightState || undefined}
           autoRotateSpeed={autoRotateSpeed}
           autoRotate={autoRotate}
+          respectReducedMotion={config.respectReducedMotion}
           theme={theme}
           lightTheme={lightTheme}
           darkTheme={darkTheme}
