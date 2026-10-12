@@ -77,14 +77,14 @@ Two outbound network calls:
         title="India 3D Interactive Map Globe" aria-label="Interactive 3D India Globe"></iframe>
 ```
 
-The dashboard's **Embed & API** dialog generates the exact URL and snippet for
+The main app's **Embed & API** dialog generates the exact URL and snippet for
 your current settings, with a live iframe preview at the copied size.
 
 ## URL parameters
 
 Supported on both the main app and `embed.html`, unless marked *embed only*.
 
-*Embed only* means `embed.html` and **not** the main app. The dashboard starts
+*Embed only* means `embed.html` and **not** the main app. The main app starts
 at a fixed zoom of `1.0` and always shows both zoom inputs, so on the main app
 `zoomLevel` is ignored and only the master `zoom` switch has any effect.
 
@@ -182,7 +182,7 @@ The build is fully static — no backend, no database, no API keys. Run
 
 ### Build output
 
-`vite.config.ts` builds two entrypoints (`index.html` → the dashboard,
+`vite.config.ts` builds two entrypoints (`index.html` → the main app,
 `embed.html` → the chrome-free globe) and splits them into long-lived chunks:
 `react-vendor`, `geo-engine` (d3-geo + topojson + world-atlas) and
 `india-cartography` (the ~210 KB of Survey of India GeoJSON), so the globe
