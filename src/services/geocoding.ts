@@ -1,4 +1,5 @@
 import { GlobeMarker } from '../components/EarthGlobe/types';
+import { formatLatLng } from '../utils/coordinates';
 
 export interface GeocodeResult {
   id: string;
@@ -209,7 +210,7 @@ export async function searchLocation(
             state: place.state,
             country: place.country,
             role: place.role || 'Indian City',
-            coordinatesFormatted: `${place.lat.toFixed(4)}° N, ${place.lng.toFixed(4)}° E`,
+            coordinatesFormatted: formatLatLng(place.lat, place.lng),
           },
         },
       });
@@ -266,9 +267,7 @@ export async function searchLocation(
           state: stateName,
           country: countryName,
           role: address.state_district ? `District: ${address.state_district}` : 'Searched Location',
-          coordinatesFormatted: `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(
-            lng
-          ).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`,
+          coordinatesFormatted: formatLatLng(lat, lng),
         },
       };
 

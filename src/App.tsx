@@ -497,6 +497,15 @@ export default function App() {
   // set while a dark theme is active is never used by a light one.
   const activeBackgroundColor = isDark ? darkBackground : lightBackground;
 
+  // Provenance of the basemap currently drawn. The India vectors are always
+  // Survey of India, but with onlyIndia off the other landmasses come from the
+  // world atlas (Natural Earth), so claiming a single source would be wrong.
+  // This is about the map, not the selected pin — a pin in Tokyo still sits on
+  // Survey of India boundaries.
+  const cartographySource = onlyIndia
+    ? "Survey of India (Official)"
+    : "Survey of India + Natural Earth";
+
   // Theme switch changes ONLY the map theme; website UI never leaves light mode.
   // Flips between the two palettes bound in the Globe Customizer, falling back to
   // the built-in defaults if a binding is somehow unusable.
@@ -875,6 +884,7 @@ export default function App() {
                   }
                 }}
                 isDark={isDark}
+                cartographySource={cartographySource}
               />
             </ErrorBoundary>
           </div>

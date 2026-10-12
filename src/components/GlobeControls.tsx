@@ -30,6 +30,7 @@ import { ColorPicker } from './ColorPicker';
 import { GlobeMarker } from './EarthGlobe/types';
 import { ALL_INDIAN_STATES, POPULAR_INDIAN_LOCATIONS } from '../data/defaultLocations';
 import { LocationSearchBar } from './LocationSearchBar';
+import { formatLatLng } from '../utils/coordinates';
 
 /**
  * Parse a user-typed latitude or longitude.
@@ -191,7 +192,7 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
       data: {
         state: customState,
         role: 'Custom User Location',
-        coordinatesFormatted: `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`,
+        coordinatesFormatted: formatLatLng(lat, lng),
       },
     };
 

@@ -12,28 +12,20 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { RotateCcw, X } from "lucide-react";
+import { normalizeBackgroundColor } from "./EarthGlobe/background";
 
 type RGB = [number, number, number];
 type HSV = { h: number; s: number; v: number };
 
 const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
 
-export const normalizeHex = (raw: unknown): string | null => {
-  if (typeof raw !== "string") return null;
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const digits = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
-  if (!/^[0-9a-fA-F]+$/.test(digits)) return null;
-  if (digits.length === 3) {
-    return `#${digits
-      .toLowerCase()
-      .split("")
-      .map((c) => c + c)
-      .join("")}`;
-  }
-  if (digits.length === 6) return `#${digits.toLowerCase()}`;
-  return null;
-};
+/**
+ * Aliased rather than reimplemented. This picker, the app, the embed and the
+ * code generator all feed user-supplied colour into a CSS `background-color`,
+ * so the allowlist that guards it has to be one function — a private copy here
+ * was free to drift from `background.ts`.
+ */
+export const normalizeHex = normalizeBackgroundColor;
 
 export const hexToRgb = (hex: string): RGB => {
   const full = normalizeHex(hex) ?? "#000000";

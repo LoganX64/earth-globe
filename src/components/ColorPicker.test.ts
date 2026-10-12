@@ -6,6 +6,15 @@ import {
   rgbToHsv,
   hsvToRgb,
 } from './ColorPicker';
+import { normalizeBackgroundColor } from './EarthGlobe/background';
+
+// The picker used to carry its own byte-equivalent copy of the hex allowlist.
+// It must stay the SAME function, or the two can drift again.
+describe('normalizeHex identity', () => {
+  it('is the shared background.ts validator, not a copy', () => {
+    expect(normalizeHex).toBe(normalizeBackgroundColor);
+  });
+});
 
 const closeToRgb = (actual: [number, number, number], expected: [number, number, number], tol = 1) => {
   expect(actual[0]).toBeCloseTo(expected[0], 0);

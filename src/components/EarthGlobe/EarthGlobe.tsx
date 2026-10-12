@@ -489,8 +489,15 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
                 -85,
                 Math.min(85, rotationRef.current[1] + velocityRef.current[1])
               );
-              velocityRef.current[0] *= 0.93;
-              velocityRef.current[1] *= 0.93;
+              // Decay is scaled to elapsed time rather than applied per frame. A flat 0.93
+              // per frame stops roughly twice as fast in wall-clock terms on a
+              // 120Hz display as on a 60Hz one, so a flick travelled half as
+              // far. Reference frame is 16ms, matching how the drag velocity
+              // below is captured, and the same delta-scaling the auto-rotation
+              // further down already uses.
+              const inertiaDecay = Math.pow(0.93, deltaTime * 60);
+              velocityRef.current[0] *= inertiaDecay;
+              velocityRef.current[1] *= inertiaDecay;
             } else if (isAutoRotatingRef.current && autoRotateSpeed > 0) {
               // Smooth ambient rotation with configurable speed & direction
               const dirMult = rotateDirection === 'east-to-west' ? -1 : 1;
@@ -1328,9 +1335,13 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas || !enableZoom) return;
-      const onWheelNative = (e: WheelEvent) => {
-        e.preventDefault();
-        const zoomDelta = e.deltaY < 0 ? 1.08 : 0.92;
+      // Symmetric steps: 0.92 is not the reciprocal of 1.08, so the old pair lost
+        // ~1.6% of zoom per scroll-in/scroll-out round trip and never returned
+        // to where it started. Zooming out by 1/1.08 makes it exactly reversible.
+        const ZOOM_STEP = 1.08;
+        const onWheelNative = (e: WheelEvent) => {
+          e.preventDefault();
+          const zoomDelta = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
         zoomRef.current = Math.min(
           maxZoom,
           Math.max(minZoom, zoomRef.current * zoomDelta)

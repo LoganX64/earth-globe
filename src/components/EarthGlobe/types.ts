@@ -80,7 +80,11 @@ export interface EarthGlobeProps {
   showAtmosphere?: boolean;
   /** Display deep space star field (default: true) */
   showStars?: boolean;
-  /** Paint the theme's background behind the globe (default: true). When false the globe floats on a transparent canvas */
+  /** Use the theme's own background behind the globe (default: true). When false
+   *  an opaque NEUTRAL backdrop is substituted instead — pure white under a
+   *  light theme, pure black under a dark one. The canvas is never transparent:
+   *  keeping it opaque is what lets the context be created with `alpha: false`
+   *  and skips a clearRect, because every frame paints the full box. */
   showBackground?: boolean;
   /** Overrides the theme's background colour, applied to the canvas only (default: null). Ignored when showBackground is false */
   backgroundColor?: string | null;

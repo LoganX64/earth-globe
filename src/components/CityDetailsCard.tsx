@@ -10,6 +10,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { formatLat, formatLng } from "../utils/coordinates";
 
 interface CityDetailsCardProps {
   marker: GlobeMarker;
@@ -21,6 +22,12 @@ interface CityDetailsCardProps {
   isStateHighlighted?: boolean;
   onToggleStateHighlight?: () => void;
   isDark?: boolean;
+  /**
+   * Provenance of the basemap actually on screen. This describes the MAP, not
+   * the pin — a pin in Tokyo still sits on Survey of India vectors — so it is
+   * driven by the caller, which knows whether the world layer is drawn too.
+   */
+  cartographySource?: string;
 }
 
 export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
@@ -31,6 +38,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
   isStateHighlighted = false,
   onToggleStateHighlight,
   isDark = false,
+  cartographySource = "Survey of India (Official)",
 }) => {
   const [istTime, setIstTime] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
@@ -169,7 +177,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
             title="Click to copy coordinates"
           >
             <span>
-              {marker.lat.toFixed(4)}° N, {marker.lng.toFixed(4)}° E
+              {formatLat(marker.lat)}, {formatLng(marker.lng)}
             </span>
             {copied ? (
               <Check className="w-3 h-3 text-emerald-500" />
@@ -237,7 +245,7 @@ export const CityDetailsCard: React.FC<CityDetailsCardProps> = ({
             <span>Map Cartography</span>
           </span>
           <span className="font-medium flex items-center">
-            Survey of India (Official)
+            {cartographySource}
           </span>
         </div>
       </div>
