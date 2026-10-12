@@ -62,6 +62,33 @@ const OTHER_COUNTRIES = countriesGeo.filter(
 // Authoritative Indian States & Union Territories (including Jammu & Kashmir and Ladakh)
 const INDIA_OFFICIAL_FEATURES = (indiaOfficialGeo as any).features as any[];
 
+// Lookup by lowercased, trimmed state name. The highlight pass still walks
+// INDIA_OFFICIAL_FEATURES in order (it has to, to preserve draw order), but
+// focusState, the hover preview and the camera centroid all want a single
+// feature by name and were doing a linear scan with a case-sensitive compare.
+const INDIA_FEATURE_BY_NAME = new Map<string, any>();
+for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
+  const stName = stateFeature.properties?.st_nm;
+  if (typeof stName === 'string') {
+    INDIA_FEATURE_BY_NAME.set(stName.toLowerCase().trim(), stateFeature);
+  }
+}
+
+/**
+ * Formatted once at module load rather than per frame. Building an
+ * `Intl.DateTimeFormat` — or the equivalent `toLocaleTimeString` call — is
+ * markedly more expensive than the rest of the primary pin's callout put
+ * together, and this value is rebuilt 60 times a second while a pin is
+ * visible.
+ */
+const IST_TIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Kolkata',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: true,
+});
+
 // Star generation for space background
 interface Star {
   x: number;
@@ -225,6 +252,11 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
     // and no browser-specific gesture events.
     const activePointersRef = useRef<Map<number, [number, number]>>(new Map());
     const pinchStartRef = useRef<{ distance: number; zoom: number } | null>(null);
+    // Hover hit-testing is far too expensive to run per pointermove event —
+    // devices emit those well above display refresh rate — so the latest
+    // position is stashed here and resolved at most once per animation frame.
+    const hoverPosRef = useRef<{ x: number; y: number } | null>(null);
+    const hoverRafRef = useRef<number | null>(null);
     // Browsers still fire a click after a two-finger gesture. Without this the
     // end of a pinch would select whatever marker or state happens to be under
     // the fingers.
@@ -291,8 +323,8 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         };
       },
       focusState: (stateName: string, targetZoomMultiplier?: number) => {
-        const stateFeature = INDIA_OFFICIAL_FEATURES.find(
-          (f) => f.properties?.st_nm?.toLowerCase() === stateName.toLowerCase()
+        const stateFeature = INDIA_FEATURE_BY_NAME.get(
+          stateName.toLowerCase().trim()
         );
         if (stateFeature) {
           const [cLng, cLat] = geoCentroid(stateFeature);
@@ -361,6 +393,47 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       let lastTimestamp = performance.now();
       const graticuleGenerator = geoGraticule().step([15, 15]);
       const graticuleLines = graticuleGenerator();
+
+      // Configured once and re-read every frame. d3-geo projections are mutable
+      // and designed to be configured this way; recreating one per frame threw
+      // away its internal caches 60 times a second. Only the values that change
+      // are reset below.
+      const projection: GeoProjection = geoOrthographic()
+        .clipAngle(90)
+        .precision(0.3);
+      const path = geoPath(projection, ctx);
+
+      // Text metrics for the primary pin's callout. The title and the
+      // sub-heading never change for a given marker, so they are measured once
+      // and reused; the cache is bounded by the number of markers ever shown.
+      const TITLE_FONT = '700 10px "Plus Jakarta Sans", sans-serif';
+      const SUB_FONT = '500 8.5px "Plus Jakarta Sans", sans-serif';
+      const BADGE_FONT = '600 10px "Plus Jakarta Sans", sans-serif';
+      const widthCache = new Map<string, number>();
+      const measureStable = (text: string, font: string): number => {
+        const key = `${font} ${text}`;
+        const cached = widthCache.get(key);
+        if (cached !== undefined) return cached;
+        ctx.font = font;
+        const width = ctx.measureText(text).width;
+        widthCache.set(key, width);
+        return width;
+      };
+
+      // The clock changes once a second, so it is re-measured on change rather
+      // than every frame — and deliberately NOT stored in widthCache, which
+      // would otherwise grow by an entry per second for as long as a pin stayed
+      // on screen.
+      let cachedTimeLine = '';
+      let cachedTimeWidth = 0;
+      const measureClock = (text: string): number => {
+        if (text !== cachedTimeLine) {
+          ctx.font = SUB_FONT;
+          cachedTimeWidth = ctx.measureText(text).width;
+          cachedTimeLine = text;
+        }
+        return cachedTimeWidth;
+      };
 
       const render = (now: number) => {
         const deltaTime = (now - lastTimestamp) / 1000;
@@ -482,19 +555,15 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           ctx.restore();
         }
 
-        // Calculate projection
+        // Calculate projection — reconfigured, not rebuilt
         const radius = Math.min(width, height) * 0.42 * zoomRef.current;
         const cx = width / 2;
         const cy = height / 2;
 
-        const projection: GeoProjection = geoOrthographic()
+        projection
           .scale(radius)
           .translate([cx, cy])
-          .rotate(rotationRef.current)
-          .clipAngle(90)
-          .precision(0.3);
-
-        const path = geoPath(projection, ctx);
+          .rotate(rotationRef.current);
 
         // 1. Atmosphere Outer Glow
         if (showAtmosphere) {
@@ -694,9 +763,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         // 5e. Hovered State Preview (gentle translucent outline when pointer is over a state)
         const hoveredSt = hoveredStateRef.current?.toLowerCase().trim();
         if (hoveredSt && !highlightedStatesList.includes(hoveredSt)) {
-          const hoveredFeature = INDIA_OFFICIAL_FEATURES.find(
-            (f) => f.properties?.st_nm?.toLowerCase().trim() === hoveredSt
-          );
+          const hoveredFeature = INDIA_FEATURE_BY_NAME.get(hoveredSt);
           if (hoveredFeature) {
             ctx.save();
             ctx.beginPath();
@@ -872,21 +939,15 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
             const labelX = mx + 16;
             const labelY = pinY;
 
-            ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
             const title = marker.name.toUpperCase();
             const sub = `${marker.region || 'State'} · ${marker.country || 'India'}`;
-            const titleWidth = ctx.measureText(title).width;
-            ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif';
-            const subWidth = ctx.measureText(sub).width;
-            const timeLine = new Date().toLocaleTimeString('en-US', {
-              timeZone: 'Asia/Kolkata',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: true,
-            });
-            const timeWidth = ctx.measureText(timeLine).width;
-            const boxWidth = Math.max(titleWidth, subWidth, timeWidth) + 18;
+            const timeLine = IST_TIME_FORMATTER.format(new Date());
+            const boxWidth =
+              Math.max(
+                measureStable(title, TITLE_FONT),
+                measureStable(sub, SUB_FONT),
+                measureClock(timeLine)
+              ) + 18;
             const boxHeight = 38;
 
             ctx.save();
@@ -973,9 +1034,11 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
           const { x: hx, y: hy } = hoveredStatePointRef.current;
 
           ctx.save();
-          ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
           const badgeText = `${stateName}, India`;
-          const textW = ctx.measureText(badgeText).width;
+          // Stable for as long as the pointer stays on one state, so this goes
+          // through the same metrics cache as the pin callout.
+          const textW = measureStable(badgeText, BADGE_FONT);
+          ctx.font = BADGE_FONT;
           const padX = 8;
           const bW = textW + padX * 2;
           const bH = 20;
@@ -1050,6 +1113,121 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
     };
 
+    /**
+     * Hover hit-test for markers and Indian states.
+     *
+     * Runs at most once per animation frame rather than once per pointermove
+     * event: this builds a projection, inverts it, and can point-in-polygon
+     * test up to 37 full-resolution boundaries, while pointermove fires well
+     * above the display's refresh rate. Bails while a drag is in progress, so a
+     * pointer sweep cannot fire hover callbacks mid-spin.
+     */
+    const runHoverHitTest = (mouseX: number, mouseY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas || isDraggingRef.current) return;
+
+      const radius =
+        Math.min(dimensions.w, dimensions.h) * 0.42 * zoomRef.current;
+      const cx = dimensions.w / 2;
+      const cy = dimensions.h / 2;
+
+      // Deliberately a separate projection from the render loop's: the two run
+      // on different cadences and must not share rotation state mid-frame.
+      const hoverProjection: GeoProjection = geoOrthographic()
+        .scale(radius)
+        .translate([cx, cy])
+        .rotate(rotationRef.current)
+        .clipAngle(90);
+
+      const currentRot = rotationRef.current;
+      const centerCoord: [number, number] = [-currentRot[0], -currentRot[1]];
+
+      let foundMarker: GlobeMarker | null = null;
+      const currentMarkers = renderPropsRef.current.markers;
+
+      for (const marker of currentMarkers) {
+        const dist = geoDistance(centerCoord, [marker.lng, marker.lat]);
+        if (dist >= Math.PI / 2) continue;
+
+        const projected = hoverProjection([marker.lng, marker.lat]);
+        if (!projected) continue;
+
+        const [px, py] = projected;
+        const hitRadius = marker.isPrimary ? 24 : 14;
+        const dX = mouseX - px;
+        const dY = mouseY - py;
+        if (dX * dX + dY * dY < hitRadius * hitRadius) {
+          foundMarker = marker;
+          break;
+        }
+      }
+
+      // Test if pointer is over any Indian state
+      let detectedStateName: string | null = null;
+      if (!foundMarker) {
+        try {
+          const invertedCoord = hoverProjection.invert?.([mouseX, mouseY]);
+          if (
+            invertedCoord &&
+            !isNaN(invertedCoord[0]) &&
+            !isNaN(invertedCoord[1])
+          ) {
+            const distToCenter = geoDistance(centerCoord, invertedCoord);
+            if (distToCenter < Math.PI / 2) {
+              for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
+                if (geoContains(stateFeature, invertedCoord)) {
+                  detectedStateName = stateFeature.properties?.st_nm || null;
+                  break;
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore projection inversion errors near singularities
+        }
+      }
+
+      if (detectedStateName !== hoveredStateRef.current) {
+        hoveredStateRef.current = detectedStateName;
+        hoveredStatePointRef.current = detectedStateName
+          ? { x: mouseX, y: mouseY }
+          : null;
+        onStateHover?.(detectedStateName);
+      } else if (detectedStateName) {
+        hoveredStatePointRef.current = { x: mouseX, y: mouseY };
+      }
+
+      if (foundMarker !== hoveredMarkerRef.current) {
+        hoveredMarkerRef.current = foundMarker;
+        onMarkerHover?.(foundMarker);
+      }
+
+      // `grabbing` was unreachable here: this only runs in the branch where
+      // isDraggingRef is false.
+      canvas.style.cursor =
+        foundMarker || detectedStateName ? 'pointer' : 'grab';
+    };
+
+    const scheduleHoverHitTest = (mouseX: number, mouseY: number) => {
+      hoverPosRef.current = { x: mouseX, y: mouseY };
+      if (hoverRafRef.current !== null) return;
+      hoverRafRef.current = requestAnimationFrame(() => {
+        hoverRafRef.current = null;
+        const pos = hoverPosRef.current;
+        if (!pos) return;
+        runHoverHitTest(pos.x, pos.y);
+      });
+    };
+
+    // A queued hover hit-test must not outlive the component.
+    useEffect(() => {
+      return () => {
+        if (hoverRafRef.current !== null) {
+          cancelAnimationFrame(hoverRafRef.current);
+        }
+      };
+    }, []);
+
     const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -1100,83 +1278,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         // Store velocity for inertia
         velocityRef.current = [dRotX * (16 / dt), dRotY * (16 / dt)];
       } else {
-        // Hit-test markers and Indian states on hover
-        const radius =
-          Math.min(dimensions.w, dimensions.h) * 0.42 * zoomRef.current;
-        const cx = dimensions.w / 2;
-        const cy = dimensions.h / 2;
-
-        const projection: GeoProjection = geoOrthographic()
-          .scale(radius)
-          .translate([cx, cy])
-          .rotate(rotationRef.current)
-          .clipAngle(90);
-
-        const currentRot = rotationRef.current;
-        const centerCoord: [number, number] = [-currentRot[0], -currentRot[1]];
-
-        let foundMarker: GlobeMarker | null = null;
-        const currentMarkers = renderPropsRef.current.markers;
-
-        for (const marker of currentMarkers) {
-          const dist = geoDistance(centerCoord, [marker.lng, marker.lat]);
-          if (dist >= Math.PI / 2) continue;
-
-          const projected = projection([marker.lng, marker.lat]);
-          if (!projected) continue;
-
-          const [px, py] = projected;
-          const hitRadius = marker.isPrimary ? 24 : 14;
-          const dX = mouseX - px;
-          const dY = mouseY - py;
-          if (dX * dX + dY * dY < hitRadius * hitRadius) {
-            foundMarker = marker;
-            break;
-          }
-        }
-
-        // Test if pointer is over any Indian state
-        let detectedStateName: string | null = null;
-        if (!foundMarker) {
-          try {
-            const invertedCoord = projection.invert?.([mouseX, mouseY]);
-            if (invertedCoord && !isNaN(invertedCoord[0]) && !isNaN(invertedCoord[1])) {
-              const distToCenter = geoDistance(centerCoord, invertedCoord);
-              if (distToCenter < Math.PI / 2) {
-                for (const stateFeature of INDIA_OFFICIAL_FEATURES) {
-                  if (geoContains(stateFeature, invertedCoord)) {
-                    detectedStateName = stateFeature.properties?.st_nm || null;
-                    break;
-                  }
-                }
-              }
-            }
-          } catch {
-            // Ignore projection inversion errors near singularities
-          }
-        }
-
-        if (detectedStateName !== hoveredStateRef.current) {
-          hoveredStateRef.current = detectedStateName;
-          hoveredStatePointRef.current = detectedStateName
-            ? { x: mouseX, y: mouseY }
-            : null;
-          onStateHover?.(detectedStateName);
-        } else if (detectedStateName) {
-          hoveredStatePointRef.current = { x: mouseX, y: mouseY };
-        }
-
-        if (foundMarker !== hoveredMarkerRef.current) {
-          hoveredMarkerRef.current = foundMarker;
-          onMarkerHover?.(foundMarker);
-        }
-
-        canvas.style.cursor =
-          foundMarker || detectedStateName
-            ? 'pointer'
-            : isDraggingRef.current
-            ? 'grabbing'
-            : 'grab';
+        scheduleHoverHitTest(mouseX, mouseY);
       }
     };
 
