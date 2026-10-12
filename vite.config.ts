@@ -12,6 +12,11 @@ export default defineConfig(() => {
       },
     },
     build: {
+      // Without this, a production stack trace in a user's console is
+      // unreadable — the bundle is minified and un-mapped, so an error points
+      // at a single obfuscated line. The sources are already public in the
+      // repository, so this discloses nothing new.
+      sourcemap: true,
       rollupOptions: {
         input: {
           main: path.resolve(import.meta.dirname, 'index.html'),

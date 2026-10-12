@@ -6,70 +6,24 @@
  * 100% Client-side React + Vite SPA (Zero backend needed, Vercel Free Tier ready).
  */
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import {
   EarthGlobe,
   EarthGlobeRef,
-  GlobeMarker,
-  DEFAULT_THEME_ID,
-  DEFAULT_DARK_THEME_ID,
-  DEFAULT_LIGHT_THEME_ID,
   THEME_PRESETS,
+  DEFAULT_THEME_ID,
 } from "./components/EarthGlobe";
-import {
-  MUMBAI_MARKER,
-  THRISSUR_MARKER,
-  ULHASNAGAR_MARKER,
-  POPULAR_INDIAN_LOCATIONS,
-} from "./data/defaultLocations";
-import {
-  hasParam,
-  parseShowBackground,
-  resolveBackgroundColor,
-  resolveFrameBackground,
-} from "./components/EarthGlobe/background";
+import type { GlobeMarker } from "./components/EarthGlobe/types";
+import { POPULAR_INDIAN_LOCATIONS } from "./data/defaultLocations";
+import { resolveFrameBackground } from "./components/EarthGlobe/background";
 import { CityDetailsCard } from "./components/CityDetailsCard";
 import { GlobeControls } from "./components/GlobeControls";
 import { Navbar } from "./components/Navbar";
 import { CodeExportModal } from "./components/CodeExportModal";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { useMapSettings } from "./hooks/useMapSettings";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { SlidersHorizontal, RotateCcw, Maximize2, X } from "lucide-react";
-
-const LAST_LOCATION_STORAGE_KEY = "bharat-atlas-active-location";
-const HIGHLIGHT_STATE_STORAGE_KEY = "bharat-atlas-highlight-state";
-const MAP_SETTINGS_STORAGE_KEY = "bharat-atlas-map-settings";
-
-type SavedMapSettings = {
-  theme?: string;
-  lightTheme?: string;
-  darkTheme?: string;
-  onlyIndia?: boolean;
-  autoRotate?: boolean;
-  autoRotateSpeed?: number;
-  rotateDirection?: "west-to-east" | "east-to-west";
-  showStateBorders?: boolean;
-  showGraticule?: boolean;
-  showAtmosphere?: boolean;
-  showStars?: boolean;
-  showBackground?: boolean;
-  lightBackground?: string;
-  darkBackground?: string;
-  customizerOpen?: boolean;
-};
-
-const readSavedMapSettings = (): SavedMapSettings => {
-  try {
-    const raw = localStorage.getItem(MAP_SETTINGS_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object")
-        return parsed as SavedMapSettings;
-    }
-  } catch {
-    // Corrupted or unavailable storage — fall through to defaults
-  }
-  return {};
-};
 
 /**
  * Stand-in shown when the globe itself fails to render. The rest of the page
@@ -94,291 +48,62 @@ const GlobeFailedNotice = ({ isDark }: { isDark: boolean }) => (
 export default function App() {
   const globeRef = useRef<EarthGlobeRef>(null);
 
-  // Read URL query parameters for embed mode and customizations
-  const urlParams =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : null;
-  const initialEmbed =
-    urlParams?.get("embed") === "true" ||
-    urlParams?.get("pure") === "true" ||
-    urlParams?.get("mode") === "embed";
-  const initialOnlyIndia =
-    urlParams?.get("onlyIndia") === "true" ||
-    urlParams?.get("indiaOnly") === "true";
-  const initialWidth =
-    urlParams?.get("width") || urlParams?.get("size") || "100%";
-  const initialHeight =
-    urlParams?.get("height") || urlParams?.get("size") || "100%";
+  // URL resolution, all settings state, persistence and multi-tab
+  // reconciliation live in the hook. `config` is resolved once at mount.
+  const [search] = useState(() =>
+    typeof window !== "undefined" ? window.location.search : ""
+  );
+  const settings = useMapSettings(search);
+  const {
+    config,
+    theme,
+    lightTheme,
+    darkTheme,
+    onlyIndia,
+    setOnlyIndia,
+    autoRotate,
+    setAutoRotate,
+    autoRotateSpeed,
+    setAutoRotateSpeed,
+    rotateDirection,
+    setRotateDirection,
+    showStateBorders,
+    setShowStateBorders,
+    showGraticule,
+    setShowGraticule,
+    showAtmosphere,
+    setShowAtmosphere,
+    showStars,
+    setShowStars,
+    showBackground,
+    setShowBackground,
+    lightBackground,
+    setLightBackground,
+    darkBackground,
+    setDarkBackground,
+    highlightState,
+    setHighlightState,
+    activeMarker,
+    setActiveMarker,
+    isControlsOpen,
+    setIsControlsOpen,
+    isEmbedMode,
+    setIsEmbedMode,
+    handleThemeChange,
+    handleToggleDarkMode,
+  } = settings;
 
-  // URL mode or theme resolution
-  const modeParam = urlParams?.get("mode")?.toLowerCase();
-  const themeParam = urlParams?.get("theme");
+  // Pure-view dimensions and interaction switches come from the parsed config.
+  const embedWidth = config.width;
+  const embedHeight = config.height;
+  const embedDragEnabled = config.dragEnabled;
+  const embedZoomEnabled = config.zoomEnabled;
+  const initialEmbed = config.isEmbedMode;
 
-  let defaultInitialTheme = DEFAULT_THEME_ID;
-  if (modeParam === "light") {
-    if (
-      themeParam &&
-      themeParam in THEME_PRESETS &&
-      !THEME_PRESETS[themeParam].isDark
-    ) {
-      defaultInitialTheme = themeParam;
-    } else {
-      defaultInitialTheme = DEFAULT_LIGHT_THEME_ID;
-    }
-  } else if (modeParam === "dark") {
-    if (
-      themeParam &&
-      themeParam in THEME_PRESETS &&
-      THEME_PRESETS[themeParam].isDark
-    ) {
-      defaultInitialTheme = themeParam;
-    } else {
-      defaultInitialTheme = DEFAULT_DARK_THEME_ID;
-    }
-  } else if (themeParam && themeParam in THEME_PRESETS) {
-    defaultInitialTheme = themeParam;
-  }
+  const [showSecondaryMarkers] = useState<boolean>(false);
 
-  const initialSpeed = urlParams?.get("speed")
-    ? parseFloat(urlParams.get("speed")!)
-    : 1.2;
-  // Embed output controls — pre-selected via URL (defaults keep old links working)
-  const embedDragEnabled = urlParams?.get("drag") !== "false";
-  const embedZoomEnabled = urlParams?.get("zoom") !== "false";
-
-  // Embed Mode state (shows ONLY globe and map)
-  const [isEmbedMode, setIsEmbedMode] = useState<boolean>(initialEmbed);
-  const [embedWidth, setEmbedWidth] = useState<string | number>(initialWidth);
-  const [embedHeight, setEmbedHeight] = useState<string | number>(
-    initialHeight,
-  );
-
-  // Core configuration states — URL params win, then saved settings, then defaults
-  const [savedSettings] = useState<SavedMapSettings>(readSavedMapSettings);
-  const urlThemeSpecified =
-    Boolean(themeParam && themeParam in THEME_PRESETS) ||
-    modeParam === "light" ||
-    modeParam === "dark";
-  const initialTheme =
-    !urlThemeSpecified &&
-    savedSettings.theme &&
-    savedSettings.theme in THEME_PRESETS
-      ? savedSettings.theme
-      : defaultInitialTheme;
-  const resolveBoolSetting = (
-    urlKey: string,
-    savedValue: unknown,
-    fallback: boolean,
-  ): boolean => {
-    if (urlParams?.has(urlKey)) return urlParams.get(urlKey) !== "false";
-    return typeof savedValue === "boolean" ? savedValue : fallback;
-  };
-  const savedSpeed =
-    typeof savedSettings.autoRotateSpeed === "number" &&
-    Number.isFinite(savedSettings.autoRotateSpeed)
-      ? savedSettings.autoRotateSpeed
-      : 1.2;
-
-  const [theme, setTheme] = useState<string>(initialTheme);
-  // Resolve which preset is bound to a given polarity. Precedence:
-  // URL param (embed) > saved settings > the active theme when it already
-  // matches the polarity > the built-in default for that polarity.
-  const resolveBoundTheme = (
-    urlKey: string,
-    savedId: string | undefined,
-    wantsDark: boolean,
-  ): string => {
-    const fallback = wantsDark ? DEFAULT_DARK_THEME_ID : DEFAULT_LIGHT_THEME_ID;
-    for (const candidate of [
-      urlParams?.get(urlKey),
-      savedId,
-      initialTheme,
-      fallback,
-    ]) {
-      if (
-        candidate &&
-        candidate in THEME_PRESETS &&
-        THEME_PRESETS[candidate].isDark === wantsDark
-      ) {
-        return candidate;
-      }
-    }
-    return fallback;
-  };
-  const [lightTheme, setLightTheme] = useState<string>(
-    resolveBoundTheme("lightTheme", savedSettings.lightTheme, false),
-  );
-  const [darkTheme, setDarkTheme] = useState<string>(
-    resolveBoundTheme("darkTheme", savedSettings.darkTheme, true),
-  );
-  const urlOnlyIndia = Boolean(
-    urlParams?.has("onlyIndia") || urlParams?.has("indiaOnly"),
-  );
-  const [onlyIndia, setOnlyIndia] = useState<boolean>(
-    urlOnlyIndia
-      ? initialOnlyIndia
-      : typeof savedSettings.onlyIndia === "boolean"
-        ? savedSettings.onlyIndia
-        : false,
-  );
-  const getInitialHighlightState = (): string | null => {
-    const urlState = urlParams?.get("state");
-    if (urlState) return urlState;
-    try {
-      const saved = localStorage.getItem(HIGHLIGHT_STATE_STORAGE_KEY);
-      if (saved && saved.trim()) return saved;
-    } catch {
-      // Storage unavailable — fall through to no highlight
-    }
-    return null;
-  };
-  const [highlightState, setHighlightState] = useState<string | null>(
-    getInitialHighlightState,
-  );
-  const [autoRotate, setAutoRotate] = useState<boolean>(
-    resolveBoolSetting("rotate", savedSettings.autoRotate, true),
-  );
-  const [autoRotateSpeed, setAutoRotateSpeed] = useState<number>(
-    urlParams?.get("speed")
-      ? isNaN(initialSpeed)
-        ? 1.2
-        : initialSpeed
-      : savedSpeed,
-  );
-  const [rotateDirection, setRotateDirection] = useState<
-    "west-to-east" | "east-to-west"
-  >(
-    savedSettings.rotateDirection === "east-to-west" ||
-      savedSettings.rotateDirection === "west-to-east"
-      ? savedSettings.rotateDirection
-      : "west-to-east",
-  );
-  const [showStateBorders, setShowStateBorders] = useState<boolean>(
-    resolveBoolSetting("borders", savedSettings.showStateBorders, true),
-  );
-  const [showGraticule, setShowGraticule] = useState<boolean>(
-    resolveBoolSetting("grid", savedSettings.showGraticule, true),
-  );
-  const [showAtmosphere, setShowAtmosphere] = useState<boolean>(
-    resolveBoolSetting("atmosphere", savedSettings.showAtmosphere, true),
-  );
-  const [showStars, setShowStars] = useState<boolean>(
-    resolveBoolSetting("stars", savedSettings.showStars, true),
-  );
-
-  // `?background` is the visibility switch only: false/none/transparent swap
-  // the theme's background for a neutral one. Colours live in their own
-  // per-polarity parameters so light and dark themes never inherit each other's
-  // value, mirroring how lightTheme/darkTheme are kept apart.
-  const backgroundParam = urlParams?.get("background");
-  const backgroundParamGiven = hasParam(backgroundParam);
-
-  const [showBackground, setShowBackground] = useState<boolean>(
-    backgroundParamGiven
-      ? parseShowBackground(backgroundParam)
-      : typeof savedSettings.showBackground === "boolean"
-        ? savedSettings.showBackground
-        : true,
-  );
-  const [lightBackground, setLightBackground] = useState<string | null>(() =>
-    resolveBackgroundColor(
-      urlParams?.get("lightBackground"),
-      savedSettings.lightBackground,
-    ),
-  );
-  const [darkBackground, setDarkBackground] = useState<string | null>(() =>
-    resolveBackgroundColor(
-      urlParams?.get("darkBackground"),
-      savedSettings.darkBackground,
-    ),
-  );
-  const [showSecondaryMarkers, setShowSecondaryMarkers] =
-    useState<boolean>(false);
-
-  // Active marker states
-  const getInitialMarker = (): GlobeMarker | null => {
-    const markerParam = urlParams?.get("marker");
-    const latParam = urlParams?.get("lat");
-    const lngParam = urlParams?.get("lng");
-    const nameParam = urlParams?.get("name");
-    const regionParam = urlParams?.get("region");
-
-    // 1. If explicit lat and lng coordinates are passed in URL query parameters:
-    if (latParam && lngParam) {
-      const lat = parseFloat(latParam);
-      const lng = parseFloat(lngParam);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        return {
-          id: markerParam || `url-marker-${lat.toFixed(4)}-${lng.toFixed(4)}`,
-          name: nameParam || "Selected Location",
-          lat,
-          lng,
-          region: regionParam || undefined,
-          country: "India",
-          isPrimary: true,
-        };
-      }
-    }
-
-    // 2. Fall back to the location saved from the previous session:
-    if (!markerParam) {
-      try {
-        const raw = localStorage.getItem(LAST_LOCATION_STORAGE_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw) as Partial<GlobeMarker>;
-          if (
-            typeof saved?.lat === "number" &&
-            Number.isFinite(saved.lat) &&
-            typeof saved?.lng === "number" &&
-            Number.isFinite(saved.lng) &&
-            typeof saved?.name === "string" &&
-            saved.name
-          ) {
-            return {
-              isPrimary: true,
-              country: "India",
-              ...saved,
-              lat: saved.lat,
-              lng: saved.lng,
-              name: saved.name,
-            } as GlobeMarker;
-          }
-        }
-      } catch {
-        // Corrupted storage key — fall through to no selection
-      }
-      return null;
-    }
-
-    // 3. Lookup by ID or location name:
-    const lower = markerParam.toLowerCase();
-    if (lower === "ulhasnagar") return ULHASNAGAR_MARKER;
-    if (lower === "thrissur") return THRISSUR_MARKER;
-    if (lower === "mumbai") return MUMBAI_MARKER;
-
-    return (
-      POPULAR_INDIAN_LOCATIONS.find(
-        (p) =>
-          p.id.toLowerCase() === lower ||
-          p.name.toLowerCase() === lower ||
-          p.name.toLowerCase().includes(lower),
-      ) || null
-    );
-  };
-
-  const initialMarkerParam = urlParams?.get("marker") || urlParams?.get("lat");
-  const [activeMarker, setActiveMarker] = useState<GlobeMarker | null>(
-    getInitialMarker,
-  );
-  // Closed by default; a returning visitor gets their last choice back.
-  const [isControlsOpen, setIsControlsOpen] = useState<boolean>(
-    typeof savedSettings.customizerOpen === "boolean"
-      ? savedSettings.customizerOpen
-      : false,
-  );
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(
-    Boolean(initialMarkerParam) || activeMarker !== null,
+    Boolean(config.urls.markerId || config.urls.hasLatLng) || activeMarker !== null
   );
   const [isCodeModalOpen, setIsCodeModalOpen] = useState<boolean>(false);
 
@@ -401,82 +126,6 @@ export default function App() {
   const openControlsPanel = useCallback(() => {
     setIsControlsOpen(true);
   }, []);
-
-  // Remember the selected location across refreshes (deselect clears it)
-  useEffect(() => {
-    try {
-      if (activeMarker) {
-        localStorage.setItem(
-          LAST_LOCATION_STORAGE_KEY,
-          JSON.stringify(activeMarker),
-        );
-      } else {
-        localStorage.removeItem(LAST_LOCATION_STORAGE_KEY);
-      }
-    } catch {
-      // Storage unavailable (private mode / quota) — ignore
-    }
-  }, [activeMarker]);
-
-  // Remember the highlighted state across refreshes (clearing it removes the key)
-  useEffect(() => {
-    try {
-      if (highlightState && highlightState.trim()) {
-        localStorage.setItem(HIGHLIGHT_STATE_STORAGE_KEY, highlightState);
-      } else {
-        localStorage.removeItem(HIGHLIGHT_STATE_STORAGE_KEY);
-      }
-    } catch {
-      // Storage unavailable — ignore
-    }
-  }, [highlightState]);
-
-  // Persist Globe Customizer settings across refreshes (URL params win on load;
-  // embed mode never overwrites the visitor's saved settings)
-  useEffect(() => {
-    if (isEmbedMode) return;
-    try {
-      localStorage.setItem(
-        MAP_SETTINGS_STORAGE_KEY,
-        JSON.stringify({
-          theme,
-          lightTheme,
-          darkTheme,
-          onlyIndia,
-          autoRotate,
-          autoRotateSpeed,
-          rotateDirection,
-          showStateBorders,
-          showGraticule,
-          showAtmosphere,
-          showStars,
-          showBackground,
-          lightBackground,
-          darkBackground,
-          customizerOpen: isControlsOpen,
-        }),
-      );
-    } catch {
-      // Storage unavailable — ignore
-    }
-  }, [
-    isEmbedMode,
-    theme,
-    lightTheme,
-    darkTheme,
-    onlyIndia,
-    autoRotate,
-    autoRotateSpeed,
-    rotateDirection,
-    showStateBorders,
-    showGraticule,
-    showAtmosphere,
-    showStars,
-    showBackground,
-    lightBackground,
-    darkBackground,
-    isControlsOpen,
-  ]);
 
   const currentThemeConfig =
     THEME_PRESETS[theme] || THEME_PRESETS[DEFAULT_THEME_ID];
@@ -505,30 +154,6 @@ export default function App() {
   const cartographySource = onlyIndia
     ? "Survey of India (Official)"
     : "Survey of India + Natural Earth";
-
-  // Theme switch changes ONLY the map theme; website UI never leaves light mode.
-  // Flips between the two palettes bound in the Globe Customizer, falling back to
-  // the built-in defaults if a binding is somehow unusable.
-  const handleToggleDarkMode = useCallback(() => {
-    setTheme((prevTheme) => {
-      const currentIsDark = THEME_PRESETS[prevTheme]?.isDark ?? false;
-      const nextThemeId = currentIsDark ? lightTheme : darkTheme;
-      return nextThemeId in THEME_PRESETS
-        ? nextThemeId
-        : currentIsDark
-          ? DEFAULT_LIGHT_THEME_ID
-          : DEFAULT_DARK_THEME_ID;
-    });
-  }, [lightTheme, darkTheme]);
-
-  // Picking a palette from the Globe Customizer applies it and binds it to its
-  // own polarity, so the dark/light switchers land on the user's own choices.
-  const handleThemeChange = useCallback((themeId: string) => {
-    if (!(themeId in THEME_PRESETS)) return;
-    setTheme(themeId);
-    if (THEME_PRESETS[themeId].isDark) setDarkTheme(themeId);
-    else setLightTheme(themeId);
-  }, []);
 
   // Active markers passed to the globe (memoized to prevent render loop restarts)
   const markersToRender: GlobeMarker[] = useMemo(() => {
@@ -604,57 +229,19 @@ export default function App() {
   };
 
   // Keyboard shortcut navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isEmbedMode) {
-        if (
-          !initialEmbed &&
-          (e.key === "x" || e.key === "X" || e.key === "Escape")
-        ) {
-          setIsEmbedMode(false);
-        }
-        return;
-      }
-      if (
-        ["INPUT", "TEXTAREA", "SELECT"].includes(
-          (e.target as HTMLElement).tagName,
-        )
-      ) {
-        return;
-      }
-
-      if (e.key === " " || e.code === "Space") {
-        e.preventDefault();
-        setAutoRotate((prev) => !prev);
-      } else if (e.key === "x" || e.key === "X" || e.key === "Escape") {
-        if (e.key === "Escape") {
-          // Escape only dismisses the panel, matching the card's close button
-          setIsDetailsOpen(false);
-        } else {
-          handleSelectLocation(null);
-        }
-      } else if (e.key === "r" || e.key === "R") {
-        handleResetView();
-      } else if (e.key === "c" || e.key === "C") {
-        if (isControlsOpen) {
-          setIsControlsOpen(false);
-        } else {
-          openControlsPanel();
-        }
-      } else if (e.key === "t" || e.key === "T") {
-        handleToggleDarkMode();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    handleSelectLocation,
-    isEmbedMode,
-    handleToggleDarkMode,
+  useKeyboardShortcuts({
+    onSelectLocation: handleSelectLocation,
+    onResetView: handleResetView,
+    onToggleControls: () =>
+      setIsControlsOpen((prev) => (prev ? false : true)),
+    onToggleDarkMode: handleToggleDarkMode,
+    onDismissDetails: () => setIsDetailsOpen(false),
+    onExitEmbedMode: () => setIsEmbedMode(false),
+    setAutoRotate,
     isControlsOpen,
-    openControlsPanel,
-  ]);
+    isEmbedMode,
+    startedInEmbedMode: initialEmbed,
+  });
 
   // =========================================================================
   // PURE EMBED / COMPONENT MODE: ONLY THE GLOBE AND MAP WITH SIZE CUSTOMIZATION

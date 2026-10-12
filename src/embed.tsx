@@ -1,21 +1,10 @@
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { EarthGlobe, EarthGlobeRef } from "./components/EarthGlobe";
-import {
-  GlobeMarker,
-  MIN_ZOOM_LEVEL,
-  MAX_ZOOM_LEVEL,
-  DEFAULT_EMBED_ZOOM,
-} from "./components/EarthGlobe/types";
-import {
-  THEME_PRESETS,
-  DEFAULT_THEME_ID,
-  DEFAULT_DARK_THEME_ID,
-  DEFAULT_LIGHT_THEME_ID,
-} from "./components/EarthGlobe/themePresets";
+import type { GlobeMarker } from "./components/EarthGlobe/types";
+import { THEME_PRESETS, DEFAULT_THEME_ID } from "./components/EarthGlobe/themePresets";
 import {
   normalizeBackgroundColor,
-  parseShowBackground,
   resolveFrameBackground,
 } from "./components/EarthGlobe/background";
 import { inject } from "@vercel/analytics";
@@ -25,132 +14,41 @@ import "./index.css";
 inject();
 
 import { isTrustedHostMessage, getParentOrigin } from "./config/embedTrust";
+import { parseGlobeConfig } from "./config/parseGlobeConfig";
+import { resolveEmbedMarker } from "./config/resolveMarker";
 
-const urlParams = new URLSearchParams(window.location.search);
+// The embed never reads localStorage and never writes it, so no `saved` layer
+// is passed — every saved fallback in the shared parser drops out. The embed
+// zoom controls are its own; the main app starts at a fixed zoom instead.
+const config = parseGlobeConfig(window.location.search, {
+  embedZoomControls: true,
+});
 
-const modeParam = urlParams.get("mode")?.toLowerCase();
-const themeParam = urlParams.get("theme");
-
-let initialTheme = DEFAULT_THEME_ID;
-if (modeParam === "light") {
-  if (
-    themeParam &&
-    themeParam in THEME_PRESETS &&
-    !THEME_PRESETS[themeParam].isDark
-  ) {
-    initialTheme = themeParam;
-  } else {
-    initialTheme = DEFAULT_LIGHT_THEME_ID;
-  }
-} else if (modeParam === "dark") {
-  if (
-    themeParam &&
-    themeParam in THEME_PRESETS &&
-    THEME_PRESETS[themeParam].isDark
-  ) {
-    initialTheme = themeParam;
-  } else {
-    initialTheme = DEFAULT_DARK_THEME_ID;
-  }
-} else if (themeParam && themeParam in THEME_PRESETS) {
-  initialTheme = themeParam;
-}
-
-const lightThemeParam = urlParams.get("lightTheme");
-const darkThemeParam = urlParams.get("darkTheme");
-
-const initialLightTheme =
-  lightThemeParam &&
-  lightThemeParam in THEME_PRESETS &&
-  !THEME_PRESETS[lightThemeParam].isDark
-    ? lightThemeParam
-    : DEFAULT_LIGHT_THEME_ID;
-
-const initialDarkTheme =
-  darkThemeParam &&
-  darkThemeParam in THEME_PRESETS &&
-  THEME_PRESETS[darkThemeParam].isDark
-    ? darkThemeParam
-    : DEFAULT_DARK_THEME_ID;
-
-const initialOnlyIndia =
-  urlParams.get("onlyIndia") === "true" ||
-  urlParams.get("indiaOnly") === "true";
-const initialWidth = urlParams.get("width") || urlParams.get("size") || "100%";
-const initialHeight =
-  urlParams.get("height") || urlParams.get("size") || "100%";
-const initialSpeed = urlParams.get("speed")
-  ? parseFloat(urlParams.get("speed")!)
-  : 1.2;
-const embedDragEnabled = urlParams.get("drag") !== "false";
-// `zoom` is the master off-switch for zooming; the two granular params let a host
-// keep one input path and drop the other, but never re-enable what zoom=false killed.
-const embedZoomEnabled = urlParams.get("zoom") !== "false";
-const embedZoomButtonsEnabled =
-  embedZoomEnabled && urlParams.get("zoomButtons") !== "false";
-const embedScrollZoomEnabled =
-  embedZoomEnabled && urlParams.get("scrollZoom") !== "false";
-
-// Zoom bounds live in types.ts so the globe and the generator stay in step.
-const parsedZoomLevel = urlParams.get("zoomLevel")
-  ? parseFloat(urlParams.get("zoomLevel")!)
-  : NaN;
-const initialZoomLevel = isNaN(parsedZoomLevel)
-  ? DEFAULT_EMBED_ZOOM
-  : Math.min(MAX_ZOOM_LEVEL, Math.max(MIN_ZOOM_LEVEL, parsedZoomLevel));
-const initialAutoRotate = urlParams.get("rotate") !== "false";
-const initialHighlightState = urlParams.get("state") || null;
-const initialShowStateBorders = urlParams.get("borders") !== "false";
-const initialShowGraticule = urlParams.get("grid") !== "false";
-const initialShowAtmosphere = urlParams.get("atmosphere") !== "false";
-const initialShowStars = urlParams.get("stars") !== "false";
-const initialShowBackground = parseShowBackground(urlParams.get("background"));
+const initialTheme = config.theme;
+const initialOnlyIndia = config.onlyIndia;
+const initialWidth = config.width;
+const initialHeight = config.height;
+const embedDragEnabled = config.dragEnabled;
+// `zoom` is the master off-switch; the two granular params let a host keep one
+// input path and drop the other, but never re-enable what zoom=false killed.
+const embedZoomEnabled = config.zoomEnabled;
+const embedZoomButtonsEnabled = config.zoomButtonsEnabled;
+const embedScrollZoomEnabled = config.scrollZoomEnabled;
+const initialZoomLevel = config.initialZoom;
+const initialAutoRotate = config.autoRotate;
+const initialSpeed = config.autoRotateSpeed;
+const initialHighlightState = config.highlightState;
+const initialShowStateBorders = config.showStateBorders;
+const initialShowGraticule = config.showGraticule;
+const initialShowAtmosphere = config.showAtmosphere;
+const initialShowStars = config.showStars;
+const initialShowBackground = config.showBackground;
 // Colours are per polarity so a dark theme and a light theme can carry their
 // own, and neither inherits the other.
-const initialLightBackground = normalizeBackgroundColor(
-  urlParams.get("lightBackground"),
-);
-const initialDarkBackground = normalizeBackgroundColor(
-  urlParams.get("darkBackground"),
-);
+const initialLightBackground = config.lightBackground;
+const initialDarkBackground = config.darkBackground;
 
-const getInitialMarker = (): GlobeMarker | null => {
-  const markerParam = urlParams.get("marker");
-  const latParam = urlParams.get("lat");
-  const lngParam = urlParams.get("lng");
-  const nameParam = urlParams.get("name");
-  const regionParam = urlParams.get("region");
-
-  if (latParam && lngParam) {
-    const lat = parseFloat(latParam);
-    const lng = parseFloat(lngParam);
-    if (!isNaN(lat) && !isNaN(lng)) {
-      return {
-        id: markerParam || `embed-marker-${lat}-${lng}`,
-        name: nameParam || "Location",
-        region: regionParam || undefined,
-        country: "India",
-        lat,
-        lng,
-        isPrimary: true,
-      };
-    }
-  }
-
-  if (markerParam) {
-    return {
-      id: markerParam,
-      name: nameParam || markerParam,
-      region: regionParam || undefined,
-      country: "India",
-      lat: 20.5937,
-      lng: 78.9629,
-      isPrimary: true,
-    };
-  }
-
-  return null;
-};
+const getInitialMarker = () => resolveEmbedMarker(config.urls);
 
 function EmbedApp() {
   const globeRef = useRef<EarthGlobeRef>(null);
