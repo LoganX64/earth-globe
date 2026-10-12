@@ -279,17 +279,26 @@ iframe.contentWindow.postMessage({
 
 ### Receiving Events
 
-The embed posts one event back to the parent page: `ready`, sent once on mount.
-It is addressed to the framing page's origin (taken from `document.referrer`), or
-to `'*'` when the browser withholds the referrer.
+The embed posts two events back to the parent page: `ready`, sent once on mount,
+and `commandRejected`, sent when an inbound command was ignored. Both are
+addressed to the framing page's origin (taken from `document.referrer`), or to
+`'*'` when the browser withholds the referrer.
 
 ```javascript
 window.addEventListener('message', (event) => {
   // Inbound messages deserve the same origin check you send outbound.
   if (event.origin !== PARENT_ORIGIN) return;
   if (event.data?.type !== 'earth-globe') return;
+
   if (event.data.command === 'ready') {
     console.log('Globe is ready');
+  }
+
+  // A rejected command was a no-op: the globe is still running, but this
+  // command did nothing. `reason` is a short human-readable explanation.
+  if (event.data.command === 'commandRejected') {
+    const { command, reason } = event.data.payload ?? {};
+    console.warn(`[earth-globe] ${command} ignored: ${reason}`);
   }
 });
 ```
@@ -301,6 +310,29 @@ window.addEventListener('message', (event) => {
 > **Note:** the embed does not currently forward clicks back to the host. There
 > are no `stateClick` or `markerClick` events — wrap the iframe in an overlay if
 > you need your own click tracking.
+
+### Payload Validation
+
+Commands are validated before they reach the globe, because the `postMessage`
+API is public and unauthenticated — a malformed value would otherwise leave the
+render loop drawing nothing at all.
+
+The rules are deliberately **lenient**, so existing integrations keep working:
+
+| Input | Behaviour |
+|---|---|
+| `"19.0760"` (string) | Coerced to a number. Safe to send JSON-API values directly |
+| `{ zoom: 5.0 }` | Clamped to `3.8` (`MAX_ZOOM_LEVEL`), never rejected |
+| `{ zoom: 0.1 }` | Clamped up to `0.65` (`MIN_ZOOM_LEVEL`) |
+| `{ lng: 200 }` | Wrapped to `-160` — the same point on the globe |
+| `marker` without `id` | Accepted, as long as `name`, `lat` and `lng` are present |
+| `lat`/`lng`/`zoom` = `NaN`, `null`, `""` or absent | Command ignored, `commandRejected` posted back |
+
+`setAutoRotateSpeed` is the one exception to clamping: `speed` is documented as
+`0.0`–`4.0` but is **not** clamped, so `speed: 0` genuinely stops rotation.
+
+Ignoring a bad command never damages the globe — it stays interactive, and the
+only sign is the `commandRejected` event above.
 
 ---
 

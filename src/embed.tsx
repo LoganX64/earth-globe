@@ -1,7 +1,12 @@
 import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { EarthGlobe, EarthGlobeRef } from "./components/EarthGlobe";
-import type { GlobeMarker } from "./components/EarthGlobe/types";
+import {
+  MAX_ZOOM_LEVEL,
+  MIN_ZOOM_LEVEL,
+  type GlobeMarker,
+} from "./components/EarthGlobe/types";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { THEME_PRESETS, DEFAULT_THEME_ID } from "./components/EarthGlobe/themePresets";
 import {
   normalizeBackgroundColor,
@@ -49,6 +54,74 @@ const initialLightBackground = config.lightBackground;
 const initialDarkBackground = config.darkBackground;
 
 const getInitialMarker = () => resolveEmbedMarker(config.urls);
+
+// Payload validation for the public postMessage API.
+//
+// These coerce first and clamp second, rejecting only input that is genuinely
+// unusable. That order is deliberate: the unguarded code relied on JS arithmetic
+// to coerce numeric strings and on `setZoom`'s internal clamp, so hosts whose
+// payloads come off a JSON API (`{ lat: "19.0760" }`) and hosts sending an
+// out-of-range `{ zoom: 5 }` both work today. A plain `typeof === "number"`
+// check would reject those and silently stop the globe moving.
+
+const toFiniteNumber = (v: unknown): number | null => {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+};
+
+const clamp = (n: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, n));
+
+const toLat = (v: unknown): number | null => {
+  const n = toFiniteNumber(v);
+  return n === null ? null : clamp(n, -90, 90);
+};
+
+// Wrap rather than clamp: longitude 200 must land on the same pixels as -160.
+const toLng = (v: unknown): number | null => {
+  const n = toFiniteNumber(v);
+  return n === null ? null : ((((n + 180) % 360) + 360) % 360) - 180;
+};
+
+const toZoom = (v: unknown): number | null => {
+  const n = toFiniteNumber(v);
+  return n === null ? null : clamp(n, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+};
+
+// `name` and the coordinates are the hard requirements — EarthGlobe calls
+// `marker.name.toUpperCase()` and projects [lng, lat]. `id` is deliberately not
+// required: a host sending only {name, lat, lng} gets a pin today, and demanding
+// `id` would silently remove it from a live page.
+const isMarker = (v: unknown): v is GlobeMarker => {
+  if (!v || typeof v !== "object") return false;
+  const m = v as Partial<GlobeMarker>;
+  return (
+    typeof m.name === "string" &&
+    toLat(m.lat) !== null &&
+    toLng(m.lng) !== null
+  );
+};
+
+// A rejected command must be visible to the host, or a no-op here is
+// indistinguishable from a bug in their own code. This is a new outbound event,
+// purely additive: hosts that ignore unknown commands are unaffected.
+const rejectCommand = (command: unknown, reason: string) => {
+  console.warn("[earth-globe] rejected command", { command, reason });
+  if (typeof window !== "undefined" && window.parent !== window) {
+    window.parent.postMessage(
+      {
+        type: "earth-globe",
+        command: "commandRejected",
+        payload: { command, reason },
+      },
+      getParentOrigin() || "*",
+    );
+  }
+};
 
 function EmbedApp() {
   const globeRef = useRef<EarthGlobeRef>(null);
@@ -117,15 +190,17 @@ function EmbedApp() {
       const { command, payload } = event.data;
 
       switch (command) {
-        case "flyTo":
-          if (payload?.lat != null && payload?.lng != null) {
-            globeRef.current?.flyTo(
-              payload.lat,
-              payload.lng,
-              payload.zoomMultiplier,
-            );
+        case "flyTo": {
+          const lat = toLat(payload?.lat);
+          const lng = toLng(payload?.lng);
+          if (lat === null || lng === null) {
+            rejectCommand(command, "flyTo requires a finite lat and lng");
+            break;
           }
+          const zoomMultiplier = toZoom(payload?.zoomMultiplier);
+          globeRef.current?.flyTo(lat, lng, zoomMultiplier ?? undefined);
           break;
+        }
         case "focusState":
           if (payload?.stateName) {
             globeRef.current?.focusState(
@@ -136,15 +211,16 @@ function EmbedApp() {
           }
           break;
         case "setMarker":
-          if (payload?.marker) {
-            setActiveMarker(payload.marker);
-            globeRef.current?.flyTo(
-              payload.marker.lat,
-              payload.marker.lng,
-              1.8,
-            );
-          } else {
+          if (payload?.marker == null) {
             setActiveMarker(null);
+          } else if (isMarker(payload.marker)) {
+            // Normalise once so nothing downstream sees a stringly-typed lat/lng.
+            const lat = toLat(payload.marker.lat)!;
+            const lng = toLng(payload.marker.lng)!;
+            setActiveMarker({ ...payload.marker, lat, lng });
+            globeRef.current?.flyTo(lat, lng, 1.8);
+          } else {
+            rejectCommand(command, "setMarker requires {name, lat, lng}");
           }
           break;
         case "clearMarker":
@@ -173,11 +249,15 @@ function EmbedApp() {
           // sync effect in EarthGlobe overwrites it on the next render.
           setAutoRotate(globeRef.current?.getIsAutoRotating() ?? true);
           break;
-        case "setZoom":
-          if (payload?.zoom != null) {
-            globeRef.current?.setZoom(payload.zoom);
+        case "setZoom": {
+          const zoom = toZoom(payload?.zoom);
+          if (zoom === null) {
+            rejectCommand(command, "setZoom requires a finite zoom");
+            break;
           }
+          globeRef.current?.setZoom(zoom);
           break;
+        }
         case "setOnlyIndia":
           setOnlyIndia(payload?.onlyIndia ?? false);
           break;
@@ -205,9 +285,13 @@ function EmbedApp() {
         case "setAutoRotate":
           setAutoRotate(payload?.enabled ?? true);
           break;
-        case "setAutoRotateSpeed":
-          setAutoRotateSpeed(payload?.speed ?? 1.2);
+        case "setAutoRotateSpeed": {
+          // Documented as 0.0–4.0 and explicitly not clamped, so only
+          // non-numeric input falls back to the default.
+          const speed = toFiniteNumber(payload?.speed);
+          setAutoRotateSpeed(speed ?? 1.2);
           break;
+        }
       }
     };
 
@@ -238,33 +322,48 @@ function EmbedApp() {
         style={{ width: formattedWidth, height: formattedHeight }}
         className="flex items-center justify-center overflow-hidden max-w-full max-h-full relative"
       >
-        <EarthGlobe
-          ref={globeRef}
-          theme={theme}
-          highlightCountry="356"
-          onlyIndia={onlyIndia}
-          highlightState={highlightState}
-          showStateBorders={showStateBorders}
-          rotateDirection="west-to-east"
-          markers={activeMarker ? [activeMarker] : []}
-          selectedMarkerId={activeMarker?.id || null}
-          autoRotate={autoRotate}
-          autoRotateSpeed={autoRotateSpeed}
-          enableDrag={embedDragEnabled}
-          enableZoom={embedScrollZoomEnabled}
-          showGraticule={showGraticule}
-          showAtmosphere={showAtmosphere}
-          showStars={showStars}
-          showBackground={showBackground}
-          backgroundColor={isDark ? darkBackground : lightBackground}
-          initialCenter={
-            activeMarker
-              ? [activeMarker.lng, activeMarker.lat]
-              : [78.9629, 20.5937]
+        <ErrorBoundary
+          resetKey={activeMarker?.id}
+          fallback={
+            <div
+              className={`flex h-full w-full items-center justify-center p-6 text-center ${
+                isDark ? "bg-zinc-950 text-zinc-400" : "bg-white text-neutral-500"
+              }`}
+            >
+              <p className="text-xs opacity-80" role="alert">
+                The globe could not be drawn.
+              </p>
+            </div>
           }
-          initialZoom={initialZoomLevel}
-          className="w-full h-full"
-        />
+        >
+          <EarthGlobe
+            ref={globeRef}
+            theme={theme}
+            highlightCountry="356"
+            onlyIndia={onlyIndia}
+            highlightState={highlightState}
+            showStateBorders={showStateBorders}
+            rotateDirection="west-to-east"
+            markers={activeMarker ? [activeMarker] : []}
+            selectedMarkerId={activeMarker?.id || null}
+            autoRotate={autoRotate}
+            autoRotateSpeed={autoRotateSpeed}
+            enableDrag={embedDragEnabled}
+            enableZoom={embedScrollZoomEnabled}
+            showGraticule={showGraticule}
+            showAtmosphere={showAtmosphere}
+            showStars={showStars}
+            showBackground={showBackground}
+            backgroundColor={isDark ? darkBackground : lightBackground}
+            initialCenter={
+              activeMarker
+                ? [activeMarker.lng, activeMarker.lat]
+                : [78.9629, 20.5937]
+            }
+            initialZoom={initialZoomLevel}
+            className="w-full h-full"
+          />
+        </ErrorBoundary>
 
         {embedZoomButtonsEnabled && (
           <div

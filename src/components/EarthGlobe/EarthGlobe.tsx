@@ -519,7 +519,7 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         const width = dimensions.w;
         const height = dimensions.h;
         if (width <= 0 || height <= 0) {
-          animationFrameId = requestAnimationFrame(render);
+          animationFrameId = requestAnimationFrame(safeRender);
           return;
         }
 
@@ -1080,10 +1080,58 @@ export const EarthGlobe = forwardRef<EarthGlobeRef, EarthGlobeProps>(
         }
 
         ctx.restore();
-        animationFrameId = requestAnimationFrame(render);
+        animationFrameId = requestAnimationFrame(safeRender);
       };
 
-      animationFrameId = requestAnimationFrame(render);
+    // A throw anywhere in `render` used to kill the frame chain outright: the
+      // two `requestAnimationFrame` calls above are the only things that queue
+      // the next frame, so one exception left the last painted pixels on screen
+      // forever — no error surfaced, no retry, no recovery. `ErrorBoundary`
+      // cannot help either, since this runs in a requestAnimationFrame callback,
+      // outside React's rendering.
+      //
+      // The message is painted onto the canvas rather than only logged because in
+      // an embed this iframe's console is invisible from the host page: a throw
+      // here shows up in nobody's devtools except ours.
+      let frameFailureReported = false;
+
+      const paintRenderFailure = (err: unknown) => {
+        if (frameFailureReported) return;
+        frameFailureReported = true;
+        console.error('EarthGlobe render loop halted:', err);
+        try {
+          const { activeTheme } = renderPropsRef.current;
+          // setTransform drops any unbalanced save/scale left by the failed
+          // frame, so the notice is drawn in buffer pixels at a known scale.
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.fillStyle = activeTheme.isDark ? '#000000' : '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = activeTheme.isDark ? '#ffffff' : '#09090b';
+          ctx.font = '600 13px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            'The globe could not be drawn.',
+            canvas.width / 2,
+            canvas.height / 2,
+          );
+        } catch {
+          // The context is unusable too; the console.error above is all we have.
+        }
+      };
+
+      const safeRender = (now: number) => {
+        try {
+          render(now);
+        } catch (err) {
+          // Nothing reschedules after a throw, so the loop is already stopped;
+          // this makes that explicit and covers the early-return path above.
+          cancelAnimationFrame(animationFrameId);
+          paintRenderFailure(err);
+        }
+      };
+
+      animationFrameId = requestAnimationFrame(safeRender);
       return () => cancelAnimationFrame(animationFrameId);
     }, [dimensions]);
 

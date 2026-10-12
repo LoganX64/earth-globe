@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # tsc --noEmit. `strict` is off today, so this is the only static gate —
+      # do not let it become advisory.
+      - run: pnpm lint
+
+      # vitest run. buildEmbedUrl.test.ts is the load-bearing one: it pins the
+      # round-trip between buildEmbedUrl and parseGlobeConfig, which is the
+      # contract behind every embed URL already pasted into the wild. If it
+      # fails, a change is shipping a silent behavioural break to live embeds.
+      - run: pnpm test
+
+      - run: pnpm build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
