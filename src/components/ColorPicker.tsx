@@ -35,7 +35,7 @@ export const normalizeHex = (raw: unknown): string | null => {
   return null;
 };
 
-const hexToRgb = (hex: string): RGB => {
+export const hexToRgb = (hex: string): RGB => {
   const full = normalizeHex(hex) ?? "#000000";
   return [
     parseInt(full.slice(1, 3), 16),
@@ -44,12 +44,12 @@ const hexToRgb = (hex: string): RGB => {
   ];
 };
 
-const rgbToHex = ([r, g, b]: RGB): string =>
+export const rgbToHex = ([r, g, b]: RGB): string =>
   `#${[r, g, b]
     .map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0"))
     .join("")}`;
 
-const rgbToHsv = ([r0, g0, b0]: RGB): HSV => {
+export const rgbToHsv = ([r0, g0, b0]: RGB): HSV => {
   const r = r0 / 255;
   const g = g0 / 255;
   const b = b0 / 255;
@@ -67,7 +67,7 @@ const rgbToHsv = ([r0, g0, b0]: RGB): HSV => {
   return { h, s: max === 0 ? 0 : d / max, v: max };
 };
 
-const hsvToRgb = ({ h, s, v }: HSV): RGB => {
+export const hsvToRgb = ({ h, s, v }: HSV): RGB => {
   const hue = ((h % 360) + 360) % 360;
   const c = v * s;
   const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
