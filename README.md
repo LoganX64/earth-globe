@@ -20,10 +20,22 @@ An interactive 3D globe of India, drawn on a 2D canvas with the country's offici
 
 ## Tech stack
 
-React 19 · Vite · TypeScript · Tailwind CSS v4 · d3-geo + topojson · canvas 2D
+| | |
+|---|---|
+| **Language** | TypeScript (strict mode) |
+| **UI** | React 19 |
+| **Build** | Vite 8, dual entrypoint, Tailwind CSS v4 |
+| **Map** | d3-geo (projection maths only) + topojson-client + world-atlas |
+| **Rendering** | Canvas 2D, drawn by hand — no WebGL, no map tile server |
+| **Testing** | Vitest |
+| **Icons / analytics** | lucide-react, `@vercel/analytics` |
 
 No backend, no database, no API keys. Everything ships as static files.
 Settings persist to `localStorage`; URL params always win over saved values.
+
+The world basemap comes from `world-atlas` (Natural Earth 110m), with India
+itself removed and replaced by vendored Survey of India GeoJSON
+(`src/data/india-*.json`) so the state boundaries are authoritative.
 
 ## Run locally
 
@@ -38,9 +50,13 @@ Other scripts:
 
 ```bash
 pnpm run lint      # type-check (tsc --noEmit)
+pnpm run test      # run the unit test suite once
+pnpm run test:watch  # re-run on change
 pnpm run build     # production build to dist/
 pnpm run preview   # serve the production build
 ```
+
+Set `DISABLE_HMR=true` to turn off HMR and file watching while editing.
 
 ### Environment variables
 
@@ -57,14 +73,20 @@ Two outbound network calls:
 
 ```html
 <iframe src="https://earth-globe-nine.vercel.app/embed.html?onlyIndia=true&mode=dark"
-        width="500" height="500" style="border: none; border-radius: 16px;"></iframe>
+        width="500" height="500" style="border: none; border-radius: 16px;"
+        title="India 3D Interactive Map Globe" aria-label="Interactive 3D India Globe"></iframe>
 ```
+
+The dashboard's **Embed & API** dialog generates the exact URL and snippet for
+your current settings, with a live iframe preview at the copied size.
 
 ## URL parameters
 
-Supported on both the main app and `embed.html`, unless marked *embed surface*.
-*Embed surface* means `embed.html` **and** the main app's `?embed=true` mode —
-those three zoom parameters and `respectReducedMotion` are honoured in both.
+Supported on both the main app and `embed.html`, unless marked *embed only*.
+
+*Embed only* means `embed.html` and **not** the main app. The dashboard starts
+at a fixed zoom of `1.0` and always shows both zoom inputs, so on the main app
+`zoomLevel` is ignored and only the master `zoom` switch has any effect.
 
 | Param | Effect |
 |---|---|
@@ -84,11 +106,11 @@ those three zoom parameters and `respectReducedMotion` are honoured in both.
 | `?background=false` | Swap the theme's backdrop for a neutral one — pure white under a light theme, pure black under a dark theme |
 | `?lightBackground=` / `?darkBackground=` | Custom backdrop colour per polarity, e.g. `%230a0a0a`. A dark theme never picks up the light theme's value. Applied to the globe's canvas only, never the page around it |
 | `?width=` / `?height=` | Embed dimensions, e.g. `500px` or `100%`. `?size=500px` sets both at once |
-| `?zoomLevel=2` | *embed surface* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped) |
-| `?zoom=false` | *embed surface* — disable zooming entirely (both buttons and scroll) |
-| `?zoomButtons=false` | *embed surface* — hide the floating +/− zoom buttons |
-| `?scrollZoom=false` | *embed surface* — disable zooming on mouse scroll / trackpad |
-| `?respectReducedMotion=true` | *embed surface, opt-in* — start still when the visitor's device asks for reduced motion. Off by default, so omitting it changes nothing |
+| `?zoomLevel=2` | *embed only* — how close the globe starts (`0.65`–`3.8`, default `1.1`; clamped) |
+| `?zoom=false` | Disable zooming entirely (master switch — gates `zoomButtons` and `scrollZoom` too) |
+| `?zoomButtons=false` | *embed only* — hide the floating +/− zoom buttons |
+| `?scrollZoom=false` | *embed only* — disable zooming on mouse scroll / trackpad |
+| `?respectReducedMotion=true` | *opt-in* — start still when the visitor's device asks for reduced motion. Off by default, so omitting it changes nothing |
 
 To lock the globe at a fixed size, combine the zoom parameters:
 
@@ -101,26 +123,75 @@ embed.html?zoomLevel=2.0&zoomButtons=false&scrollZoom=false
 ```
 src/
 ├── main.tsx                    # Main entrypoint (analytics inject, React root)
-├── App.tsx                     # App shell, state routing, keyboard shortcuts
+├── App.tsx                     # App shell: composes the globe, panels and HUDs
 ├── embed.tsx                   # Chrome-free iframe entrypoint (postMessage API)
-├── components/
-│   ├── EarthGlobe/             # Canvas globe renderer (projection, markers, themes)
-│   ├── Navbar.tsx              # Header, search, controls toggle
-│   ├── GlobeControls.tsx       # Customizer HUD (layers, rotation, states, pins)
-│   ├── LocationSearchBar.tsx   # Search input + Nominatim client
-│   ├── CityDetailsCard.tsx     # Active location details card
-│   └── CodeExportModal.tsx     # Live embed preview + export helper
+├── config/                     # Pure logic — no React, no DOM, fully unit-tested
+│   ├── parseGlobeConfig.ts     # URL → GlobeConfig. Single source of truth
+│   ├── buildEmbedUrl.ts        # GlobeConfig → embed URL / iframe snippet
+│   ├── resolveMarker.ts        # URL signals → marker (per-entrypoint policy)
+│   └── embedTrust.ts           # postMessage trust boundary
+├── hooks/
+│   ├── useMapSettings.ts       # Settings state, localStorage, multi-tab sync
+│   └── useKeyboardShortcuts.ts # Global key bindings
+├── services/
+│   └── geocoding.ts            # Nominatim client, rate budget, offline fallback
+├── utils/
+│   └── coordinates.ts          # Hemisphere-correct lat/lng formatting
 ├── data/
-│   ├── defaultLocations.ts     # Cities, states, marker presets
-│   └── india-*.json            # Survey of India boundary GeoJSON
-└── services/
-    └── geocoding.ts            # Nominatim search + local fallback
+│   ├── defaultLocations.ts     # Curated cities + ALL_INDIAN_STATES
+│   └── india-*.json            # Survey of India GeoJSON (official, internal
+│                               # borders, outer boundary)
+└── components/
+    ├── EarthGlobe/             # Canvas globe renderer (projection, markers,
+    │   │                       # themes, backdrop) + its own pure helpers
+    ├── Navbar.tsx              # Header, search, controls toggle
+    ├── GlobeControls.tsx       # Customizer HUD (layers, rotation, states, pins)
+    ├── LocationSearchBar.tsx   # Search input (debounced, abortable)
+    ├── CityDetailsCard.tsx     # Active location details card
+    ├── CodeExportModal.tsx     # Live embed preview + export helper
+    ├── ColorPicker.tsx         # In-app SV/hex colour picker for the backdrop
+    └── ErrorBoundary.tsx       # Render-error isolation
 ```
+
+`*.test.ts` files sit next to the modules they cover. The globe renderer,
+the panels and the two hooks have no tests — see [Testing](#testing).
+
+## Testing
+
+```bash
+pnpm run test        # 273 tests, ~1s
+pnpm run test:watch
+```
+
+Vitest runs in the `node` environment against `src/**/*.test.ts`. Everything
+under test is pure logic, so there is no jsdom, no DOM shim and no canvas mock.
+
+The load-bearing suite is `src/config/buildEmbedUrl.test.ts`: it generates an
+embed URL, parses it straight back through `parseGlobeConfig`, and asserts the
+configuration survives the round trip — plus tests pinning the exact byte order
+of the generated parameters. Those URLs are already pasted into live pages, so a
+change that silently reinterprets one has to fail the build.
+
+CI (`.github/workflows/ci.yml`) runs `pnpm lint` → `pnpm test` → `pnpm build`
+on Node 22 and uploads `dist/` as an artifact.
 
 ## Self-hosting
 
 The build is fully static — no backend, no database, no API keys. Run
 `pnpm run build` and serve `dist/` from any static host.
+
+### Build output
+
+`vite.config.ts` builds two entrypoints (`index.html` → the dashboard,
+`embed.html` → the chrome-free globe) and splits them into long-lived chunks:
+`react-vendor`, `geo-engine` (d3-geo + topojson + world-atlas) and
+`india-cartography` (the ~210 KB of Survey of India GeoJSON), so the globe
+assets are cached separately from the app code.
+
+Production source maps are on (`build.sourcemap: true`). Without them a
+production stack trace in a user's console points at one obfuscated line;
+the sources are public in this repository anyway, so nothing is disclosed
+that wasn't already.
 
 ### Allow the globe to be embedded
 
@@ -130,6 +201,9 @@ by default. The host must send:
 ```
 Content-Security-Policy: frame-ancestors *;
 ```
+
+`vercel.json` already applies this to `/embed(.*)`, so a Vercel deployment
+needs no extra configuration. Anywhere else you must send it yourself.
 
 Without that header the browser refuses to frame the page: you get an empty
 iframe and nothing in your own console pointing at the cause. Once you have
@@ -144,7 +218,7 @@ works. See [EMBED.md](EMBED.md#security-headers).
 
 ### Rewrites
 
-`vercel.json` configures two:
+`vercel.json` sets `"cleanUrls": true` and two rewrites:
 
 | Source | Destination | Why |
 |---|---|---|
@@ -154,3 +228,21 @@ works. See [EMBED.md](EMBED.md#security-headers).
 The catch-all is not there for routing — the app has no client-side router.
 On Netlify translate it to `_redirects`; on GitHub Pages drop it, or copy
 `index.html` to `404.html`.
+
+## Known limitations
+
+- **The canvas render loop is not covered by tests.** The suite covers the pure
+  config, colour, marker and geocoding logic; the renderer, hit-testing and
+  gesture physics have no test seam yet.
+- **Reduced-motion support is opt-in.** `?respectReducedMotion=true` is required
+  because defaulting it on would silently freeze the globe for every host whose
+  URL omits `rotate`.
+- **The embed cannot be composited over a host background.** The canvas is
+  opaque by design (pure white/black when the theme backdrop is off), so an
+  embed always sits on a solid field.
+- **The geocoder has a third-party rate limit.** The ≥1 req/s budget is per
+  browser tab, so aggregate traffic against the public Nominatim service is
+  unbounded. A server-side proxy with a shared cache is the right production
+  shape at scale.
+- **The Globe Customizer has no full accessibility pass** — toggle buttons do
+  not expose `aria-pressed` and the panel has no focus management.
