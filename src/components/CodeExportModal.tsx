@@ -19,6 +19,12 @@ import {
   DEFAULT_DARK_THEME_ID,
   DEFAULT_LIGHT_THEME_ID,
 } from "./EarthGlobe/themePresets";
+import {
+  resolveEmbedTheme,
+  buildEmbedUrl,
+  buildIframeSnippet,
+  iframeBackgroundFor,
+} from "../config/buildEmbedUrl";
 
 // A single on/off option: shows "✓ Label" while enabled and just "Label" once off,
 // both stacked in the same grid cell so the button never changes width.
@@ -179,22 +185,6 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
       ? window.location.origin
       : "https://your-domain.vercel.app";
 
-  // Ensure embed theme matches mode selection, falling back to the theme bound
-  // to that polarity in the Globe Customizer
-  const activeEmbedTheme = (() => {
-    const isSelectedThemeDark = THEME_PRESETS[theme]?.isDark ?? true;
-    if (embedMode === "dark" && !isSelectedThemeDark) {
-      return darkTheme;
-    }
-    if (embedMode === "light" && isSelectedThemeDark) {
-      return lightTheme;
-    }
-    return theme;
-  })();
-
-  const embedWidth = embedSize === "100%" ? "100%" : `${embedSize}px`;
-  const embedHeight = embedSize === "100%" ? "600px" : `${embedSize}px`;
-
   // The preview is rendered at the real embed size, then scaled to fit the
   // dialog column. A 500px preview is wider than a phone, and simply capping the
   // box would crop the iframe rather than fit it.
@@ -211,57 +201,47 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     embedSize === "100%" ? "600px" : `${previewNaturalHeight}px`;
   const previewScaledHeight = `${previewNaturalHeight * previewScale}px`;
 
-  const baseSrc = `${currentHost}/embed.html?embed=true&mode=${embedMode}&theme=${activeEmbedTheme}&lightTheme=${lightTheme}&darkTheme=${darkTheme}${embedOnlyIndia ? "&onlyIndia=true" : ""}${
-    autoRotateSpeed !== 1.2 ? `&speed=${autoRotateSpeed.toFixed(1)}` : ""
-  }&drag=${embedDrag}&zoom=${embedZoom}&zoomButtons=${embedZoomButtons}&scrollZoom=${embedScrollZoom}&zoomLevel=${embedZoomLevel.toFixed(2)}&rotate=${embedRotate}&stars=${embedStars}&grid=${embedGrid}&borders=${embedBorders}&atmosphere=${embedAtmosphere}&width=${encodeURIComponent(embedWidth)}&height=${encodeURIComponent(embedHeight)}`;
+  const activeEmbedTheme = resolveEmbedTheme({
+    embedMode,
+    theme,
+    lightTheme,
+    darkTheme,
+  });
 
-  // `background` is the visibility switch. Colours are per polarity, and this
-  // embed pins one mode, so only the matching slot is worth emitting — the
-  // other would never apply unless a host later drives it with setTheme.
-  const backgroundParam = !showBackground
-    ? "&background=false"
-    : embedMode === "light"
-      ? lightBackground
-        ? `&lightBackground=${encodeURIComponent(lightBackground)}`
-        : ""
-      : darkBackground
-        ? `&darkBackground=${encodeURIComponent(darkBackground)}`
-        : "";
+  const embedSrc = buildEmbedUrl({
+    host: currentHost,
+    embedMode,
+    theme,
+    lightTheme,
+    darkTheme,
+    onlyIndia: embedOnlyIndia,
+    autoRotateSpeed,
+    drag: embedDrag,
+    zoom: embedZoom,
+    zoomButtons: embedZoomButtons,
+    scrollZoom: embedScrollZoom,
+    zoomLevel: embedZoomLevel,
+    rotate: embedRotate,
+    stars: embedStars,
+    grid: embedGrid,
+    borders: embedBorders,
+    atmosphere: embedAtmosphere,
+    size: embedSize,
+    showBackground,
+    lightBackground,
+    darkBackground,
+    marker: activeMarker,
+    highlightState,
+  });
 
-  // What the HOST page paints behind the iframe element. The neutral backdrop
-  // has to reach the host's snippet too, otherwise the globe sits in a
-  // letterbox of the theme's own colour. A custom colour deliberately does NOT
-  // — inside the embed it is painted on the globe's canvas only.
-  const iframeBackground = !showBackground
-    ? embedMode === "light"
-      ? "#ffffff"
-      : "#000000"
-    : embedMode === "light"
-      ? "#f8fafc"
-      : "#000000";
+  const iframeBackground = iframeBackgroundFor(embedMode, showBackground);
 
-  // Shared by both tabs — mirrors the component's current config
-  const embedSrc = `${baseSrc}${backgroundParam}${
-    activeMarker
-      ? `&marker=${encodeURIComponent(activeMarker.id)}&name=${encodeURIComponent(activeMarker.name)}&lat=${activeMarker.lat.toFixed(4)}&lng=${activeMarker.lng.toFixed(4)}${
-          activeMarker.region
-            ? `&region=${encodeURIComponent(activeMarker.region)}`
-            : ""
-        }`
-      : ""
-  }${highlightState ? `&state=${encodeURIComponent(highlightState)}` : ""}`;
-
-  const iframeSnippet = `<!-- Drop-in 3D India Globe for any Portfolio, Webflow, WordPress, or HTML website -->
-<!-- Mode: ${embedMode === "light" ? "Light Mode Map & UI" : "Dark Mode Map & UI"} -->
-<iframe
-  src="${embedSrc}"
-  width="${embedSize === "100%" ? "100%" : `${embedSize}px`}"
-  height="${embedSize === "100%" ? "600px" : `${embedSize}px`}"
-  style="border: none; border-radius: 16px; overflow: hidden; background: ${iframeBackground};"
-  allow="fullscreen"
-  title="India 3D Interactive Map Globe"
-  aria-label="Interactive 3D India Globe"
-></iframe>`;
+  const iframeSnippet = buildIframeSnippet(
+    embedSrc,
+    embedMode,
+    showBackground,
+    embedSize,
+  );
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
