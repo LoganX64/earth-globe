@@ -31,6 +31,30 @@ import { GlobeMarker } from './EarthGlobe/types';
 import { ALL_INDIAN_STATES, POPULAR_INDIAN_LOCATIONS } from '../data/defaultLocations';
 import { LocationSearchBar } from './LocationSearchBar';
 
+/**
+ * Parse a user-typed latitude or longitude.
+ *
+ * `parseFloat(value) || fallback` was wrong here: latitude/longitude 0 is a
+ * real coordinate (Null Island, the equator, the prime meridian), and `0` is
+ * falsy, so `lat=0&lng=0` silently became a pin in Thrissur. It also let
+ * through anything unparseable — `120`, `-500`, `12abc` — straight to the
+ * projection.
+ *
+ * Non-numeric or empty input falls back; out-of-range input is clamped to the
+ * nearest valid coordinate rather than rejected, so the form never silently
+ * discards what the user typed.
+ */
+export const parseCoordinate = (
+  raw: string,
+  fallback: number,
+  min: number,
+  max: number
+): number => {
+  const parsed = Number.parseFloat(raw.trim());
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+};
+
 interface GlobeControlsProps {
   currentTheme: string;
   onThemeChange: (themeId: string) => void;
@@ -152,8 +176,8 @@ export const GlobeControls: React.FC<GlobeControlsProps> = ({
     e.preventDefault();
     if (!customCity.trim()) return;
 
-    const lat = parseFloat(customLat) || 10.5276;
-    const lng = parseFloat(customLng) || 76.2144;
+    const lat = parseCoordinate(customLat, 10.5276, -90, 90);
+    const lng = parseCoordinate(customLng, 76.2144, -180, 180);
 
     const newMarker: GlobeMarker = {
       id: `custom-${Date.now()}`,

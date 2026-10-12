@@ -32,6 +32,7 @@ import { CityDetailsCard } from "./components/CityDetailsCard";
 import { GlobeControls } from "./components/GlobeControls";
 import { Navbar } from "./components/Navbar";
 import { CodeExportModal } from "./components/CodeExportModal";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { SlidersHorizontal, RotateCcw, Maximize2, X } from "lucide-react";
 
 const LAST_LOCATION_STORAGE_KEY = "bharat-atlas-active-location";
@@ -69,6 +70,26 @@ const readSavedMapSettings = (): SavedMapSettings => {
   }
   return {};
 };
+
+/**
+ * Stand-in shown when the globe itself fails to render. The rest of the page
+ * stays interactive, so the customizer, search and code export all still work —
+ * only the map is lost.
+ */
+const GlobeFailedNotice = ({ isDark }: { isDark: boolean }) => (
+  <div
+    className={`flex h-full w-full items-center justify-center p-6 text-center ${
+      isDark ? "bg-zinc-950 text-zinc-400" : "bg-white text-neutral-500"
+    }`}
+  >
+    <div className="max-w-xs space-y-2">
+      <p className="text-sm font-semibold">The globe could not be drawn.</p>
+      <p className="text-xs opacity-80">
+        Reload the page to try again. Your saved settings are safe.
+      </p>
+    </div>
+  </div>
+);
 
 export default function App() {
   const globeRef = useRef<EarthGlobeRef>(null);
@@ -383,17 +404,17 @@ export default function App() {
 
   // Remember the selected location across refreshes (deselect clears it)
   useEffect(() => {
-    if (activeMarker) {
-      try {
+    try {
+      if (activeMarker) {
         localStorage.setItem(
           LAST_LOCATION_STORAGE_KEY,
           JSON.stringify(activeMarker),
         );
-      } catch {
-        // Storage unavailable (private mode / quota) — ignore
+      } else {
+        localStorage.removeItem(LAST_LOCATION_STORAGE_KEY);
       }
-    } else {
-      localStorage.removeItem(LAST_LOCATION_STORAGE_KEY);
+    } catch {
+      // Storage unavailable (private mode / quota) — ignore
     }
   }, [activeMarker]);
 
@@ -626,35 +647,6 @@ export default function App() {
     openControlsPanel,
   ]);
 
-  // Sync selections to embed view via postMessage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const message = activeMarker
-      ? {
-          type: "earth-globe",
-          command: "setMarker",
-          payload: { marker: activeMarker },
-        }
-      : { type: "earth-globe", command: "clearMarker" };
-
-    window.postMessage(message, "*");
-  }, [activeMarker]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const message = highlightState
-      ? {
-          type: "earth-globe",
-          command: "setHighlightState",
-          payload: { stateName: highlightState },
-        }
-      : { type: "earth-globe", command: "clearHighlightState" };
-
-    window.postMessage(message, "*");
-  }, [highlightState]);
-
   // =========================================================================
   // PURE EMBED / COMPONENT MODE: ONLY THE GLOBE AND MAP WITH SIZE CUSTOMIZATION
   // =========================================================================
@@ -675,33 +667,35 @@ export default function App() {
           style={{ width: formattedWidth, height: formattedHeight }}
           className="flex items-center justify-center overflow-hidden max-w-full max-h-full relative"
         >
-          <EarthGlobe
-            ref={globeRef}
-            theme={theme}
-            highlightCountry="356" // India Survey of India official map
-            onlyIndia={onlyIndia} // Shows only India or world with India featured
-            highlightState={highlightState}
-            showStateBorders={showStateBorders}
-            rotateDirection={rotateDirection}
-            markers={markersToRender}
-            selectedMarkerId={activeMarker?.id || null}
-            autoRotate={autoRotate}
-            autoRotateSpeed={autoRotateSpeed}
-            enableDrag={embedDragEnabled}
-            enableZoom={embedZoomEnabled}
-            showGraticule={showGraticule}
-            showAtmosphere={showAtmosphere}
-            showStars={showStars}
-            showBackground={showBackground}
-            backgroundColor={activeBackgroundColor}
-            initialCenter={
-              activeMarker
-                ? [activeMarker.lng, activeMarker.lat]
-                : [78.9629, 20.5937]
-            }
-            initialZoom={1.2}
-            className="w-full h-full"
-          />
+          <ErrorBoundary fallback={<GlobeFailedNotice isDark={isDark} />}>
+            <EarthGlobe
+              ref={globeRef}
+              theme={theme}
+              highlightCountry="356" // India Survey of India official map
+              onlyIndia={onlyIndia} // Shows only India or world with India featured
+              highlightState={highlightState}
+              showStateBorders={showStateBorders}
+              rotateDirection={rotateDirection}
+              markers={markersToRender}
+              selectedMarkerId={activeMarker?.id || null}
+              autoRotate={autoRotate}
+              autoRotateSpeed={autoRotateSpeed}
+              enableDrag={embedDragEnabled}
+              enableZoom={embedZoomEnabled}
+              showGraticule={showGraticule}
+              showAtmosphere={showAtmosphere}
+              showStars={showStars}
+              showBackground={showBackground}
+              backgroundColor={activeBackgroundColor}
+              initialCenter={
+                activeMarker
+                  ? [activeMarker.lng, activeMarker.lat]
+                  : [78.9629, 20.5937]
+              }
+              initialZoom={1.2}
+              className="w-full h-full"
+            />
+          </ErrorBoundary>
 
           {/* Floating zoom controls */}
           {embedZoomEnabled && (
@@ -806,39 +800,41 @@ export default function App() {
 
       {/* 2. Interactive 3D Canvas Globe Viewport */}
       <main className="relative flex-1 w-full h-full min-h-0">
-        <EarthGlobe
-          ref={globeRef}
-          theme={theme}
-          highlightCountry="356" // India Survey of India official map
-          onlyIndia={onlyIndia} // When true, only India sovereign territory is rendered
-          highlightState={highlightState}
-          showStateBorders={showStateBorders}
-          rotateDirection={rotateDirection}
-          markers={markersToRender}
-          selectedMarkerId={activeMarker?.id || null}
-          autoRotate={autoRotate}
-          autoRotateSpeed={autoRotateSpeed}
-          enableDrag={true}
-          enableZoom={true}
-          showGraticule={showGraticule}
-          showAtmosphere={showAtmosphere}
-          showStars={showStars}
-          showBackground={showBackground}
-          backgroundColor={activeBackgroundColor}
-          initialCenter={
-            activeMarker
-              ? [activeMarker.lng, activeMarker.lat]
-              : [78.9629, 20.5937]
-          }
-          initialZoom={1.2}
-          onMarkerClick={(marker) => {
-            handleSelectLocation(marker);
-          }}
-          onStateClick={(stateName) => {
-            handleHighlightStateChange(stateName);
-          }}
-          className="w-full h-full"
-        />
+        <ErrorBoundary fallback={<GlobeFailedNotice isDark={isDark} />}>
+          <EarthGlobe
+            ref={globeRef}
+            theme={theme}
+            highlightCountry="356" // India Survey of India official map
+            onlyIndia={onlyIndia} // When true, only India sovereign territory is rendered
+            highlightState={highlightState}
+            showStateBorders={showStateBorders}
+            rotateDirection={rotateDirection}
+            markers={markersToRender}
+            selectedMarkerId={activeMarker?.id || null}
+            autoRotate={autoRotate}
+            autoRotateSpeed={autoRotateSpeed}
+            enableDrag={true}
+            enableZoom={true}
+            showGraticule={showGraticule}
+            showAtmosphere={showAtmosphere}
+            showStars={showStars}
+            showBackground={showBackground}
+            backgroundColor={activeBackgroundColor}
+            initialCenter={
+              activeMarker
+                ? [activeMarker.lng, activeMarker.lat]
+                : [78.9629, 20.5937]
+            }
+            initialZoom={1.2}
+            onMarkerClick={(marker) => {
+              handleSelectLocation(marker);
+            }}
+            onStateClick={(stateName) => {
+              handleHighlightStateChange(stateName);
+            }}
+            className="w-full h-full"
+          />
+        </ErrorBoundary>
 
         {/* 3. Floating Left Panel: Active Location Spotlight Card.
             Stacking tiers used by every floating overlay in the app:
@@ -849,33 +845,38 @@ export default function App() {
               the 384px panel. Stays under the navbar drawer (z-50). */}
         {isDetailsOpen && activeMarker && (
           <div className="absolute inset-x-2 top-2 z-45 pointer-events-auto transition-all animate-in fade-in slide-in-from-left-4 duration-300 sm:inset-x-auto sm:left-6 sm:top-6 sm:z-40">
-            <CityDetailsCard
-              marker={activeMarker}
-              onFlyTo={(lat, lng, zoom) =>
-                globeRef.current?.flyTo(lat, lng, zoom)
-              }
-              onClose={() => setIsDetailsOpen(false)}
-              onDeselect={() => handleSelectLocation(null)}
-              isStateHighlighted={Boolean(
-                highlightState &&
-                activeMarker.region &&
-                highlightState.toLowerCase().trim() ===
-                  activeMarker.region.toLowerCase().trim(),
-              )}
-              onToggleStateHighlight={() => {
-                if (
-                  highlightState &&
-                  activeMarker.region &&
-                  highlightState.toLowerCase().trim() ===
-                    activeMarker.region.toLowerCase().trim()
-                ) {
-                  setHighlightState(null);
-                } else if (activeMarker.region) {
-                  handleHighlightStateChange(activeMarker.region);
+{/* The card sits on top of the globe, so it gets its own boundary:
+                a throw here must not take the map down with it. resetKey lets
+                a fresh selection retry after a failure. */}
+            <ErrorBoundary fallback={null} resetKey={activeMarker?.id}>
+              <CityDetailsCard
+                marker={activeMarker}
+                onFlyTo={(lat, lng, zoom) =>
+                  globeRef.current?.flyTo(lat, lng, zoom)
                 }
-              }}
-              isDark={isDark}
-            />
+                onClose={() => setIsDetailsOpen(false)}
+                onDeselect={() => handleSelectLocation(null)}
+                isStateHighlighted={Boolean(
+                  highlightState &&
+                    activeMarker.region &&
+                    highlightState.toLowerCase().trim() ===
+                      activeMarker.region.toLowerCase().trim(),
+                )}
+                onToggleStateHighlight={() => {
+                  if (
+                    highlightState &&
+                    activeMarker.region &&
+                    highlightState.toLowerCase().trim() ===
+                      activeMarker.region.toLowerCase().trim()
+                  ) {
+                    setHighlightState(null);
+                  } else if (activeMarker.region) {
+                    handleHighlightStateChange(activeMarker.region);
+                  }
+                }}
+                isDark={isDark}
+              />
+            </ErrorBoundary>
           </div>
         )}
 
@@ -887,49 +888,51 @@ export default function App() {
             share its width and were intercepting clicks on the layer toggles. */}
         {isControlsOpen && (
           <div className="absolute inset-x-2 top-2 z-40 pointer-events-auto transition-all animate-in fade-in slide-in-from-right-4 duration-300 sm:inset-x-auto sm:top-6 sm:right-6 sm:z-30">
-            <GlobeControls
-              currentTheme={theme}
-              onThemeChange={handleThemeChange}
-              lightTheme={lightTheme}
-              darkTheme={darkTheme}
-              autoRotate={autoRotate}
-              onToggleAutoRotate={() => setAutoRotate((prev) => !prev)}
-              autoRotateSpeed={autoRotateSpeed}
-              onSpeedChange={setAutoRotateSpeed}
-              rotateDirection={rotateDirection}
-              onRotateDirectionChange={setRotateDirection}
-              highlightState={highlightState}
-              onHighlightStateChange={handleHighlightStateChange}
-              selectedLocationId={activeMarker?.id || null}
-              onSelectLocation={handleSelectLocation}
-              onAddCustomLocation={handleAddCustomLocation}
-              showStateBorders={showStateBorders}
-              onToggleStateBorders={() => setShowStateBorders((prev) => !prev)}
-              showGraticule={showGraticule}
-              onToggleGraticule={() => setShowGraticule((prev) => !prev)}
-              showAtmosphere={showAtmosphere}
-              onToggleAtmosphere={() => setShowAtmosphere((prev) => !prev)}
-              showStars={showStars}
-              showBackground={showBackground}
-              backgroundColor={activeBackgroundColor}
-              onToggleStars={() => setShowStars((prev) => !prev)}
-              onToggleShowBackground={() => setShowBackground((prev) => !prev)}
-              // The picker edits whichever polarity is on screen, so a colour
-              // chosen under a dark theme is never reused by a light one.
-              onBackgroundColorChange={(color) => {
-                if (isDark) setDarkBackground(color);
-                else setLightBackground(color);
-              }}
-              onlyIndia={onlyIndia}
-              onToggleOnlyIndia={() => setOnlyIndia((prev) => !prev)}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onReset={handleResetView}
-              onClose={() => setIsControlsOpen(false)}
-              onToggleDarkMode={handleToggleDarkMode}
-              mapThemeIsDark={isDark}
-              isDark={isDark}
-            />
+            <ErrorBoundary fallback={null} resetKey={theme}>
+              <GlobeControls
+                currentTheme={theme}
+                onThemeChange={handleThemeChange}
+                lightTheme={lightTheme}
+                darkTheme={darkTheme}
+                autoRotate={autoRotate}
+                onToggleAutoRotate={() => setAutoRotate((prev) => !prev)}
+                autoRotateSpeed={autoRotateSpeed}
+                onSpeedChange={setAutoRotateSpeed}
+                rotateDirection={rotateDirection}
+                onRotateDirectionChange={setRotateDirection}
+                highlightState={highlightState}
+                onHighlightStateChange={handleHighlightStateChange}
+                selectedLocationId={activeMarker?.id || null}
+                onSelectLocation={handleSelectLocation}
+                onAddCustomLocation={handleAddCustomLocation}
+                showStateBorders={showStateBorders}
+                onToggleStateBorders={() => setShowStateBorders((prev) => !prev)}
+                showGraticule={showGraticule}
+                onToggleGraticule={() => setShowGraticule((prev) => !prev)}
+                showAtmosphere={showAtmosphere}
+                onToggleAtmosphere={() => setShowAtmosphere((prev) => !prev)}
+                showStars={showStars}
+                showBackground={showBackground}
+                backgroundColor={activeBackgroundColor}
+                onToggleStars={() => setShowStars((prev) => !prev)}
+                onToggleShowBackground={() => setShowBackground((prev) => !prev)}
+                // The picker edits whichever polarity is on screen, so a colour
+                // chosen under a dark theme is never reused by a light one.
+                onBackgroundColorChange={(color) => {
+                  if (isDark) setDarkBackground(color);
+                  else setLightBackground(color);
+                }}
+                onlyIndia={onlyIndia}
+                onToggleOnlyIndia={() => setOnlyIndia((prev) => !prev)}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onReset={handleResetView}
+                onClose={() => setIsControlsOpen(false)}
+                onToggleDarkMode={handleToggleDarkMode}
+                mapThemeIsDark={isDark}
+                isDark={isDark}
+              />
+            </ErrorBoundary>
           </div>
         )}
 
@@ -1103,26 +1106,28 @@ export default function App() {
       </main>
 
       {/* 8. Code & Embed Modal */}
-      <CodeExportModal
-        isOpen={isCodeModalOpen}
-        onClose={() => setIsCodeModalOpen(false)}
-        activeMarker={activeMarker}
-        highlightState={highlightState || undefined}
-        autoRotateSpeed={autoRotateSpeed}
-        autoRotate={autoRotate}
-        theme={theme}
-        lightTheme={lightTheme}
-        darkTheme={darkTheme}
-        onlyIndia={onlyIndia}
-        isDark={isDark}
-        showStars={showStars}
-        showBackground={showBackground}
-        lightBackground={lightBackground}
-        darkBackground={darkBackground}
-        showGraticule={showGraticule}
-        showAtmosphere={showAtmosphere}
-        showStateBorders={showStateBorders}
-      />
+      <ErrorBoundary fallback={null} resetKey={isCodeModalOpen}>
+        <CodeExportModal
+          isOpen={isCodeModalOpen}
+          onClose={() => setIsCodeModalOpen(false)}
+          activeMarker={activeMarker}
+          highlightState={highlightState || undefined}
+          autoRotateSpeed={autoRotateSpeed}
+          autoRotate={autoRotate}
+          theme={theme}
+          lightTheme={lightTheme}
+          darkTheme={darkTheme}
+          onlyIndia={onlyIndia}
+          isDark={isDark}
+          showStars={showStars}
+          showBackground={showBackground}
+          lightBackground={lightBackground}
+          darkBackground={darkBackground}
+          showGraticule={showGraticule}
+          showAtmosphere={showAtmosphere}
+          showStateBorders={showStateBorders}
+        />
+      </ErrorBoundary>
     </div>
   );
 }
